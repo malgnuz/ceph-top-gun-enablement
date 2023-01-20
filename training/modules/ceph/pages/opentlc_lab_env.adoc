@@ -76,7 +76,7 @@ While you have root access to all of the systems, including the workstation node
 
 [NOTE]
 ====
-* If you are using Windows, use a terminal program such as PuTTY to connect instead of the `ssh` command shown.
+* If you are using Windows either use the built-in SSH client present on recent builds of Windows 10 and Windows 11 or use a terminal program such as PuTTY to connect instead of the `ssh` command shown.
 
 * To learn more about SSH and keys, read link:https://www.opentlc.com/ssh.html[Setting Up an SSH Key Pair^].
 ====
