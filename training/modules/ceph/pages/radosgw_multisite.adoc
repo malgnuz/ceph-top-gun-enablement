@@ -125,7 +125,7 @@ Run commands on the master/primary cluster.
 If you have more than one RGW service running per zone, as you would do for
 production, you can add all the rgw address to the endpoints list
 --endpoints=http://proxy01:8000,http://ceph-node02:8000 for example, if we want
-to the sync to survive DNS outages we can use the IP for the endpoints instead
+the sync to survive DNS outages we can use the IP for the endpoints instead
 of the Hostnames.
 ====
 
