@@ -395,6 +395,14 @@ a single cephadm command that creates an object gateway across two random server
 <div class="paragraph">
 <p>Due to the limited number of OSDs in the lab environment, the <code>mon_max_pg_per_osd</code> configuration setting is lower than required. When you create more than seven pools each of PGs and PGPs, with the pool size being 32, you must increase the value of <code>mon_max_pg_per_osd</code> from <code>256</code> to <code>512</code> to create the additional pools.</p>
 </div>
+<div class="paragraph">
+<p>The Realm/Zonegroup/Zone Layout in our Lab:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/single-ms.png" alt="Lab RGW layout">
+</div>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
