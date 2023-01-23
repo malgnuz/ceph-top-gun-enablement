@@ -19,7 +19,7 @@
 
 All file data in CephFS is stored as RADOS objects. CephFS clients can directly access RADOS to operate on file data. MDS only handles metadata operations.
 
-To read/write a CephFS file, client needs to have ‘file read/write’ capabilities for corresponding inode. If client does not have required capabilities, it sends a ‘cap message’ to MDS, telling MDS what it wants. MDS will issue capabilities to client when it is possible. Once client has ‘file read/write’ capabilities, it can directly access RADOS to read/write file data. File data are stored as RADOS objects in the form of <inode number>.<object index>. See ‘Data Striping’ section of Architecture for more information. If the file is only opened by one client, MDS also issues ‘file cache/buffer’ capabilities to the only client. The ‘file cache’ capability means that file read can be satisfied by client cache. The ‘file buffer’ capability means that file write can be buffered in client cache.
+To read/write a CephFS file, the client needs to have ‘file read/write’ capabilities for the corresponding inode. If the client does not have the required capabilities, it sends a ‘cap message’ to MDS, telling MDS what it wants. MDS will issue capabilities to clients when it is possible. Once the client has ‘file read/write’ capabilities, it can directly access RADOS to read/write file data. File data are stored as RADOS objects in the form of <inode number>.<object index>. See the Upstream doc about ‘Data Striping’ in the Architecture section for more information. If the file is only opened by one client, MDS also issues ‘file cache/buffer’ capabilities to the only client. The ‘file cache’ capability means that file read can be satisfied by the client cache. The ‘file buffer’ capability means that file write can be buffered in the client cache.
 
 image:::cephfs_io_path.png[cephfs layout,840,680]
 
@@ -34,15 +34,15 @@ Layout fields
 
 *pool*
 
-String, giving ID or name. String can only have characters in the set [a-zA-Z0-9\_-.]. Which RADOS pool a file's data objects will be stored in.
+String, giving ID or name. The string can only have characters in the set [a-zA-Z0-9\_-.]. Which RADOS pool a file's data objects will be stored in.
 
 *pool_id*
 
-String of digits. This is the system assigned pool id for the RADOS pool whenever it is created.
+String of digits. This is the system-assigned pool id for the RADOS pool whenever it is created.
 
 *pool_name*
 
-String, given name. This is the user defined name for the RADOS pool whenever user creates it.
+String, given name. This is the user-defined name for the RADOS pool whenever a user creates it.
 
 *pool_namespace*
 
@@ -51,7 +51,7 @@ String with only characters in the set [a-zA-Z0-9\_-.].  Within the data pool, w
 
 *stripe_unit*
 
-Integer in bytes.  The size (in bytes) of a block of data used in the RAID 0 distribution of a file. All stripe units for a file have equal size. The last stripe unit is typically incomplete–i.e. it represents the data at the end of the file as well as unused “space” beyond it up to the end of the fixed stripe unit size.
+Integer in bytes.  The size (in bytes) of a block of data used in the RAID 0 distribution of a file. All stripe units for a file have an equal size. The last stripe unit is typically incomplete–i.e. it represents the data at the end of the file as well as unused “space” beyond it up to the end of the fixed stripe unit size.
 
 
 *stripe_count*
@@ -65,20 +65,20 @@ Integer in bytes.  File data is chunked into RADOS objects of this size.
 
 [NOTE]
 ====
-RADOS enforces a configurable limit on object sizes: if you increase CephFS object sizes beyond that limit then writes may not succeed. The OSD setting is osd_max_object_size, which is 128MB by default. Very large RADOS objects may prevent smooth operation of the cluster, so increasing the object size limit past the default is not recommended.
+RADOS enforces a configurable limit on object sizes: if you increase CephFS object sizes beyond that limit then writes may not succeed. The OSD setting is osd_max_object_size, which is 128MB by default. Very large RADOS objects may prevent the smooth operation of the cluster, so increasing the object size limit past the default is not recommended.
 ====
 
 
 == Cephfs Layouts Hands-On
 
-From the `workstation` server we first we need to install the `attr` RPM so we have access to the `setfattr` and
+From the `workstation` server, we first need to install the `attr` RPM. Hence, we have access to the `setfattr` and
 `getfattr` commands
 
 ----
 # dnf install -y attr
 ----
 
-We mount the cepfs filesystem at the root level with user id 0, this user has
+We mount the cephfs filesystem at the root level with user id 0. This user has
 Read/Write client caps at the / level
 
 ----
@@ -105,18 +105,18 @@ Because user `0` was created with the following client capabilities.
 ----
 
 If we try to modify the attribute for the / cephfs filesystem we will get
-permision denied
+permission denied
 
 ----
 # setfattr -n ceph.dir.layout.stripe_count -v 2 /mnt
 setfattr: /mnt: Permission denied
 ----
 
-TIP: Users need the 'P' client capability to be able to modify FS attributes
+TIP: Users need the 'P' client capability to be able to modify FS attributes,
 and quotas
 
 
-Lets create a new cephx user that has the `P` capability flag to modify
+Let's create a new cephx user that has the `P` capability flag to modify
 attributes in the `/dir4` folder
 
 ----
@@ -126,7 +126,7 @@ attributes in the `/dir4` folder
 	key = AQBmK71j0FcKERAAJqwhXOHoucR+iY0nzGV9BQ==
 ----
 
-Now lets re-mount the FS using user with id `4` that we just created
+Now let's re-mount the FS using a user with id `4` that we just created
 
 ----
 # umount /mnt
@@ -145,11 +145,11 @@ ceph.file.layout="stripe_unit=4194304 stripe_count=2 object_size=4194304 pool=ce
 
 NOTE: Files inherit the layout of their parent directory at creation time. However, subsequent changes to the parent directory’s layout do not affect children.
 
-NOTE: Files created as descendents of the directory also inherit the layout, if the intermediate directories do not have layouts set
+NOTE: Files created as descendants of the directory also inherit the layout if the intermediate directories do not have layouts set
 
 === Creating files in different Rados Namespaces
 
-Using the dir layout we can select a rados namespace for a directory
+Using the dir layout, we can select a rados namespace for a directory
 
 ----
 # mkdir /mnt/dir4/dir-namespace
@@ -170,8 +170,8 @@ Let's mount at the new directory level and create a file
 ceph.file.layout="stripe_unit=4194304 stripe_count=1 object_size=4194304 pool=cephfs.fs_name.data pool_namespace=client4"
 ----
 
-If we check at the rados level we can see that the new file is created in the
-client4 rados namespace, there is no data on the default namespace for the data
+If we check at the rados level, we can see that the new file is created in the
+client4 rados namespace. There is no data on the default namespace for the data
 cephfs pool
 
 ----
@@ -220,7 +220,7 @@ set pool 5 allow_ec_overwrites to true
 enabled application 'cephfs' on pool 'cephfs-data-ec'
 ----
 
-Lets add the new pool to our filesystem
+Let's add the new pool to our filesystem
 
 ----
 # ceph fs add_data_pool fs_name cephfs-data-ec
@@ -256,8 +256,8 @@ rados namespace called `clientec` inside the new pool `cephfs-data-ec`
 # setfattr -n ceph.dir.layout.pool -v cephfs-data-ec /mnt/clientec
 ----
 
-Now let's mount the direcory with the client.ec we created before, and by
-creating a file we can check that the file went to the rados namespace called `clientec` inside the new pool `cephfs-data-ec`
+Let's mount the directory with the client.ec we created before, and by
+creating a file, we can check that the file went to the rados namespace called `clientec` inside the new pool `cephfs-data-ec`
 
 ----
 # mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/clientec /mnt -o name=ec,secret="AQDpSr1jQm/yGBAAst+6elZFUY3BIZqeySZZ+w=="
@@ -271,13 +271,13 @@ clientec	10000000006.00000000
 
 === *Quota Restrictions*
 
-Quotas are cooperative and non-adversarial. CephFS quotas rely on the cooperation of the client who is mounting the file system to stop writers when a limit is reached. A modified or adversarial client cannot be prevented from writing as much data as it needs. Quotas should not be relied on to prevent filling the system in environments where the clients are fully untrusted.
+Quotas are cooperative and non-adversarial. CephFS quotas rely on the client's cooperation, who is mounting the file system to stop writers when a limit is reached. A modified or adversarial client cannot be prevented from writing as much data as it needs. Quotas should not be relied on to prevent filling the system in environments where the clients are fully untrusted.
 
-Quotas are imprecise. Processes that are writing to the file system will be stopped a short time after the quota limit is reached. They will inevitably be allowed to write some amount of data over the configured limit. How far over the quota they are able to go depends primarily on the amount of time, not the amount of data. Generally speaking writers will be stopped within 10s of seconds of crossing the configured limit.
+Quotas are imprecise. Processes written to the file system will be stopped shortly after the quota limit is reached. They will inevitably be allowed to write some data over the configured limit. How far over the quota they can go depends primarily on the amount of time, not the amount of data. Generally speaking, writers will be stopped within 10s of seconds of crossing the configured limit.
 
-Quotas are implemented in the kernel client 4.17 and higher. Quotas are supported by the userspace client (libcephfs, ceph-fuse). Linux kernel clients >= 4.17 support CephFS quotas but only on mimic+ clusters. Kernel clients (even recent versions) will fail to handle quotas on older clusters, even if they may be able to set the quotas extended attributes.
+Quotas are implemented in the kernel client 4.17 and higher. Quotas are supported by the userspace client (libcephfs, ceph-fuse). Linux kernel clients >= 4.17 support CephFS quotas but only on mimic+ clusters. Kernel clients (even recent versions) will fail to handle quotas on older clusters, even if they may be able to set the quota's extended attributes.
 
-Quotas must be configured carefully when used with path-based mount restrictions. The client needs to have access to the directory inode on which quotas are configured in order to enforce them. If the client has restricted access to a specific path (e.g., /home/user) based on the MDS capability, and a quota is configured on an ancestor directory they do not have access to (e.g., /home), the client will not enforce it. When using path-based access restrictions be sure to configure the quota on the directory the client is restricted too (e.g., /home/user) or something nested beneath it.
+Quotas must be configured carefully when used with path-based mount restrictions. The client needs access to the directory inode on which quotas are configured to enforce them. If the client has restricted access to a specific path (e.g., /home/user) based on the MDS capability, and a quota is configured on an ancestor directory they do not have access to (e.g., /home), the client will not enforce it. When using path-based access restrictions, be sure to configure the quota on the directory the client is restricted to (e.g., /home/user) or something nested beneath it.
 
 === *Example*
 
@@ -335,14 +335,14 @@ To remove the Quotas
 
 == MDS High Availability
 
-If an MDS daemon stops communicating with the cluster’s monitors, the monitors will wait mds_beacon_grace seconds (default 15) before marking the daemon as laggy. If a standby MDS is available, the monitor will immediately replace the laggy daemon.
+If an MDS daemon stops communicating with the cluster’s monitors, the monitors will wait mds_beacon_grace seconds (default 15) before marking the daemon as laggy. The monitor will immediately replace the laggy daemon if a standby MDS is available.
 
 Each file system may specify a minimum number of standby daemons in order to be considered healthy. This number includes daemons in the standby-replay state waiting for a rank to fail. Note that a standby-replay daemon will not be assigned to take over a failure for another rank or a failure in a different CephFS file system). The pool of standby daemons not in replay counts towards any file system count.
 
 Each file system may set the desired number of standby daemons by setting the
 `ceph fs set <fs name> standby_count_wanted <count>` command.
 
-By default it's set to 1, if we for example increase it to two, wi will get a
+By default, it's set to 1. If we, for example, increase it to two, we will get a
 new MDS daemon deployed as standby
 
 ----
@@ -362,9 +362,9 @@ fs_name.ceph-node01.uygvno  <------ We have one MDS daemon as standby
 MDS version: ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)
 ----
 
-Because we configured the MDS service placement to a count of two and with
+Because we configured the MDS service placement to a count of two. With
 dedicated hosts `ceph-node01,proxy01`, ceph can't add a new MDS daemon to
-fulfill the requirement of two `standby_count_wanted` per Filesystem.
+fulfil the requirement of two `standby_count_wanted` per Filesystem.
 
 ----
 # ceph -s
@@ -445,7 +445,7 @@ Each CephFS file system may be configured to add standby-replay daemons. These s
 
 [TIP]
 ====
-Once an MDS has entered the standby-replay state, it will only be used as a standby for the rank that it is following. If another rank fails, this standby-replay daemon will not be used as a replacement, even if no other standbys are available. For this reason, it is advised that if standby-replay is used then every active MDS should have a standby-replay daemon.
+Once an MDS has entered the standby-replay state, it will only be used as a standby for the rank that it is following. If another rank fails, this standby-replay daemon will not be used as a replacement, even if no other standbys are available. For this reason, it is advised that if standby-replay is used, then every active MDS should have a standby-replay daemon.
 ====
 
 Configuration of standby-replay on a file system is done using the below:
@@ -470,7 +470,7 @@ fs_name.ceph-node02.kxxoad
 
 === MDS Stand-by Affinity
  
-When failing over MDS daemons, a cluster’s monitors will prefer standby daemons with mds_join_fs equal to the file system name with the failed rank. If no standby exists with mds_join_fs equal to the file system name, it will choose an unqualified standby (no setting for mds_join_fs) for the replacement, or any other available standby, as a last resort. Note, this does not change the behavior that standby-replay daemons are always selected before other standbys.
+When failing over MDS daemons, a cluster’s monitors will prefer standby daemons with mds_join_fs equal to the file system name with the failed rank. If no standby exists with mds_join_fs equal to the file system name, it will choose an unqualified standby (no setting for mds_join_fs) for the replacement, or any other available standby, as a last resort. Note, this does not change the behaviour that standby-replay daemons are always selected before other standbys.
 
 
 We can check our current status with the `ceph fs dump` command, our standby
@@ -501,7 +501,7 @@ Workloads that typically benefit from a larger number of active MDS daemons are 
 
 *Example*
 
-First let's reduce the count of wanted stand by daemos, currently we have it
+First let's reduce the count of wanted stand-by daemons, currently we have it
 set to `2`
 
 ----
@@ -589,7 +589,7 @@ Once an MDS rank is assigned to a daemon, it proceeds through a series of states
 replay – replaying journal
 resolve – disambiguating perhaps-incomplete MDCache operations such as import/export
 reconnect – waiting for clients to send reconnect messages
-rejoin – bring cache into consistent state with peers (load)
+rejoin – bring cache into a consistent state with peers (load)
 clientreplay – execute part-done client requests
 active – normal operation
 ====
@@ -632,9 +632,9 @@ RANK      STATE                  MDS                 ACTIVITY     DNS    INOS   
 
 *In multiple active metadata server configurations* a balancer runs which works to spread metadata load evenly across the cluster. 
 
-This usually works well enough for most users but sometimes it is desirable to override the dynamic balancer with explicit mappings of metadata to particular ranks. 
+This usually works well enough for most users, but sometimes it is desirable to override the dynamic balancer with explicit metadata mappings to particular ranks. 
 
-This can allow the administrator or users to evenly spread application load or limit impact of users’ metadata requests on the entire cluster.
+This can allow the administrator or users to evenly spread the application load or limit the impact of users’ metadata requests on the entire cluster.
 
 image:::subtree-partitioning.svg[Subtree Partitioning,840,680]
 
@@ -659,11 +659,11 @@ Let's configure static pinning, `dir4` will go to `rank0` and `clientec` to `ran
 ceph.dir.pin="1"
 ----
 
-The problem with traditional subtree partitioning is that the workload growth by depth (across a single MDS) leads to a hotspot of activity. This results in lack of vertical scaling and wastage of non-busy resources/MDSs.
+The problem with traditional subtree partitioning is that the workload growth by depth (across a single MDS) leads to a hotspot of activity. This results in a lack of vertical scaling and wastage of non-busy resources/MDSs.
 
-This led to the adoption of a more dynamic way of handling metadata: Dynamic
-Subtree Partitioning, where load intensive portions of the directory hierarchy
-from busy MDSs are migrated to non busy MDSs. , check out more information on
+This led to adopting a more dynamic way of handling metadata: Dynamic
+Subtree Partitioning, where load-intensive portions of the directory hierarchy
+from busy MDSs are migrated to non-busy MDSs. , check out more information on
 this https://docs.ceph.com/en/quincy/cephfs/multimds/#setting-subtree-partitioning-policies[upstream doc]
 
 
@@ -802,7 +802,7 @@ keep 24 snapshots at least an hour apart
 Retention added to path /
 ----
 
-NOTE: The snapshot schedule data is stored in a rados object in the cephfs metadata pool. At runtime all data lives in a sqlite database that is serialized and stored as a rados object.
+NOTE: The snapshot schedule data is stored in a rados object in the cephfs metadata pool. At runtime, all data lives in a sqlite database that is serialized and stored as a rados object.
 
 == Client Sessions
 
@@ -953,7 +953,7 @@ mds1_inotable
 1.00000000
 ----
 
-*mds_snaptable* Tracks snapshots (obviously), One per filesystem: owned by rank 0, Map of snapid_t to SnapInfo Stored as normal object (not omap)
+*mds_snaptable* Tracks snapshots (obviously), One per filesystem: owned by rank 0, Map of snapid_t to SnapInfo Stored as a normal object (not omap)
 *Inode table* mds0_inotable/mds1_inotable. Free list of inode numbers (no actual inodes in here) One per MDS rank: each rank is granted 1/MAX_MDS share of overall space.
 ----
 # cephfs-table-tool 0 show inode
@@ -1005,8 +1005,8 @@ mds1_inotable
 
 
 
-*Journal Pointer objects* 400.00000000. MDS daemons have ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.
-*Journal objects* 200.00000000,200.00000001,200.0000000X .Object names increment as journal grows, multiple objects will exist depending on length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)
+*Journal Pointer objects* 400.00000000. MDS daemons have the ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.
+*Journal objects* 200.00000000,200.00000001,200.0000000X .Object names increment as the journal grows, multiple objects will exist depending on the length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)
 
 
 === Objects from Data pool
@@ -1030,12 +1030,11 @@ Controlled by `file_layout_t` , Layout can only be changed on empty files: once 
 CephFS shared file systems require at least one active MDS service for correct operation, and
 at least one standby MDS to ensure high availability. The MDS autoscaler module ensures the
 availability of enough MDS daemons.
-This module monitors the number of ranks and the number of standby daemons, and adjusts the
-number of MDS daemons that the orchestrator spawns.
+This module monitors the number of ranks and the number of standby daemons and adjusts the
+the number of MDS daemons that the orchestrator spawns.
 
 To enable the MDS autoscaler module.
 
 ----
 # ceph mgr module enable mds_autoscaler
 ----
-

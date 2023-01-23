@@ -17,11 +17,11 @@
 
 == Introduction
 
-The Ceph File System, or CephFS, is a POSIX-compliant file system built on top of Ceph’s distributed object store, RADOS. CephFS endeavors to provide a state-of-the-art, multi-use, highly available, and performant file store for a variety of applications, including traditional use-cases like shared home directories, HPC scratch space, and distributed workflow shared storage.
+The Ceph File System, or CephFS, is a POSIX-compliant file system built on top of Ceph’s distributed object store, RADOS. CephFS endeavours to provide a state-of-the-art, multi-use, highly available, and performant file store for various applications, including traditional use cases like shared home directories, HPC scratch space, and distributed workflow shared storage.
 
-CephFS achieves these goals through the use of some novel architectural choices. Notably, file metadata is stored in a separate RADOS pool from file data and served via a resizable cluster of Metadata Servers, or MDS, which may scale to support higher throughput metadata workloads. Clients of the file system have direct access to RADOS for reading and writing file data blocks. For this reason, workloads may linearly scale with the size of the underlying RADOS object store; that is, there is no gateway or broker mediating data I/O for clients.
+CephFS achieves these goals through the use of some novel architectural choices. Notably, file metadata is stored in a separate RADOS pool from file data and served via a resizable cluster of Metadata Servers, or MDS, which may scale to support higher throughput metadata workloads. File system clients have direct access to RADOS for reading and writing file data blocks. For this reason, workloads may linearly scale with the size of the underlying RADOS object store; that is, there is no gateway or broker mediating data I/O for clients.
 
-Access to data is coordinated through the cluster of MDS which serve as authorities for the state of the distributed metadata cache cooperatively maintained by clients and MDS. Mutations to metadata are aggregated by each MDS into a series of efficient writes to a journal on RADOS; no metadata state is stored locally by the MDS. This model allows for coherent and rapid collaboration between clients within the context of a POSIX file system.
+Access to data is coordinated through the cluster of MDS, which serve as authorities for the state of the distributed metadata cache cooperatively maintained by clients and MDS. Mutations to metadata are aggregated by each MDS into a series of efficient writes to a journal on RADOS; no metadata state is stored locally by the MDS. This model allows for coherent and rapid collaboration between clients within a POSIX file system.
 
 image::cephfs-architecture.svg[cephfs,740,580]
 
@@ -31,27 +31,26 @@ image::cephfs-architecture.svg[cephfs,740,580]
 
 The Metadata Server (MDS) manages metadata for CephFS clients. This daemon provides
 information that CephFS clients need to access RADOS objects, such as providing file locations
-within the file-system tree. MDS manages the directory hierarchy and stores file metadata, such
-as the owner, time stamps, and permission modes, in a RADOS cluster. MDS is also responsible for
+within the file-system tree. MDS manages the directory hierarchy and stores file metadata in a RADOS cluster, such as the owner, time stamps, and permission modes. MDS is also responsible for
 access caching and managing client caches to maintain cache coherence.
 
-While the data for inodes in a Ceph file system is stored in RADOS and accessed by the clients directly, inode metadata and directory information is managed by the Ceph metadata server (MDS). The MDS’s act as mediator for all metadata related activity, storing the resulting information in a separate RADOS pool from the file data.
+While the data for inodes in a Ceph file system is stored in RADOS and accessed by the clients directly, inode metadata and directory information is managed by the Ceph metadata server (MDS). The MDSs act as mediators for all metadata-related activity, storing the resulting information in a separate RADOS pool from the file data.
 
 CephFS clients can request that the MDS fetch or change inode metadata on its
 behalf, but an MDS can also grant the client capabilities (aka caps) for each
 inode
 
-Since the cache is distributed, the MDS must take great care to ensure that no client holds capabilities that may conflict with other clients’ capabilities, or operations that it does itself. This allows cephfs clients to rely on much greater cache coherence than a filesystem like NFS, where the client may cache data and metadata beyond the point where it has changed on the server.
+Since the cache is distributed, the MDS must take great care to ensure that no client holds capabilities that may conflict with other clients’ capabilities or operations that it does itself. This allows cephfs clients to rely on much greater cache coherence than a filesystem like NFS, where the client may cache data and metadata beyond the point where it has changed on the server.
 
-When a client needs to query/change inode metadata or perform an operation on a directory, it has two options. It can make a request to the MDS directly, or serve the information out of its cache. With CephFS, the latter is only possible if the client has the necessary caps.
+When a client needs to query/change inode metadata or perform an operation on a directory, it has two options. It can request the MDS directly or serve the information out of its cache. With CephFS, the latter is only possible if the client has the necessary caps.
 
 Clients can send simple requests to the MDS to query or request changes to certain metadata. The replies to these requests may also grant the client a certain set of caps for the inode, allowing it to perform subsequent requests without consulting the MDS.
 
-Clients can also request caps directly from the MDS, which is necessary in order to read or write file data.
+Clients can also request caps directly from the MDS, which is necessary to read or write file data.
 
 
 MDS daemons operate in two modes: active and standby. An active MDS manages the metadata
-on the CephFS file system. A standby MDS serves as a backup, and switches to the active mode
+on the CephFS file system. A standby MDS serves as a backup and switches to the active mode
 if the active MDS becomes unresponsive. CephFS shared file systems require an active MDS
 service. You should deploy at least one standby MDS in your cluster to ensure high availability.
 CephFS clients first contact a MON to authenticate and retrieve the cluster map. Then, the client
@@ -65,15 +64,15 @@ One or more MDS daemons are required to use the CephFS file system. These are cr
 
 [TIP]
 ====
-For more control over the deploying process, you can do a 3 step proccess:
-- Manually create the pools that are associated to the CephFS
+For more control over the deploying process, you can do a 3 step process:
+- Manually create the pools that are associated with the CephFS
 - Start the MDS service on the hosts
 - Create the CephFS file system.
-In our example we are going to do the 1 command process to get everything ready
-with help of the `ceph fs volume` interface
+In our example, we are going to do the single command process to get everything ready
+with the help of the `ceph fs volume` interface
 ====
 
-. Create a CephFS volume, specifying `fs_name` as the name, and a comma-separated list of host names as the placement:
+. Create a CephFS volume, specifying `fs_name` as the name and a comma-separated list of host names as the placement:
 +
 [source,sh]
 ----
@@ -112,7 +111,7 @@ placement:
 EOF
 ----
 
-. As the root user on the `ceph-node01` server, apply the specification to manually deploy the MDS daemons, using the YAML file that you created:
+. As the root user on the `ceph-node01` server, apply the specification to manually deploy the MDS daemons using the YAML file that you created:
 +
 [source,sh]
 ----
@@ -190,20 +189,20 @@ You can mount CephFS file systems with:
 - The kernel client
 - The FUSE client
 
-The kernel driver is developed separately from the core ceph code, and as such
+The kernel driver is developed separately from the core ceph code, and as such,
 it sometimes differs from the FUSE driver in feature implementation. The
 following details the implementation status of various CephFS features in the
-kernel driver. For more information on the current kernel client supporte
+kernel driver. For more information on the current kernel client, supported
 features check this upstream https://docs.ceph.com/en/quincy/cephfs/kernel-features/[link]
 
 [WARN]
 ====
-The kernel client requires a Linux which is available starting with RHEL 8.
+The kernel client requires Linux, which is available starting with RHEL 8.
 ====
 
-== Pre-Reqs for Mounting a Cephfs Filesytem
+== Pre-Reqs for Mounting a Cephfs Filesystem
 
-In this Lab we are going to mount the Cephfs Filesystems from the
+In this Lab, we are going to mount the Cephfs Filesystems from the
 `workstation.example.com` node, so we need to run the following pre-req
 commands for this server.
 
@@ -213,15 +212,15 @@ Install the ceph-common package. For the FUSE client, also install the ceph-fuse
 workstation# dnf install ceph-common ceph-fuse -y 
 ----
 
-A minimal Ceph configuration file is needed stored in `/etc/ceph/ceph.conf` by
+A minimal Ceph configuration file must be stored in `/etc/ceph/ceph.conf` by
 default. We are going to copy the conf file from our admin ceph node, in this
-case `ceph-node01`
+case, `ceph-node01`
 
 ----
 workstation# scp -p ceph-node01:/etc/ceph/ceph.conf /etc/ceph/ceph.conf
 ----
 
-Authorize the client to access the CephFS file system. In this example we give
+Authorise the client to access the CephFS file system. In this example, we give
 the user `0` Read/
 
 ----
@@ -230,7 +229,7 @@ ceph-node01# ceph fs authorize fs_name client.0 / rw
 	key = AQBAaLVjpZu3NhAAlu30WoNaBn08obWB6T5IEQ==
 ----
 
-Get the new authorization key with the ceph auth get command and copy it to the
+Get the new authorisation key with the ceph auth to get command and copy it to the
 `/etc/ceph` folder
 
 ----
@@ -261,12 +260,12 @@ specify the id of the user we created called `0`
 ...
 ----
 
-Now we have the fullfiled the pre-reqs we are ready to mount the CephFS Filesystem
+Now we have the fulfilled the pre-reqs we are ready to mount the CephFS Filesystem.
 
 
 === FUSE client
 
-With the Fuse Client installed we can simply run the command `ceph-fuse` and
+With the Fuse Client installed, we can simply run the command `ceph-fuse` and
 the id of our user
 
 ----
@@ -279,7 +278,7 @@ ceph-fuse       9.5G     0  9.5G   0% /mnt
 ----
 
 ceph-fuse mounts by default the / root of the filesystem, if we want to mount
-at a specific tree level we can use the -r paramter, for example:
+at a specific tree level, we can use the -r parameter, for example:
 
 ----
 # mkdir /mnt/dir0
@@ -292,7 +291,7 @@ ceph-fuse[31883]: starting fuse
 total 0
 ----
 
-Lets add a file and check the pool df status, to verify that files are being
+Let's add a file and check the pool df status, to verify that files are being
 stored in the fs_name filesystem, still from our workstation:
 
 ----
@@ -301,9 +300,9 @@ dd if=/dev/zero of=/mnt/100MB bs=4k iflag=fullblock,count_bytes count=100M
 Error EACCES: access denied: does your client key have mgr caps? See http://docs.ceph.com/en/latest/mgr/administrator/#client-authentication
 ----
 
-Ah ok, so we are getting an error when triying to get information about the
-filesystem status with the persmisions we have assigned to user with id 0, we
-don't have the needed permisions on our user, let's copy the admin keyring and
+Ah ok, so we are getting an error when trying to get information about the
+filesystem status with the permissions we have assigned to the user with id 0, we
+don't have the needed permissions on our user, let's copy the admin keyring and
 use it:
 
 ----
@@ -323,14 +322,14 @@ fs_name.ceph-node02.mvtdpg
 MDS version: ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)
 ----
 
-If we want to auto mount the FS on boot, we need to add it to /etc/fstab with the following format:
+If we want to auto-mount the FS on boot, we need to add it to /etc/fstab with the following format:
 ----
 # umount /mnt
 # echo 'ceph-node01:6789,ceph-node02:6789,ceph-node03:6789 /mnt fuse.ceph ceph.id=0,ceph.client_mountpoint=/dir0,_netdev 0 0' >> /etc/fstab
 # mount /mnt
 ----
 
-Let's leave the FS umounted to try out the kernel client on the next section
+Let's leave the FS umounted to try out the kernel client in the next section.
 
 ----
 # umount /mnt
@@ -345,13 +344,13 @@ fuse.conf configuration file.
 [WARNING]
 ====
 A host that runs OSDs must not mount Ceph RBD images or CephFS file systems
-by using the kernel-based client. Mounted resources can become unresponsive due
-to memory deadlocks or blocked I/O that is pending on stale sessions.
+using the kernel-based client. Mounted resources can become unresponsive due
+to memory deadlocks or blocked I/O pending on stale sessions.
 ====
 
 === Kernel Client
 
-Using the same user with id 0, we can go straigth ahead and mount our Cephfs FS
+Using the same user with id 0, we can go straight ahead and mount our Cephfs FS
 with the kernel client:
 
 ----
@@ -363,7 +362,7 @@ total 204800
 -rw-r--r--. 1 root root 104857600 Jan  4 07:26 100MB
 ----
 
-If we want to auto mount the FS on boot, we need to add it to /etc/fstab with the following format:
+If we want to auto-mount the FS on boot, we need to add it to /etc/fstab with the following format:
 
 ----
 # cat /etc/ceph/ceph.client.0.keyring | grep key | awk '{print $NF}' > /etc/ceph/ceph.client.0.kernel.keyring
@@ -373,7 +372,7 @@ If we want to auto mount the FS on boot, we need to add it to /etc/fstab with th
 
 [TIP]
 ====
-With the kernel client to be able to use the mount `secretfile` option we need to
+With the kernel client to be able to use the mount `secretfile` option, we need to
 have the ceph-common packages installed
 ====
 
@@ -383,7 +382,7 @@ Use Ceph authentication capabilities to restrict your file system clients to the
 
 - *Path Restriction*
 
-To restrict clients to only mount and work within a certain directory, use path-based MDS authentication capabilities.
+Use path-based MDS authentication capabilities to restrict clients to only mount and work within a certain directory.
 
 ----
 ceph fs authorize <fs_name> client.<client_id> <path-in-cephfs> rw
@@ -391,9 +390,9 @@ ceph fs authorize <fs_name> client.<client_id> <path-in-cephfs> rw
 
 - *Free Space Reporting*
 
-By default, when a client is mounting a sub-directory, the used space (df) will be calculated from the quota on that sub-directory, rather than reporting the overall amount of space used on the cluster.
+By default, when a client is mounting a sub-directory, the used space (df) will be calculated from the quota on that sub-directory rather than reporting the overall amount of space used on the cluster.
 
-If you would like the client to report the overall usage of the file system, and not just the quota usage on the sub-directory mounted, then set the following config option on the client:
+If you would like the client to report the overall usage of the file system and not just the quota usage on the sub-directory mounted, then set the following config option on the client:
 
 ----
 client quota df = false
@@ -413,7 +412,7 @@ client.0
 
 - *Snapshot Restrictions*
 
-To create or delete snapshots, clients require the ‘s’ flag in addition to ‘rw’. Note that when capability string also contains the ‘p’ flag, the ‘s’ flag must appear after it (all flags except ‘rw’ must be specified in alphabetical order).
+To create or delete snapshots, clients require the ‘s’ flag in addition to ‘rw’. Note that when the capability string contains the ‘p’ flag, the ‘s’ flag must appear after it (all flags except ‘rw’ must be specified in alphabetical order).
 
 ----
 client.0
@@ -461,7 +460,7 @@ touch: cannot touch '/mnt/dir2': Permission denied
 ----
 
 === More examples
-By yourself checkout what these other example client caps allow the user to do:
+By yourself check out what these other example client caps allow the user to do:
 
 ----
 # ceph fs authorize cephfs client.2 /client2 rw

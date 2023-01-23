@@ -30,17 +30,17 @@ Cloud transition has some caveats:
 
 *Placement* – Logical separation of data within the same zone.
 
-*Storage Class* – Storage classes are used to customize the placement of object data. S3 Bucket Lifecycle rules can automate the transition of objects between storage classes. 
+*Storage Class* – Storage classes are used to customise the placement of object data. S3 Bucket Lifecycle rules can automate the transition of objects between storage classes. 
 
 == RadosGW cloud transition Lab
 
-In this Lab we are going to configure RGW cloud transition from our on-prem
+In this Lab, we are going to configure RGW cloud transition from our on-prem
 ceph cluster to an AWS S3 bucket, objects will transition to the cloud once
 their life cycle policy expires.
 
 === Ceph On-premise Cluster overview
 
-We are going to use one of our currently deployed clusters, that already have
+We are going to use one of our currently deployed clusters, which already have
 RGW services running.
 
 ----
@@ -54,11 +54,11 @@ rgw.objectgw.ceph-mon02.vyeifa     ceph-mon02  *:8080       running (5h)      86
 ----
 
 We are going to use `rgw.objectgw.ceph-mon02.vyeifa` rgw service to configure
-cloud transitions, this RGW is service the `default` realm and zone.
+cloud transitions, this RGW serves the `default` realm and zone.
 
-By default when we deploy RGW on a Ceph cluster, we get a default zonegroup, zone and placement, from a ceph node with the admin keys available we are going to use the radosgw-admin command to list our zonegroup and zone, both of them with called default
+By default, when we deploy RGW on a Ceph cluster, we get a default zonegroup, zone and placement. From a ceph node with the admin keys available, we are going to use the radosgw-admin command to list our zonegroup and zone, both of them called default
 
-List the current zonegroup placement, We have a placement with default placement id, containing the STANDARD storage class.
+List the current zonegroup placement. We have a placement with a default placement id, containing the STANDARD storage class.
 
 ----
 #  radosgw-admin zonegroup placement list
@@ -100,7 +100,7 @@ written to it. You can see this storage class contains its dedicated ceph pools.
 ]
 ----
 
-We first create an RGW user, with simplified access/secret keys.
+We first create an RGW user with simplified access/secret keys.
 
 ----
 # radosgw-admin user create --uid=transitionuser --display-name=transitionuser --access-key=transitionuser --secret=transitionuser  --rgw-zone=default --rgw-zonegroup=default --rgw-realm=default 
@@ -144,7 +144,7 @@ We first create an RGW user, with simplified access/secret keys.
 }
 ----
 
-We configure the AWS CLI with  the credentials from the previously created transitionuser, we create a bucket(default placement) called transition
+We configure the AWS CLI with  the credentials from the previously created transition user, we create a bucket(default placement) called transition.
 
 ----
 # aws --endpoint http://ceph-mon02:8080 s3 mb s3://transition  --region default
@@ -181,8 +181,8 @@ transitioned from the RGW on-prem bucket to an S3 AWS bucket so the data will
 also be available through AWS S3 APIs, so services from AWS will be able to
 consume the Data from the AWS S3 Bucket without any issues.
 
-Using AWS S3 credentials(access key and secret) we are going to configure our
-aws cli client, and create the bucket we will configure as our transitioned
+Using AWS S3 credentials(access key and secret), we are going to configure our
+AWS cli client, and create the bucket we will configure as our transitioned
 objects destination
 
 === Ceph On-premise Cluster Storage Class configuration
@@ -196,7 +196,7 @@ objects destination
 === Ceph On-premise Cluster Lifecycle Policy configuration
 
 Create a new storage class on the default placement within the default
-zonegroup, we are using the special rgw `--tier-type=cloud-s3` , to configure the
+zonegroup, we are using the special rgw `--tier-type=cloud-s3`, to configure the
 storage class against our previously configured bucket in AWS s3.
 
 ----
@@ -217,7 +217,7 @@ storage class against our previously configured bucket in AWS s3.
 ----
 
 The configuration of the cloud-s3 storage classes we called AWS can be done
-using the `radosgw-admin zonegroup placement modify command`, with the
+using the `radosgw-admin zonegroup placement modify command` with the
 --tier-config parameter we can specify using `key,value` pairs the config of the
 AWS S3 endpoint & account credentials we gathered previously:
 
@@ -232,7 +232,7 @@ AWS S3 endpoint & account credentials we gathered previously:
 [TIP]
 ====
 We are using `target_path='rgwtransition'` to set a specific bucket in the
-cloudprovider that we pre-created, The target path specifies a prefix to which the source ‘bucket-name/object-name’ is appended. If not specified the target_path created is “rgwx-${zonegroup}-${storage-class}-cloud-bucket”.
+cloudprovider that we pre-created. The target path specifies a prefix to which the source ‘bucket-name/object-name’ is appended. If not specified the target_path created is “rgwx-${zonegroup}-${storage-class}-cloud-bucket”.
 ====
 
 
@@ -259,13 +259,13 @@ days will be transitioned to the cloud storage class called `AWS`
                     "StorageClass": "AWS"
                 }
             ],
-            "ID": "Transition Objects in bucket to AWS Blob after 30 days"
+            "ID": "Transition Objects in thebucket to AWS Blob after 30 days"
         }
     ]
         }
 ----
 
-Using the AWS cli and the transitionuser profile, we will apply/put the bucket-lifecycle-configuration using the file transition.json we created in the previous step.
+Using the AWS cli and the `transitionuser` profile, we will apply/put the bucket-lifecycle-configuration using the file transition.json we created in the previous step.
 
 ----
 # aws s3api --profile rgw  --endpoint http://ceph-mon02:8080 --region default put-bucket-lifecycle-configuration --lifecycle-configuration  file://transition.json --bucket transition
@@ -274,7 +274,7 @@ Using the AWS cli and the transitionuser profile, we will apply/put the bucket-l
 {
     "Rules": [
         {
-            "ID": "Transition Objects in bucket to S3 AWS after 30 days",
+            "ID": "Transition Objects in the bucket to S3 AWS after 30 days",
             "Prefix": "",
             "Status": "Enabled",
             "Transitions": [
@@ -325,9 +325,9 @@ $ radosgw-admin lc get --bucket transition
     },
     "rule_map": [
         {
-            "id": "Transition Objects in bucket to AWS after 30 days",
+            "id": "Transition Objects inthe bucket to AWS after 30 days",
             "rule": {
-                "id": "Transition Objects in bucket to AWS after 30 days",
+                "id": "Transition Objects in the bucket to AWS after 30 days",
                 "prefix": "",
                 "status": "Enabled",
                 "expiration": {
@@ -407,61 +407,61 @@ d9c4f708-5598-4c44-9d36-849552a08c4d.169377.1_transition5
 We are now going to force the Lifecycle process to start, it will evaluate all the bucket Lifecycle policies configured and will start the transition of data where needed.
 
 ----
-$  radosgw-admin lc process
+$  radosgw-admin lc process
 ----
 
-If we now run the radosgw-admin lc list we should the LifeCycle for our transition bucket in a completed state:
+If we now run the radosgw-admin lc list, we should have the LifeCycle for our transition bucket in a completed state:
 
 ----
 $ radosgw-admin lc list
 
 [
-    {
+    {
 
-        "bucket": ":transition:d9c4f708-5598-4c44-9d36-849552a08c4d.170017.5",
-        "started": "Mon, 31 Oct 2022 16:52:56 GMT",
-        "status": "COMPLETE"
-    }
+        "bucket": ":transition:d9c4f708-5598-4c44-9d36-849552a08c4d.170017.5",
+        "started": "Mon, 31 Oct 2022 16:52:56 GMT",
+        "status": "COMPLETE"
+    }
 ]
 ----
 
 
-If we now list the objects available in the transition bucket on our on-premise cluster, we can see that the objects are 0 in size, this is because they have been transitioned to the cloud but the metadata/head of the object still is available because of the use of the "retain_head_object": "true" parameter when creating the cloud storage class, so we can list the objects but NOT download/copy them.
+If we now list the objects available in the transition bucket on our on-premise cluster, we can see that the objects are 0 in size. This is because they have been transitioned to the cloud. However, the metadata/head of the object still is available because of the use of the "retain_head_object": "true" parameter when creating the cloud storage class, so we can list the objects but NOT download/copy them.
 
 
 ----
-$ aws s3 --profile rgw  --endpoint http://ceph-mon02:8080 --region default ls s3://transition
+$ aws s3 --profile rgw  --endpoint http://ceph-mon02:8080 --region default ls s3://transition
 
-2022-10-31 17:52:56          0 transition1
-2022-10-31 17:51:59          0 transition2
-2022-10-31 17:51:59          0 transition3
-2022-10-31 17:51:58          0 transition4
-2022-10-31 17:51:59          0 transition5
+2022-10-31 17:52:56          0 transition1
+2022-10-31 17:51:59          0 transition2
+2022-10-31 17:51:59          0 transition3
+2022-10-31 17:51:58          0 transition4
+2022-10-31 17:51:59          0 transition5
 ----
 
 
 If we check the head of the object using the s3api we can see that the storage
-class for this object is now AWS so this object has been transitioned into the cloud provider:
+class for this object is now AWS, so this object has been transitioned into the cloud provider:
 
 ----
-$ aws s3api --profile rgw  --endpoint http://ceph-mon02:8080 --region default head-object --key transition1 --bucket transition
+$ aws s3api --profile rgw  --endpoint http://ceph-mon02:8080 --region default head-object --key transition1 --bucket transition
 
 {
 
-    "AcceptRanges": "bytes",
-    "LastModified": "2022-10-31T16:52:56+00:00",
-    "ContentLength": 0,
-    "ETag": "\"46ecb42fd0def0e42f85922d62d06766\"",
-    "ContentType": "binary/octet-stream",
-    "Metadata": {},
-    "StorageClass": "AWS"
+    "AcceptRanges": "bytes",
+    "LastModified": "2022-10-31T16:52:56+00:00",
+    "ContentLength": 0,
+    "ETag": "\"46ecb42fd0def0e42f85922d62d06766\"",
+    "ContentType": "binary/octet-stream",
+    "Metadata": {},
+    "StorageClass": "AWS"
 
 }
 ----
 
 If we check in AWS we can see that the objects are available in AWS S3. Due to
-API limitations there is no way to preserve original object modification time
-and ETag but they get stored as metadata attributes on the destination objects.
+API limitations there is no way to preserve the original object modification time
+and ETag, but they get stored as metadata attributes on the destination objects.
 
 ----
 $ aws s3api  --profile aws head-object --bucket rgwtransition --key transition/transition2
@@ -482,14 +482,14 @@ $ aws s3api  --profile aws head-object --bucket rgwtransition --key transition/t
 }
 ----
 
-To avoid object names collision across various buckets, source bucket name is prepended to the target object name. If the object is versioned, object versionid is appended to the end.
+To avoid object names collision across various buckets, the source bucket name is prepended to the target object name. If the object is versioned, the object version id is appended to the end.
 
 Below is the sample object name format:
 
 `s3://<target_path>/<source_bucket_name>/<source_object_name>(-<source_object_version_id>)`
 
 
-For versioned and locked objects, similar semantics as that of LifecycleExpiration are applied as stated below.
+For versioned and locked objects, similar semantics as that of LifecycleExpiration are applied below.
 
-- If the object is current, post transitioning to cloud, it is made noncurrent with delete marker created.
+- If the object is current, post transitioning to the cloud, it is made noncurrent with a delete marker created.
 - If the object is noncurrent and is locked, its transition is skipped.

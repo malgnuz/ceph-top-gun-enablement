@@ -22,26 +22,27 @@
 
 == Deploy RGW services
 
-* Create a realm called `single` , add a zonegroup called `singlezg` , and a master zone called `singlezone`
-* Deploy two RGW services, using the above mentioned realm and zone, on port 8080
+* Create a realm called `single`, add a zonegroup called `singlezg`, and a master zone called `singlezone`
+* Deploy two RGW services, using the above-mentioned realm and zone, on port 8080
 * Create a test user called `user1`, and test rgw setup by creating a bucket * called `bucket1` and object with S3 client
 
 == Deploy a secured(SSL) Ingress service to provide HA
 
-* Deploy an ingress service using ip `192.168.56.100` that will loadbalance client requests between both of the deployed RGW services
+* Deploy an ingress service using ip `192.168.56.100` that will load-balance client requests between both of the deployed RGW services
 * Configure SSL, the SSL termination must be done at the Ingress/HAproxy level
 ** You can use certificates available on /root/certificates of the admin nodes,
-or create your own custom certicates, the SAN of the provided certs covers `s3.example.com` and `s3zone1.example.com`
+or create your own custom certificates, the SAN of the provided certs covers `s3.example.com` and `s3zone1.example.com`
 
 == Add a new placement target to zonegroup `singlezg`
 
 * Create dedicated EC pools for the placement target
 ** Create a new EC pool called `singlezone.rgw.ssd.buckets.data` pg count 32, with 2+1 EC and host failure domain
+WARNING: EC 2+1 Setting is not supported in production, just for lab testing, check-out valid configurations https://access.redhat.com/articles/1548993[here]
 *** Enable Bluestore compression: aggressive, snappy
 ** Create a new replicated pool `singlezone.rgw.ssd.buckets.index` pg count: 8, replica 3 and host failure domain
 ** Create a new replicated pool `singlezone.rgw.ssd.buckets.non-ec` pg count: 8, replica 3 and host failure domain
 * Create a Placement target called rgwec
-** Users should be able to store data on the new placement target using a reference tag when they create their vuckets
+** Users should be able to store data on the new placement target using a reference tag when they create their buckets
 
 == Configure a LifeCycle policy to transition objects to a COLD Storage Class
 
@@ -55,7 +56,7 @@ or create your own custom certicates, the SAN of the provided certs covers `s3.e
 
 == Create a Bucket Life Cycle policy
 
-* Create a new user called `user2`, create a bucket called `policy` with the following layout:
+* Create a new user called `user2`, and create a bucket called `policy` with the following layout:
 ** Policy
 *** Policy/reads
 *** Policy/write
@@ -66,15 +67,15 @@ or create your own custom certicates, the SAN of the provided certs covers `s3.e
 
 == Configure Local Database STS(using AssumeRole)
 
-* We need to allow `user1` and `user2` to assume a IAM role called `role1` that will give them full access to a bucket called `admin`
+* We need to allow `user1` and `user2` to assume an IAM role called `role1` that will give them full access to a bucket called `admin`
 ** Create a new RGW `admin` user
-*** With the `admin` user create and `admin` bucket and add 1 object
+*** With the `admin` user create an `admin` bucket and add 1 object
 ** Enable the STS endpoint in the RGW services
 ** Create a new IAM role called `admin` 
 ** Create a Role Policy Document that will allow `user1` and `user2` to assume `role1`
 ** Create a new role policy that allows `user1` and `user2` full access to bucket `admin`
 ** Using an AWS client assume the IAM `admin` role using STS
-** USe the temporal token created to access the `admin` bucket
+** Use the temporal token created to access the `admin` bucket
 
 == Audit all S3 operations
 * Configure the opslog, so all S3 operations get stored in * /var/log/ceph/`FSID`/opslog.log
@@ -105,5 +106,3 @@ or create your own custom certicates, the SAN of the provided certs covers `s3.e
 * Create a new bucket called `sync2`
 * Configure uni-directional replication from zone `singlezone1` to `singlezone2`
 * Test bucket granular replication
-
-

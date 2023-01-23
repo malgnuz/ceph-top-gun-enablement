@@ -24,8 +24,8 @@
 ** The newfs filesystem will have 2 stand-by mds servers
 ** One of the stand-by MDS servers has to be configured as Standby-replay
 ** Mount the Filesystem with a client on the `workstation` and create the
-following tree
-*** /data 
+the following tree
+*** /data
 **** /data/archive
 **** /data/work
 **** /data/users
@@ -33,15 +33,21 @@ following tree
 
 == Add dedicate a pool to a specific directory
 
-* The `/data/archive` folder is going to be used for long lived file archival,very low number of metadata operations required, performance is not an issue.
+* The `/data/archive` folder is going to be used for long-lived file archival, a very low number of metadata operations is required, and performance is not an issue.
 ** Create a new EC pool called `fs_data_archive_ec` with 2+1 and host failure domain
-** Assing the new EC pool `fs_data_archive_ec` to folder `/data/archive`  
+[WARNING]
+====
+EC 2+1 schema is not supported for production workloads, check-out supported configurations https://access.redhat.com/articles/1548993[here]
+====
+** Assing the new EC pool `fs_data_archive_ec` to folder `/data/archive`
 
 == Add another Active MDS daemon
 
 * The `/data/work` folder has a high count of create/delete operations, it's not performing as expected
 ** Add a new Active MDS daemon and manually ping it to the `/data/work`
-** Double the size of the assgined MDS Daemon Cache
+** Double the size of the assigned MDS Daemon Cache
+** Each Active MDS needs a backup MDS daemon, so you will need to add a new MDS 
+as a backup for the new ACTIVE MDS you created
 
 == Configure a scheduled snapshot
 
@@ -50,7 +56,7 @@ following tree
 
 == Create Quotas
 
-* We need to give `user1` priviledges to configure quotas on the `/data/users` folder
-** Create user1 and assinged the needed client caps to assign quotas
+* We need to give `user1` privileges to configure quotas on the `/data/users` folder
+** Create user1 and assigned the needed client caps to assign quotas
 ** As user1 set the quota to 100MB for the `/data/users` folder
 * As `user2` mount the folder and check the quota limit is working.

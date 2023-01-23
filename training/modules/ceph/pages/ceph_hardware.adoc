@@ -122,7 +122,7 @@ The following elements to consider for such cluster are:
 
 * All servers have OS on flash devices
 * 10 cores per NVMe SSD (assuming a 2 GHz CPU)
-* 16GB OS + 8GB per OSD
+* 16GB OS + 10GB per OSD
 * 3GB and at least 10GB disk space per Monitor
 * 3GB per Manager
 * 8GB and at least 20GB disk space (logging) per MDS

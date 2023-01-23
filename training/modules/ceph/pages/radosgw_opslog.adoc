@@ -13,7 +13,7 @@
 
 == Enable Opslog in RGW
 
-First thing we need to do is adding the following options in our ceph database
+The first thing we need to do is add the following options to our ceph database
 configuration
 
 * *rgw_enable_ops_log:* Enable/Disable rgw_ops_log.
@@ -41,7 +41,7 @@ Scheduled to restart rgw.objectgw.ceph-mon02.hxvmmy on host 'ceph-mon02'
 ....
 
 NOTE: the path we selected for the socket is inside the container
-`/var/run/ceph/opslog` , on the host it translates to `/var/run/ceph/$CLUSTERFSID/opslog`
+`/var/run/ceph/opslog` , on the host, it translates to `/var/run/ceph/$CLUSTERFSID/opslog`
 
 
 Let's create a bucket and copy a file to generate some operations for the
@@ -54,11 +54,10 @@ make_bucket: demobucket
 upload: ../etc/hosts to s3://demobucket/hosts 
 ----
 
-Connect to the node where the RGW daemon is running, in our case `ceph-mon02`,
+Connect to the node where the RGW daemon is running, in our case, `ceph-mon02`,
 to check our RadosGW ops log socket.
 
-On the opslog socket we have both of the actions logged, creating the bucket `demobucket` and
-uploading a file to the bucket
+On the opslog socket, we have both of the actions logged, creating the bucket `demobucket` and uploading a file to the bucket
 
 ....
 # dnf install nc -y
@@ -69,7 +68,7 @@ uploading a file to the bucket
 
 
 Currently, RadosGW `ops_log` is stored in a socket. We would like to
-send these logs to a file in our server or even to log aggregation server. 
+send these logs to a file in our server or even to the log aggregation server. 
 
 As a workaround until the feature described above is implemented, we can:
 
@@ -112,7 +111,7 @@ WantedBy=multi-user.target
 
 ----
 # logrotate  -d -f  /etc/logrotate.d/opslogs
-rotating pattern: /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log  forced from command line (4 rotations)
+rotating pattern: /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log  forced from the command line (4 rotations)
 empty log files are not rotated, old logs are removed
 switching euid to 167 and egid to 167
 considering log /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log
@@ -136,13 +135,15 @@ switching euid to 0 and egid to 0
 [NOTE]
 ----
 The RadosGW `ops_log` can become quickly very big, thus if there
-is a concern about the space usage in the system we recommend to rotate
+is a concern about the space usage in the system, we recommend rotating
 the RadosGW `ops_log` based on the file size.
 ----
 
 [NOTE]
 ----
 Even when using STS temporary tokens assuming roles, the
-`ops_log` is able to identify and log the original user starting the
-transaction, not the temportal token itself.
+`ops_log` can identify and log the original user starting the
+the transaction, not the temporal token itself.
 ----
+
+

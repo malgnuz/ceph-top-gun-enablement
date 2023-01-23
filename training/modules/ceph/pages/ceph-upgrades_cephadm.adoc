@@ -24,9 +24,9 @@ The automated upgrade process follows Ceph best practices.
 
 . The upgrade order starts with Ceph Managers, Ceph Monitors, then other daemons.
 . Each daemon is restarted only after Ceph indicates that the cluster will remain available.
-. The storage cluster health status is likely to switch to HEALTH_WARNING during the upgrade. When the upgrade is complete, the health status should switch back to HEALTH_OK.
+. The storage cluster health status is likely to switch to HEALTH_WARNING during the upgrade. When the upgrade is complete, the health status should switch to HEALTH_OK.
 
-Cephadm strictly enforces an order for the upgrade of daemons that is still present in staggered upgrade scenarios. The current upgrade order is:
+Cephadm strictly enforces an order to upgrade daemons that is still present in staggered upgrade scenarios. The current upgrade order is:
 
 * Ceph Manager nodes
 * Ceph Monitor nodes
@@ -46,9 +46,9 @@ If you specify parameters that upgrade daemons out of order, the upgrade command
 
 == Lab pre-req
 
-You will need to have a running 5.2 cluster, if you use the latest image
-available you will get 5.3, to deploy with the specific 5.2 container image
-tag you need to specify the `--image` parameter in the bootstrap command
+You will need a running 5.2 cluster. If you use the latest image
+available, you will get 5.3. To deploy with the specific 5.2 container image
+tag, you need to specify the `--image` parameter in the bootstrap command
 
 [WARNING]
 ====
@@ -256,7 +256,7 @@ Error EINVAL: Need at least 2 running mgr daemons for upgrade
 ----
 
 cephadm will check that it can upgrade every component before starting without
-affecting the service, we can see that in this example it's complaning that it
+affecting the service, we can see that in this example it's complaining that it
 only has one manager so he can't failover the service during upgrade
 
 let's deploy a failover mgr daemon

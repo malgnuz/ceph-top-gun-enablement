@@ -23,26 +23,26 @@ rebalancing, by design Ceph has a Peer-to-peer architecture that seamlessly hand
 == Detecting OSD Failures
 
 Each Ceph OSD Daemon checks the heartbeat of other Ceph OSD Daemons at random
-intervals(`osd_heartbeat_interval`) less than every 6 seconds, If a neighboring
-Ceph OSD Daemon doesn’t show a heartbeat within a 20 second grace period(`osd_heartbeat_grace`), the Ceph OSD Daemon may consider the neighboring Ceph OSD Daemon down and report it back to a Ceph Monitor
+intervals(`osd_heartbeat_interval`) less than every 6 seconds, If a neighbouring
+Ceph OSD Daemon doesn’t show a heartbeat within a 20 second grace period(`osd_heartbeat_grace`), the Ceph OSD Daemon may consider the neighbouring Ceph OSD Daemon down and report it back to a Ceph Monitor
 
 [WARNING]
 ====
-Setting low values for the `osd_heartbeat_grace` Ceph parameter  is not recommended as with really low values the chances to generate false alarms for our Ceph cluster increase dramatically.
+Setting low values for the `osd_heartbeat_grace` Ceph parameter is not recommended as with really low values the chances to generate false alarms for our Ceph cluster increase dramatically.
 ====
 
 image:::ceph_osd_heartbeat.png[OSD/MON Heartbeat]
 
-By default, two(`mon_osd_min_down_reporters`) Ceph OSD Daemons from different chrush subtrees(`mon_osd_reporter_subtree_level`) must report to the Ceph Monitors that another Ceph OSD Daemon is down before the Ceph Monitors acknowledge that the reported Ceph OSD Daemon is down
+By default, two(`mon_osd_min_down_reporters`) Ceph OSD Daemons from different crush subtrees(`mon_osd_reporter_subtree_level`) must report to the Ceph Monitors that another Ceph OSD Daemon is down before the Ceph Monitors acknowledge that the reported Ceph OSD Daemon is down
 
 image:::ceph_2osds_out.png[OSD reporter]
 
-If an Ceph OSD Daemon doesn’t report to a Ceph Monitor, the Ceph Monitor will
+If a Ceph OSD Daemon doesn’t report to a Ceph Monitor, the Ceph Monitor will
 consider the Ceph OSD Daemon down after the mon osd report timeout elapses(`mon_osd_report_timeout`).
 
 == When OSD failure happens
 
-When a disk or storage node fails, the OSD's are marked out of the cluster and
+When a disk or storage node fails, the OSDs are marked out of the cluster, and
 the self-healing process triggers (default
 600 seconds,`mon_osd_down_out_interval`) and Ceph begins to automatically recover the unavailable PGs from other copies on other OSDs in the cluster. As a result, a node failure has several effects:
 
@@ -52,11 +52,11 @@ the self-healing process triggers (default
 
 The time required for the recovery process is directly proportional to how much data was on the failed node and how much throughput the rest of the cluster can sustain.
 
-Because of the TCO and the performance impact of using a replica 3 policy, many RHCS all-flash clusters are being configured with pools using replica 2,  with only 2 copies of the data, it’s vital to test and measure how much time our cluster takes to recover from failure.
+Because of the TCO and the performance impact of using a replica three policy, many RHCS all-flash clusters are being configured with pools using replica 2,  with only 2 copies of the data. It’s vital to test and measure how much time our cluster takes to recover from failure.
 
 == Ceph recovery configuration options
 
-Ceph has several configuration options to control the recovery process. We can make the recovery process resource-intensive and get faster recovery times, or make it less resource intensive and increase the recovery time. Since we are running with replica 2 we want to recover as fast as possible but finding just the right balance by which the intense use of resources during recovery won’t severely affect the running production workloads.
+Ceph has several configuration options to control the recovery process. We can make the recovery process resource-intensive and get faster recovery times, or make it less resource intensive and increase the recovery time. Since we are running with replica 2, we want to recover as fast as possible but find just the right balance by which the intense use of resources during recovery won’t severely affect the running production workloads.
 
 There are several parameters we can use to control the recovery process, we are going to briefly mention some of the most important parameters available, there are more knobs to control the recovery process.
 
@@ -75,7 +75,7 @@ have occurred to a given PG on that OSD then recovery is used for that PG, Else 
 
 === Priorities
 
-We can specify priorities for the client and recovery operations, by default the client has the maximum priority configured, and the recovery operations the least.
+We can specify priorities for the client and recovery operations. By default, the client has the maximum priority configured, and the recovery operations the least.
 
 * *osd_client_op_priority:* This is the priority set for client operation
 * *osd_recovery_op_priority:* This is the priority set for the recovery operation
@@ -84,14 +84,14 @@ We have to find a balance between the recovery time and how much we can affect c
 
 === Controlling the  Recovery Operations.
 
-*Recovery*, this is log-based recovery ,where we  compare the PG logs and move over the objects which have changed. There are several parameters that help us  control the impact the recovery operations will have in our client IOPs.
+*Recovery*, this is log-based recovery, where we compare the PG logs and move over the objects which have changed. There are several parameters that help us control the impact the recovery operations will have on our client IOPs.
  
 * *osd_recovery_max_active:* The number of active recovery requests per OSD at a given moment.
 * *osd_recovery_threads:* The number of threads needed for recovering data.
 
 === Controlling the Backfill Recovery Operations.
 
-*Backfill*, requires us to incrementally move through the entire PG's hash space and compare the source PG’s with the destination PG’s
+*Backfill*, requires us to incrementally move through the entire PG's hash space and compare the source PGs with the destination PG’s
 
 * *osd_max_backfills:* The maximum number of backfills allowed to or from a single OSD
 * *osd_backfill_scan_min:* The minimum number of objects per backfill scan
@@ -99,11 +99,11 @@ We have to find a balance between the recovery time and how much we can affect c
 
 === Delaying the recovery/backfill Operations.
 
-There is a parameter that introduces a sleep time between recovery operations, by default the recovery_sleep is 0 for ssds, but if we are running very sensitive workloads and we wan’t to severely reduce the impact on client IO we can use this parameter, it’s highly granular as we can configure sleep in decimals for example: 0.00001.
+There is a parameter that introduces a sleep time between recovery operations. By default the recovery_sleep is 0 for ssds. Still, if we are running very sensitive workloads and we want to reduce the impact on client IO severely we can use this parameter. It’s highly granular as we can configure sleep in decimals for example 0.00001.
 
 * *osd_recovery_sleep_ssd":* "0.000000"
 
-=== Prevent Recovery or Backfill from hapenning
+=== Prevent Recovery or Backfill from happening
 
 We have nobackfill and norecover flags.
 
@@ -126,10 +126,10 @@ state of the PGs.
 
 * peering is the process by which OSDs compare PG states to determine the proper current state of a PG.
 * peering also makes note of which OSDs have the most recent data and metadata for various objects within the PG.
-* peering occurs when an OSD is brought up (either a new OSD, or a previously down OSD) or down.
+* peering occurs when an OSD is brought up (either a new OSD or a previously down OSD) or down.
 * Data access is blocked for the entire PG while peering is ongoing
 * This prevents changes requested by client IO from invalidating the peering process.
-* Once peering is complete, the PG will enter either backfill_wait or recovery_wait state.
+* Once peering is complete, the PG will enter either the backfill_wait or recovery_wait state.
 * The PG should move from the wait state to backfilling or recovering as slots for these operations become available on the target OSD.
 
 NOTE: Agreeing on the state does not mean that they all have the latest contents. This is what backfill and recovery accomplish.
@@ -137,18 +137,18 @@ NOTE: Agreeing on the state does not mean that they all have the latest contents
 
 == Small Ceph Cluster. Reduce I/O Freeze(OSD Failure Detection)
 
-One of the main things we seen when executing HA tests in Small clusters(3
-node) Like ODF clusters, is that upon unexpected failure in one of our OSD
-nodes (such as power outage or network partition) we get I/O interruption for
+One of the main things we see when executing HA tests in Small clusters(3
+nodes), Like ODF clusters, is that upon unexpected failure in one of our OSD
+nodes (such as a power outage or network partition), we get I/O interruption for
 20-25 seconds.
 
-With 3 Ceph(ODF) nodes in our cluster we get:
-* 100% of write operations affected (with replica 3 pools):
-  * This is because all write operations hit all the OSD nodes and the write operation needs to be acknowledged by all OSD nodes before acknowledging the write operation to the client.
+With 3 Ceph(ODF) nodes in our cluster, we get:
+* 100% of write operations affected (with replica three pools):
+  * This is because all write operations hit all the OSD nodes. The write operation needs to be acknowledged by all OSD nodes before acknowledging the write operation to the client.
 * 33% of read operations affected:
-  * If the block/s for the file we are reading are hosted on the primary OSDs for the node that is suffering the outage, we will have a 20-25 seconds read pause. If not, we will not notice any downtime.
+  * If the block/s for the file we are reading is hosted on the primary OSDs for the node that is suffering the outage, we will have a 20-25 seconds read pause. If not, we will not notice any downtime.
 
-This is  expected as OSD detection of unexpected failure is controlled by some specific parameters in
+This is expected as OSD detection of unexpected failure is controlled by some specific parameters in
 our Ceph cluster. By default we have the following configuration:
 
 * Global parameters:
@@ -160,7 +160,7 @@ our Ceph cluster. By default we have the following configuration:
 shown a heartbeat that the Ceph Storage Cluster considers it down |20
 seconds|
 
-|osd_heartbeat_interval |How often an Ceph OSD Daemon pings its peers
+|osd_heartbeat_interval |How often a Ceph OSD Daemon pings its peers
 (in seconds) |6 seconds |
 
 |mon_osd_adjust_heartbeat_grace |If set to true, Ceph will scale
@@ -188,11 +188,11 @@ failure in one of the OSD nodes.
 |mon_election_timeout |On election proposer, maximum waiting time for
 all ACKs in seconds |5 seconds |
 
-|mon_lease_ack_timeout_factor |The monitor leader will wait `mon_lease`
+|mon_lease_ack_timeout_factor |The monitor leader will wait for `mon_lease`
 * `mon_lease_ack_timeout_factor` for the providers to acknowledge the
 lease extension |2.0 |
 
-|mon_accept_timeout_factor |The Leader will wait `mon_lease` *
+|mon_accept_timeout_factor |The Leader will wait for `mon_lease` *
 `mon_accept_timeout_factor` for the requester(s) to accept a Paxos
 update. It is also used during the Paxos recovery phase for similar
 purposes |2.0 |
@@ -206,33 +206,34 @@ purposes |2.0 |
 |osd_client_watch_timeout |If the client loses its connection to the
 primary OSD for a watched object, the watch will be removed after a
 timeout configured with `osd_client_watch_timeout`. Watches are
-automatically reestablished when a new connection is made, or a
+automatically reestablished when a new connection is made or a
 placement group switches OSDs |30 seconds |
 |===
 
-*WARNING:* Modifying the parameters described above can help to minimize
+*WARNING:* Modifying the parameters described above can help to minimise
 the I/O pause upon unexpected failure in one of the OSD nodes but not
 completely resolve it. Also, setting these parameters with less than
 default values will generate false alarms for Ceph clusters if there is
-a situation like high load on nodes, network congestion is high or the
+a situation like a high load on nodes, network congestion is high, or the
 network quality is bad. Therefore these parameter changes should be
-tested in a lab environment before putting into production.
+tested in a lab environment before production.
 
-*NOTE:* Tuning the parameters described above might increase both Ceph
+*NOTE:* Tuning the parameters described above might increase Ceph
 resource consumption and Ceph network traffic.
 
 *WARNING:* Changing default OSD heartbeat parameters is not supported. A
-Support Exception (through a support case) is needed in order to change
+Support Exception (through a support case) is needed to change
 these parameters in Ceph.
 
-=== How to prevent flapping OSD to come back to the cluster
+=== How to prevent flapping OSDs from coming back to the cluster
 
-Sometimes some of our OSDs may have problems and will flap in and out in the Ceph cluster. This is controlled by two parameters in Ceph:
+Sometimes, some of our OSDs may have problems and will flap in and out in the Ceph cluster. This is controlled by two parameters in Ceph:
 
 * *osd_max_markdown_count:* Default value: 5.
 * *osd_max_markdown_period:* Default value: 600 seconds.
 
-The OSD that is reported down from its peers to the Ceph monitor 5 times in 10 minutes will be immediately marked as out to prevent flapping OSD. This will immediately trigger data rebalance in our Ceph cluster.
+The OSD reported down from its peers to the Ceph monitor five times in 10 minutes will be immediately marked as out to prevent flapping OSD. This will immediately trigger data rebalance in our Ceph cluster.
 
-We can control this behaviour setting the parameters osd_max_markdown_count and osd_max_markdown_period appropriately.
+We can control this behaviour by setting the parameters osd_max_markdown_count and osd_max_markdown_period appropriately.
+
 

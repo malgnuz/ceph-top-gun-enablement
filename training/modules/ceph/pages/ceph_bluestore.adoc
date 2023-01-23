@@ -27,9 +27,9 @@ Data is directly written to the raw block device and all metadata operations are
 
 image:::filestore-vs-bluestore-2.png[Filestore vs Bluestore]
 
-RocksDB is an embedded high-performance key-value store that excels with flash-storage, RocksDB can’t directly write to the raw disk device, it needs and underlying filesystem to store it’s persistent data, this is where BlueFS comes in, BlueFS is a Filesystem developed with the minimal feature set needed by RocksDB to store its sst files.
+RocksDB is an embedded high-performance key-value store that excels with flash storage, RocksDB can’t directly write to the raw disk device, it needs an underlying filesystem to store its persistent data, this is where BlueFS comes in, BlueFS is a Filesystem developed with the minimal feature set needed by RocksDB to store its .sst files.
 
-RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one were data is written directly to the block device and the other were we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.
+RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one where data is written directly to the block device and the other where we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.
 
 New Bluestore features:
 * it enables compression of data at the lowest level.
@@ -46,13 +46,13 @@ BlueStore consumes raw block devices or partitions. This avoids any intervening 
 BlueStore uses the RocksDB’ key-value database to manage internal metadata, such as the mapping from object names to block locations on a disk.
 
 * Full data and metadata checksumming
-By default all data and metadata written to BlueStore is protected by one or more checksums. No data or metadata are read from disk or returned to the user without verification.
+By default all data and metadata written to BlueStore are protected by one or more checksums. No data or metadata are read from the disk or returned to the user without verification.
 Efficient copy-on-write
 
-* The Ceph Block Device and Ceph File System snapshots rely on a copy-on-write clone mechanism that is implemented efficiently in BlueStore. This results in efficient I/O both for regular snapshots and for erasure coded pools which rely on cloning to implement efficient two-phase commits.
+* The Ceph Block Device and Ceph File System snapshots rely on a copy-on-write clone mechanism that is implemented efficiently in BlueStore. This results in efficient I/O both for regular snapshots and for erasure-coded pools which rely on cloning to implement efficient two-phase commits.
 No large double-writes
 
-* BlueStore first writes any new data to unallocated space on a block device, and then commits a RocksDB transaction that updates the object metadata to reference the new region of the disk. Only when the write operation is below a configurable size threshold, it falls back to a write-ahead journaling scheme, similar to how FileStore operates.
+* BlueStore first writes any new data to unallocated space on a block device and then commits a RocksDB transaction that updates the object metadata to reference the new region of the disk. Only when the write operation is below a configurable size threshold, it falls back to a write-ahead journaling scheme, similar to how FileStore operates.
 
 == Bluestore Layout
 
@@ -64,13 +64,13 @@ Bluestore has a number of possible storage layout configurations:
 * An optional WAL device that stores the transaction logs.
 ** A write-ahead log (WAL) device (identified as block.wal in the data directory) can be used for BlueStore’s internal journal or write-ahead log. It is only useful to use a WAL device if the device is faster than the primary device (e.g., when it is on an SSD and the primary device is an HDD).
 
-For example you could configure the main device on the an HDD drive , this is
+For example, you could configure the main device on the HDD drive, this is
 where the user data will be stored. We then configured the WAL and RocksDB
-devices on a faster Flash NVMe drive, having WAL and RocksDB on a high performing drive will give us more IOPS with lower latency.
+devices on a faster Flash NVMe drive, having WAL and RocksDB on a high-performing drive will give us more IOPS with lower latency.
 
 We can check inside an OSD container
 `/var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.3/` dir to get the osd
-layout, this OSD has been configured specifiying the 3 devices block,block.db
+layout. This OSD has been configured specifying the 3 devices block,block.db
 and block.wal that is why we have 3 different devices for each
 
 ----
@@ -203,13 +203,13 @@ without the OSD process for debugging xref:troubleshooting_bluestore.adoc[here].
 Spill Over happens when RocksDB starts using the `slow` block device affecting
 performance.
 
-BlueFS wraps RocksDB understanding of filesystem and transforms into structure well suited for block devices.
+BlueFS wraps RocksDB understanding of the filesystem and transforms it into a structure well suited for block devices.
 
 . *db is* allocated from device options.bluestore_block_db_path, (informal block.db)
 . *db.slow* is allocated from device options.bluestore_block_path, (informal block)
 . *db.wal* is allocated from device options.bluestore_wal_path, (informal block.wal)
 
-During processing, RocksDB has a temporary higher demand for space. It asks to create a file on "/db/xxxx" but exhausts space on block.db and starts consuming block space. This redirection of allocation is done internally in BlueFS and RocksDB is unaware that relocation occurred. This means that file with name "/db/xxxxx" is located on slow block device, so RocksDB still thinks it is fast. After the peak is gone, data allocated on block remains there, with a lot of space free on block.db.
+During processing, RocksDB has a temporary higher demand for space. It asks to create a file on "/db/xxxx" but exhausts space on block.db and starts consuming block space. This redirection of allocation is done internally in BlueFS and RocksDB is unaware that the relocation occurred. This means that the file with name "/db/xxxxx" is located on a slow block device, so RocksDB still thinks it is fast. After the peak is gone, data allocated on block remains there, with a lot of space free on block.db.
 
 *How to check?*
 
@@ -227,12 +227,12 @@ If you have spillover you can expect the "slow_bytes" values to be > 0.
 
 It's recommended to follow these guidelines:
 
-* If all devices are the same type, for example all rotational drives, and there are no fast devices to use for metadata, it makes sense to specify the block device only and to not separate block.db or block.wal.
+* If all devices are the same type, for example, all rotational drives, and there are no fast devices to use for metadata, it makes sense to specify the block device only and do not separate block.db or block.wal.
 * If you have a mix of fast and slow devices (SSD / NVMe and rotational), it is recommended to place block.db on the faster device while block (data) lives on the slower (spinning drive).
 
 When using a mixed spinning and solid drive setup it is important to make a large enough block.db logical volume for BlueStore. Generally, block.db should have as large as possible logical volumes.
 
-The general recommendation is to have block.db size in between 1% to 4% of block size. For RGW workloads, it is recommended that the block.db size isn’t smaller than 4% of block, because RGW heavily uses it to store metadata (omap keys). For example, if the block size is 1TB, then block.db shouldn’t be less than 40GB. For RBD workloads, 1% to 2% of block size is usually enough.
+The general recommendation is to have block.db size in between 1% to 4% of block size. For RGW workloads, it is recommended that the block.db size isn’t smaller than 4% of the block device, because RGW heavily uses it to store metadata (omap keys). For example, if the block size is 1TB, then block.db shouldn’t be less than 40GB. For RBD workloads, 1% to 2% of block size is usually enough.
 
 You can check detailed information on the OSD layout with the `ceph osd metadata command` 
 
@@ -263,7 +263,7 @@ sizes, which with default settings means roughly 3 GB, 30 GB, 300 GB, and so
 forth. Most deployments will not substantially benefit from sizing to
 accommodate L3 and higher.
 
-Improvements in the latest releases beginning with Nautilus 14.2.12 and Octopus 15.2.6 enable better utilization of arbitrary DB device sizes, and the Pacific release brings experimental dynamic level support.
+Improvements in the latest releases beginning with Nautilus 14.2.12 and Octopus 15.2.6 enable better utilization of arbitrary DB device sizes, and the Pacific release brings experimental dynamic-level support.
 ====
 
 == Bluestore Cache
@@ -274,7 +274,7 @@ The BlueStore cache is a collection of buffers that, depending on configuration,
 
 BlueStore can be configured to automatically resize its caches when TCMalloc is configured as the memory allocator and the bluestore_cache_autotune setting is enabled. This option is currently enabled by default. BlueStore will attempt to keep OSD heap memory usage under a designated target size via the osd_memory_target configuration option. This is a best effort algorithm and caches will not shrink smaller than the amount specified by osd_memory_cache_min.
 
-Automatic Cache sized works great with most workloads, as such we recommend to
+Automatic Cache sizing works great with most workloads, as such, we recommend
 using it.
 
 === Bluestore Manual Cache Sizing
@@ -298,14 +298,14 @@ TIP: you can check per OSD memory usage details with the following command `ceph
 
 === The importance of the Bluestore Onode Cache.
 
-With all NVMe deployments, and specially with RBD workloads the size of the
-bluestore cache can have a huge impact on performance. Onode caching in bluestore is hierarchical.  If a onode is not cached, it will be read from the DB disk, populated into the KV cache, and finally populated into the bluestore onode cache, as you can imagine having a direct hit in the Onode cache is much faster than reading from disk or from the KV cache.
+With all NVMe deployments, and especially with RBD workloads the size of the
+bluestore cache can have a huge impact on performance. Onode caching in bluestore is hierarchical.  If an onode is not cached, it will be read from the DB disk, populated into the KV cache, and finally populated into the bluestore onode cache. As you can imagine having a direct hit in the Onode cache is much faster than reading from the disk or the KV cache.
 
-When all onodes in a data set fit into bluestore's block cache, the onodes are never read from disk and thus onodes never have to be populated into the KV cache at all.  This is the optimal scenario for RBD. On the other hand, a worst case scenario is were you end up needing to read onodes from disk, you'll end up populating both the rocksdb KV cache and the bluestore onode cache with fresh data and force out older onodes, which may be read back in again from disk later.
+When all onodes in a data set fit into bluestore's block cache, the onodes are never read from disk, and thus onodes never have to be populated into the KV cache at all.  This is the optimal scenario for RBD. On the other hand, a worst-case scenario is where you end up needing to read onodes from disk, you'll end up populating both the rocksdb KV cache and the bluestore onode cache with fresh data and force out older onodes, which may be read back in again from disk later.
 
 == Bluestore Database Sharding
 
-BlueStore can divide this data into multiple RocksDB column families. When keys have similar access frequency, modification frequency and lifetime, BlueStore benefits from better caching and more precise compaction. This improves performance, and also requires less disk space during compaction, since each column family is smaller and can compact independent of others.
+BlueStore can divide this data into multiple RocksDB column families. When keys have similar access frequency, modification frequency and lifetime, BlueStore benefits from better caching and more precise compaction. This improves performance, and also requires less disk space during compaction since each column family is smaller and can compact independently of others.
 
 OSDs deployed in Pacific or later use RocksDB sharding by default. If Ceph is upgraded to Pacific from a previous version, sharding is off.
 
@@ -322,15 +322,15 @@ m(3) p(3,0-12) O(3,0-13)=block_cache={type=binned_lru} L P
 
 There is a configured minimum amount of storage that BlueStore will allocate on an OSD. In practice, this is the least amount of capacity that a RADOS object can consume. The value of bluestore_min_alloc_size is derived from the value of bluestore_min_alloc_size_hdd or bluestore_min_alloc_size_ssd depending on the OSD’s rotational attribute.
 
-Through the Mimic release, the default values were 64KB and 16KB for rotational (HDD) and non-rotational (SSD) media respectively. Octopus changed the default for SSD (non-rotational) media to 4KB, and Pacific changed the default for HDD (rotational) media to 4KB as well.
+Through the Mimic release, the default values were 64KB and 16KB for rotational (HDD) and non-rotational (SSD) media, respectively. Octopus changed the default for SSD (non-rotational) media to 4KB, and Pacific changed the default for HDD (rotational) media to 4 KB.
 
-For example, when an RGW client stores a 1KB S3 object, it is written to a single RADOS object. With the default min_alloc_size value, 4KB of underlying drive space is allocated. This means that roughly (4KB - 1KB) == 3KB is allocated but never used, which corresponds to 300% overhead or 25% efficiency
+For example, when an RGW client stores a 1KB S3 object, it is written to a single RADOS object. With the default min_alloc_size value, 4KB of underlying drive space is allocated. This means that roughly (4KB - 1KB) == 3KB is allocated but never used, corresponding to 300% overhead or 25% efficiency
 
-This happens for each replica. So when using the default three copies of data (3R), a 1KB S3 object actually consumes roughly 9KB of storage device capacity. If erasure coding (EC) is used instead of replication, the amplification may be even higher: for a k=4,m=2 pool, our 1KB S3 object will allocate (6 * 4KB) = 24KB of device capacity.
+This happens for each replica. So when using the default three copies of data (3R), a 1KB S3 object consumes roughly 9KB of storage device capacity. If erasure coding (EC) is used instead of replication, the amplification may be even higher: for a k=4,m=2 pool, our 1KB S3 object will allocate (6 * 4KB) = 24KB of device capacity.
 
 [IMPORTANT]
 ====
-Note that this BlueStore attribute takes effect only at OSD creation; if changed later, a given OSD’s behavior will not change unless / until it is destroyed and redeployed with the appropriate option value(s). Upgrading to a later Ceph release will not change the value used by OSDs deployed under older releases or with other settings.
+Note that this BlueStore attribute takes effect only at OSD creation; if changed later, a given OSD’s behaviour will not change unless/until it is destroyed and redeployed with the appropriate option value(s). Upgrading to a later Ceph release will not change the value used by OSDs deployed under older releases or with other settings.
 ====
 
 == Configuring OSDs with a separate device for Block and Block.DB
@@ -358,10 +358,10 @@ In our case first it would not make sense to separate in different drives our db
 wal devices, because all of our disks are the same, but just for the sake of
 training let's use `vde` as our flash disk and `vdc,vdd` as the HDD drives.
 
-To make things more complicated we can't filter our disk for block.db using the
+To make things more complicated, we can't filter our disk for block.db using the
 rotation/non-rotational flags, because all our disks are the same.
 
-So our best option is using direct paths filtering option, here is an example
+So our best option is using the direct paths filtering option. Here is an example
 spec to get it working
 
 ----
@@ -380,7 +380,7 @@ db_devices:
     - /dev/vde
 ----
 
-We can use the `dry-run` parameter to check what actions will be take by cephadm
+We can use the `dry-run` parameter to check what actions will be taken by cephadm
 
 ----
 # ceph orch apply -i osd-path-spec.yaml --dry-run
@@ -569,7 +569,7 @@ re-used.
 
 [TIP]
 ====
-First get rid of the OSDs at the Ceph Level, make sure you don't loose data!
+First, get rid of the OSDs at the Ceph Level, make sure you don't lose data!
 
 The Cephadm approach to deleting OSDs
 ----
@@ -597,8 +597,10 @@ ceph auth del osd.11
 
 [TIP]
 ====
-If the unmanaged flag is unset, cephadm automatically deploys drives that match the OSDSpec. For example, if you use the all-available-devices option when creating OSDs, when you zap a device the cephadm orchestrator automatically creates a new OSD in the device.
+If the unmanaged flag is unset, cephadm automatically deploys drives that match the OSDSpec. For example, if you use the all-available-devices option when creating OSDs, when you zap a device, the cephadm orchestrator automatically creates a new OSD in the device.
 
-it’s best to modify the drivegroup spec before removal. Setting the unmanaged:
+it’s best to modify the drive group spec before removal. Setting the unmanaged:
 true to the OSD spec.
 ====
+
+
