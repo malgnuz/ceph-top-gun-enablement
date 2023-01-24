@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Ceph RadosGW Opslog configuration :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_opslog.html">
+    <title>Troubleshooting with Break and Fix Exercises :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/troubleshooting_break_and_fix.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -187,7 +187,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -214,7 +214,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
@@ -266,198 +266,83 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="radosgw_opslog.html">RGW Opslog</a></li>
+    <li>Ceph Troubleshooting</li>
+    <li><a href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_opslog.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/troubleshooting_break_and_fix.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Ceph RadosGW Opslog configuration</h1>
+<h1 class="page">Troubleshooting with Break and Fix Exercises</h1>
 <div class="sect1">
-<h2 id="_enable_opslog_in_rgw"><a class="anchor" href="#_enable_opslog_in_rgw"></a>1. Enable Opslog in RGW</h2>
+<h2 id="_prepare_the_environment"><a class="anchor" href="#_prepare_the_environment"></a>Prepare the Environment</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The first thing we need to do is add the following options to our ceph database
-configuration</p>
+<p>To be able to complete the Break &amp; Fix exercises we need to fulfil certain pre-reqs:</p>
 </div>
-<div class="ulist">
-<ul>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
-<p><strong>rgw_enable_ops_log:</strong> Enable/Disable rgw_ops_log.</p>
+<p>Deploy the ceph cluster <code>ceph-mon0X</code>.</p>
 </li>
 <li>
-<p><strong>rgw_ops_log_rados:</strong> Whether the operations log should be written to
-the Ceph Storage Cluster backend.
-the following HTTP headers:</p>
+<p>Use the script available in the admin node <code>ceph-mon01</code> called <code>/root/one_step_cluster_deploy.sh</code></p>
 </li>
-<li>
-<p><strong>rgw_ops_log_socket_path:</strong> Socket path where Ceph RadosGW <code>ops_log</code>
-will be stored.</p>
-</li>
-</ul>
+</ol>
 </div>
 <div class="paragraph">
-<p>We add the options to the client.rgw ceph database configuration, and restart
-the RGW instances</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre># ceph config set client.rgw rgw_enable_ops_log true
-# ceph config set client.rgw rgw_ops_log_rados false
-# ceph config set client.rgw rgw_ops_log_socket_path /var/run/ceph/opslog
-# ceph config dump | grep client.rgw
-    client.rgw                                   advanced  rgw_enable_ops_log                     true
-    client.rgw                                   advanced  rgw_ops_log_rados                      false
-    client.rgw                                   advanced  rgw_ops_log_socket_path                /var/run/ceph/opslog
-# ceph orch ls | grep rgw.objectgw
-rgw.objectgw               ?:8080           1/1  3m ago     2h   count:1;label:rgw
-# ceph orch restart rgw.objectgw
-Scheduled to restart rgw.objectgw.ceph-mon02.hxvmmy on host 'ceph-mon02'</pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-the path we selected for the socket is inside the container
-<code>/var/run/ceph/opslog</code> , on the host, it translates to <code>/var/run/ceph/$CLUSTERFSID/opslog</code>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s create a bucket and copy a file to generate some operations for the
-opslog to capture</p>
+<p>Once the cluster is deployed and in a healthy state, you will have ceph,rgw and
+mds services running</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#  aws --endpoint http://ceph-mon02:8080 s3 mb s3://demobucket --region default
-make_bucket: demobucket
-#  aws --endpoint http://ceph-mon02:8080 s3 cp /etc/hosts s3://demobucket/
-upload: ../etc/hosts to s3://demobucket/hosts</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Connect to the node where the RGW daemon is running, in our case, <code>ceph-mon02</code>,
-to check our RadosGW ops log socket.</p>
-</div>
-<div class="paragraph">
-<p>On the opslog socket, we have both of the actions logged, creating the bucket <code>demobucket</code> and uploading a file to the bucket</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre># dnf install nc -y
-# nc -U --recv-only  /var/run/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/opslog
-[{"bucket":"demobucket","time":"2023-01-11T20:20:49.452139Z","time_local":"2023-01-11T20:20:49.452139+0000","remote_addr":"172.16.7.64","user":"user1","operation":"create_bucket","uri":"PUT /demobucket HTTP/1.1","http_status":"200","error_code":"","bytes_sent":0,"bytes_received":0,"object_size":0,"total_time":2388,"user_agent":"aws-cli/2.9.13 Python/3.9.11 Linux/4.18.0-425.3.1.el8.x86_64 exe/x86_64.rhel.8 prompt/off command/s3.mb","referrer":"","trans_id":"tx00000c578315716012330-0063bf1a21-5f32-default","authentication_type":"Local","access_key_id":"S3user1","temp_url":false},
-{"bucket":"demobucket","time":"2023-01-11T20:21:56.714423Z","time_local":"2023-01-11T20:21:56.714423+0000","remote_addr":"172.16.7.64","user":"user1","operation":"put_obj","uri":"PUT /demobucket/hosts HTTP/1.1","http_status":"200","error_code":"","bytes_sent":0,"bytes_received":1354,"object_size":1354,"total_time":1297,"user_agent":"aws-cli/2.9.13 Python/3.9.11 Linux/4.18.0-425.3.1.el8.x86_64 exe/x86_64.rhel.8 prompt/off command/s3.cp","referrer":"","trans_id":"tx00000529241f6b609d1b1-0063bf1a64-5f32-default","authentication_type":"Local","access_key_id":"S3user1","temp_url":false},</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Currently, RadosGW <code>ops_log</code> is stored in a socket. We would like to
-send these logs to a file in our server or even to the log aggregation server.</p>
-</div>
-<div class="paragraph">
-<p>As a workaround until the feature described above is implemented, we can:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a systemd unit:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># vim /etc/systemd/system/rgwopslog.service
-[Unit]
-Description=RGW opslog
-After=network.target
+<pre># ceph -s
+  cluster:
+    id:     3c6182ba-9b1d-11ed-87b3-2cc260754989
+    health: HEALTH_OK
 
-[Service]
-ExecStartPre=/bin/bash -c 'until ss -lnt |grep 8080; do sleep 1; done;'
-ExecStart=/bin/bash -c "/usr/bin/nc -U  --recv-only /var/run/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/opslog &gt;&gt; /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target</code></pre>
+  services:
+    mon: 3 daemons, quorum ceph-mon01,ceph-mon02,ceph-mon03 (age 22m)
+    mgr: ceph-mon01.ndicbs(active, since 22m)
+    mds: 1/1 daemons up
+    osd: 3 osds: 3 up (since 22m), 3 in (since 13h)
+    rgw: 1 daemon active (1 hosts, 1 zones)
+...</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>At this point from the <code>workstation</code> node, run the <code>break_and_fix.yaml</code> playbook</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ansible-playbook -i /root/cluster2 /root/cephadmdeploy/ansible-cephadm-deploy/break-fix.yaml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Create a task to rotate the opslog:</p>
+<p>Take a look at the cluster health in detail</p>
 </li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># vim /etc/logrotate.d/opslogs
-/var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log {
-  su ceph ceph
-  rotate 4
-  daily
-  dateext
-  compress
-  postrotate
-    systemctl restart rgwopslog
-  endscript
-  missingok
-  notifempty
-}</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
 <li>
-<p>Lets test the configuration forcing a log rotation in debug mode</p>
+<p>Increase debug log verbosity if needed</p>
+</li>
+<li>
+<p>Take a look at the container logs during the startup</p>
+</li>
+<li>
+<p>ceph pg PG.NUM query can help identify the problem</p>
+</li>
+<li>
+<p>Once problems have been fixed restart the affected daemons if needed</p>
 </li>
 </ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># logrotate  -d -f  /etc/logrotate.d/opslogs
-rotating pattern: /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log  forced from the command line (4 rotations)
-empty log files are not rotated, old logs are removed
-switching euid to 167 and egid to 167
-considering log /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log
-Creating new state
-  Now: 2023-01-11 17:22
-  Last rotated at 2023-01-11 17:00
-  log needs rotating
-rotating log /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log, log-&gt;rotateCount is 4
-dateext suffix '-20230111'
-glob pattern '-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-glob finding old rotated logs failed
-renaming /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log to /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log-20230111
-running postrotate script
-running script with arg /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log: "
-    systemctl restart rgwopslog
-"
-compressing log with: /bin/gzip
-switching euid to 0 and egid to 0</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>The RadosGW `ops_log` can become quickly very big, thus if there
-is a concern about the space usage in the system, we recommend rotating
-the RadosGW `ops_log` based on the file size.</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>Even when using STS temporary tokens assuming roles, the
-`ops_log` can identify and log the original user starting the
-the transaction, not the temporal token itself.</pre>
-</div>
 </div>
 </div>
 </div>

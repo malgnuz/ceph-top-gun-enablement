@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -282,7 +291,7 @@ baseline testing to be sure all the server components are working as expected.</
 <h2 id="_define_software_versions"><a class="anchor" href="#_define_software_versions"></a>1. Define Software Versions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Let&#8217;s layout the versions of the software that we will be using during the
+<p>Let&#8217;s lay out the versions of the software that we will be using during the
 testing</p>
 </div>
 <div class="paragraph">
@@ -309,7 +318,7 @@ testing</p>
 <div class="sect2">
 <h3 id="_ceph_nodes"><a class="anchor" href="#_ceph_nodes"></a>2.1. Ceph Nodes</h3>
 <div class="paragraph">
-<p>Let&#8217;s layout the the hardware that we will be used during the
+<p>Let&#8217;s lay out the hardware that we will be using during the
 testing</p>
 </div>
 <div class="paragraph">
@@ -344,7 +353,7 @@ testing</p>
 </div>
 </li>
 <li>
-<p>Network Interface Cards: The High Availability is managed at the Cisco Fabric Interconnect layer, so only 2 nics are presented to the OS for Ceph:
+<p>Network Interface Cards: The High Availability is managed at the Cisco Fabric Interconnect layer, so only 2 NICs are presented to the OS for Ceph:
 ***1 x 40 Gbps NIC for the Ceph public network.</p>
 </li>
 <li>
@@ -362,7 +371,7 @@ testing</p>
 <div class="sect2">
 <h3 id="_client_nodes"><a class="anchor" href="#_client_nodes"></a>2.2. Client Nodes</h3>
 <div class="paragraph">
-<p>Not only the Ceph server specification is importan, the client resources are a
+<p>Not only the Ceph server specification is important, but the client resources are also a
 fundamental part of the testing as we will need enough firepower from the
 client side to saturate our ceph cluster</p>
 </div>
@@ -410,7 +419,7 @@ client side to saturate our ceph cluster</p>
 <h2 id="_configure_bios_options_for_performance"><a class="anchor" href="#_configure_bios_options_for_performance"></a>4. Configure BIOS options for performance.</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This is dependent on the Hardware being used, but in general we recommend to disable P-states and C-states on the Intel® processors, and also to ensure consistency of CPU performance, we disabled Enhanced Intel SpeedStep® technology (EIST) and Intel® Turbo Boost Technology.</p>
+<p>This is dependent on the Hardware being used, but in general, we recommend disabling P-states and C-states on the Intel® processors, and also to ensure consistency of CPU performance, we disabled Enhanced Intel SpeedStep® technology (EIST) and Intel® Turbo Boost Technology.</p>
 </div>
 <div class="paragraph">
 <p><strong>Example:</strong></p>
@@ -431,15 +440,21 @@ Global C-State  Control Disabled</code></pre>
 </div>
 <div class="paragraph">
 <p>Very related to the specific Hardware/NiCs that are being used, in many
-ocassions no need to modify. Cisco UCS for example does need modifications so
+occasions no need to modify. Cisco UCS, for example, does need modifications so
 it&#8217;s always good to check</p>
 </div>
 <div class="paragraph">
-<p>Number of Transmit and receive queue for each NIC configured on the system, The ring buffer size.</p>
+<p>the Number of Transmit and receive queues for each NIC configured on the system, The ring buffer size.</p>
 </div>
-<div class="paragraph">
-<p>* Once the ring buffer has been increased, allowing more traffic to be stored to achieve higher traffic rates.
-* Increasing the number of queues allows multiple CPU cores to work to service the ring buffer at the same time.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Once the ring buffer has been increased, allow more traffic to be stored to achieve higher traffic rates.</p>
+</li>
+<li>
+<p>Increasing the number of queues allows multiple CPU cores to work to service the ring buffer at the same time.</p>
+</li>
+</ul>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -449,7 +464,7 @@ it&#8217;s always good to check</p>
 </td>
 <td class="content">
 The values used here are just an example for a specific workload, don&#8217;t
-copy and paste into other configurations
+copy and paste them into other configurations
 </td>
 </tr>
 </table>
@@ -542,10 +557,10 @@ net.ipv4.tcp_max_tw_buckets = 2000000</code></pre>
 <div class="sect2">
 <h3 id="_burn_in_tools"><a class="anchor" href="#_burn_in_tools"></a>6.1. Burn-in Tools</h3>
 <div class="paragraph">
-<p>Burn-in tests are usually performed on hardware to enable the detection of any problems before the performance tests of Ceph begin, the tests will be run individually on each component. If any component is defective, it is most likely to be detected during the Burn-in test, so the defective part can be replaced before the performance tests are run in this way it won’t affect the results in any way.</p>
+<p>Burn-in tests are usually performed on hardware to enable the detection of any problems before the performance tests of Ceph to begin, the tests will be run individually on each component. If any component is defective, it is most likely to be detected during the Burn-in test, so the defective part can be replaced before the performance tests are run in this way it won’t affect the results in any way.</p>
 </div>
 <div class="paragraph">
-<p>There are many Burn-in tools, just as an example we cxan use stress-ng tool. stress-ng will stress test a computer system in various selectable ways. It was designed to exercise various physical subsystems of a computer as well as the various operating system kernel interfaces.</p>
+<p>There are many Burn-in tools, just as an example, we can use stress-ng tool. stress-ng will stress test a computer system in various selectable ways. It was designed to exercise various physical subsystems of a computer as well as the various operating system kernel interfaces.</p>
 </div>
 <div class="paragraph">
 <p><strong>Example:</strong></p>
@@ -576,18 +591,18 @@ net.ipv4.tcp_max_tw_buckets = 2000000</code></pre>
 <div class="sect2">
 <h3 id="_raw_disk_baseline_benchmarking_tests"><a class="anchor" href="#_raw_disk_baseline_benchmarking_tests"></a>6.3. RAW Disk Baseline Benchmarking tests</h3>
 <div class="paragraph">
-<p>This test helps us compare the performance (IOPS) of each hard drive installed on the servers against a known standard of reference provided by the manufacturer, in this case Intel. So we can be certain that disks are performing as expected before we start adding extra layers of complexity on top of them.</p>
+<p>This test helps us compare the performance (IOPS) of each hard drive installed on the servers against a known standard of reference provided by the manufacturer, in this case, Intel. So we can be certain that disks are performing as expected before we start adding extra layers of complexity on top of them.</p>
 </div>
 <div class="paragraph">
-<p>This tests will be run locally on each server against each of the 8 disks individually and also against and aggregate of the NVMe disks.</p>
+<p>These tests will be run locally on each server against each of the eight disks individually and also against an aggregate of the NVMe disks.</p>
 </div>
 <div class="paragraph">
-<p>With this test we can check each disk is giving similar IOPS, and that each
+<p>With this test, we can check each disk is giving similar IOPS, and that each
 host is giving and similar IOPS aggregate.</p>
 </div>
 <div class="paragraph">
-<p>The tool that we will use to run these I/O tests against the hardrives is fio, fio spawns a number of threads or processes doing a particular type of I/O action as specified by the user. fio takes a number of global parameters, each inherited by the thread unless otherwise parameters given to them overriding
-that setting is given.  The typical use of fio is to write a job file matching the I/O load one wants to simulate.</p>
+<p>The tool we will use to run these I/O tests against the Media is fio, fio spawns a number of threads or processes doing a particular type of I/O action as specified by the user. fio takes several global parameters, each inherited by the thread unless otherwise parameters given to them overriding
+that setting are given.  The typical use of fio is to write a job file matching the I/O load one wants to simulate.</p>
 </div>
 <div class="paragraph">
 <p><strong>Example:</strong></p>
@@ -628,7 +643,7 @@ numjobs=4</code></pre>
 <div class="sect3">
 <h4 id="_full_node_drive_testing"><a class="anchor" href="#_full_node_drive_testing"></a>6.3.2. Full node drive testing:</h4>
 <div class="paragraph">
-<p>We can run 2 types of workloads:</p>
+<p>We can run two types of workloads:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -697,10 +712,10 @@ numjobs=4</code></pre>
 <div class="sect2">
 <h3 id="_network_performance_throughput_and_latency_baseline_tests"><a class="anchor" href="#_network_performance_throughput_and_latency_baseline_tests"></a>6.4. Network Performance: Throughput and Latency baseline tests.</h3>
 <div class="paragraph">
-<p>Because Ceph is a distributed storage solution it heavily relays on the network, the performance that we are able to get from Ceph is tightly coupled with the performance of the network, this is why we need to run extensive network performance tests so we can be sure that each component in the network is delivering as expected.</p>
+<p>Because Ceph is a distributed storage solution, it heavily relays on the network. The performance that we can get from Ceph is tightly coupled with the performance of the network, this is why we need to run extensive network performance tests so we can be sure that each component in the network is delivering as expected.</p>
 </div>
 <div class="paragraph">
-<p>During the tests we will be measuring 3 major indicators:</p>
+<p>During the tests, we will be measuring three major indicators:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -708,7 +723,7 @@ numjobs=4</code></pre>
 <p><strong>Latency</strong> is the time required to transmit a packet across a network</p>
 </li>
 <li>
-<p><strong>Throughput</strong> is defined as the quantity of data being sent/received by unit of time</p>
+<p><strong>Throughput</strong> is defined as the quantity of data being sent/received by a unit of time</p>
 </li>
 <li>
 <p><strong>Packet loss</strong> reflects the number of packets lost per 100 packets sent by a host</p>
@@ -716,14 +731,14 @@ numjobs=4</code></pre>
 </ol>
 </div>
 <div class="paragraph">
-<p>To run these tests we can for example use pbench. Pbench is a Benchmarking and
+<p>To run these tests, we can, for example, use pbench. Pbench is a Benchmarking and
 Performance Analysis Framework that provides a set of pre-packaged scripts to
 run some common benchmarks using the collection tools and other facilities that
-Pbench provides. Pbench has different modules/add-ons that we can use, for
-networking we ca use the pbench_uperf module.</p>
+Pbench provides. Pbench has different modules/add-ons that we can use. For
+networking, we can use the pbench_uperf module.</p>
 </div>
 <div class="paragraph">
-<p>uperf represents a new kind of benchmarking tool where instead of running a fixed benchmark or workload, a description (or model) of the workload is provided and the tool generates the load according to the model. By distilling the benchmark or workload into a model, you can now do various things like change the scale of the workload, change different parameters, change protocols, etc and analyse the effect of these changes on your model. Some of the questions you could answer using uperf are bandwidth and latency (unidirectional and bidirectional) with different protocols like TCP, UDP, SCTP or SSL.</p>
+<p>uperf represents a new kind of benchmarking tool where instead of running a fixed benchmark or workload, a description (or model) of the workload is provided, and the tool generates the load according to the model. By distilling the benchmark or workload into a model, you can now do various things like change the scale of the workload, change different parameters, change protocols, etc. and analyse the effect of these changes on your model. Some of the questions you could answer using uperf are bandwidth and latency (unidirectional and bidirectional) with protocols like TCP, UDP, SCTP or SSL.</p>
 </div>
 <div class="paragraph">
 <p>Two types of tests can be run from each endpoint:</p>
@@ -735,12 +750,12 @@ networking we ca use the pbench_uperf module.</p>
 </li>
 <li>
 <p><strong>RR</strong>: Request/response performance is quoted as "Transactions/s" From a
-transaction rate, one can infer one way and round-trip average latency.</p>
+transaction rate, one can infer one-way and round-trip average latency.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>This is an example of iperf3 tests mentioned before from all the Ceph nodes in the cluster and at each of the following endpoints :</p>
+<p>This is an example of iperf3 tests mentioned before from all the Ceph nodes in the cluster and at each of the following endpoints:</p>
 </div>
 <div class="listingblock">
 <div class="content">

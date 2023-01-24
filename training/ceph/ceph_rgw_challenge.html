@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -308,10 +317,10 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Create a realm called <code>single</code> , add a zonegroup called <code>singlezg</code> , and a master zone called <code>singlezone</code></p>
+<p>Create a realm called <code>single</code>, add a zonegroup called <code>singlezg</code>, and a master zone called <code>singlezone</code></p>
 </li>
 <li>
-<p>Deploy two RGW services, using the above mentioned realm and zone, on port 8080</p>
+<p>Deploy two RGW services, using the above-mentioned realm and zone, on port 8080</p>
 </li>
 <li>
 <p>Create a test user called <code>user1</code>, and test rgw setup by creating a bucket * called <code>bucket1</code> and object with S3 client</p>
@@ -326,7 +335,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Deploy an ingress service using ip <code>192.168.56.100</code> that will loadbalance client requests between both of the deployed RGW services</p>
+<p>Deploy an ingress service using ip <code>192.168.56.100</code> that will load-balance client requests between both of the deployed RGW services</p>
 </li>
 <li>
 <p>Configure SSL, the SSL termination must be done at the Ingress/HAproxy level</p>
@@ -334,7 +343,7 @@
 <ul>
 <li>
 <p>You can use certificates available on /root/certificates of the admin nodes,
-or create your own custom certicates, the SAN of the provided certs covers <code>s3.example.com</code> and <code>s3zone1.example.com</code></p>
+or create your own custom certificates, the SAN of the provided certs covers <code>s3.example.com</code> and <code>s3zone1.example.com</code></p>
 </li>
 </ul>
 </div>
@@ -353,7 +362,8 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new EC pool called <code>singlezone.rgw.ssd.buckets.data</code> pg count 32, with 2+1 EC and host failure domain</p>
+<p>Create a new EC pool called <code>singlezone.rgw.ssd.buckets.data</code> pg count 32, with 2+1 EC and host failure domain
+WARNING: EC 2+1 Setting is not supported in production, just for lab testing, check-out valid configurations <a href="https://access.redhat.com/articles/1548993">here</a></p>
 <div class="ulist">
 <ul>
 <li>
@@ -376,7 +386,7 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <div class="ulist">
 <ul>
 <li>
-<p>Users should be able to store data on the new placement target using a reference tag when they create their vuckets</p>
+<p>Users should be able to store data on the new placement target using a reference tag when they create their buckets</p>
 </li>
 </ul>
 </div>
@@ -429,7 +439,7 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new user called <code>user2</code>, create a bucket called <code>policy</code> with the following layout:</p>
+<p>Create a new user called <code>user2</code>, and create a bucket called <code>policy</code> with the following layout:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -474,7 +484,7 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <div class="ulist">
 <ul>
 <li>
-<p>We need to allow <code>user1</code> and <code>user2</code> to assume a IAM role called <code>role1</code> that will give them full access to a bucket called <code>admin</code></p>
+<p>We need to allow <code>user1</code> and <code>user2</code> to assume an IAM role called <code>role1</code> that will give them full access to a bucket called <code>admin</code></p>
 <div class="ulist">
 <ul>
 <li>
@@ -482,7 +492,7 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <div class="ulist">
 <ul>
 <li>
-<p>With the <code>admin</code> user create and <code>admin</code> bucket and add 1 object</p>
+<p>With the <code>admin</code> user create an <code>admin</code> bucket and add 1 object</p>
 </li>
 </ul>
 </div>
@@ -503,7 +513,7 @@ or create your own custom certicates, the SAN of the provided certs covers <code
 <p>Using an AWS client assume the IAM <code>admin</code> role using STS</p>
 </li>
 <li>
-<p>USe the temporal token created to access the <code>admin</code> bucket</p>
+<p>Use the temporal token created to access the <code>admin</code> bucket</p>
 </li>
 </ul>
 </div>

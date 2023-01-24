@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Ceph RadosGW Opslog configuration :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_opslog.html">
+    <title>Ceph and Logs :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/troubleshooting_logging.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -187,7 +187,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -202,7 +202,7 @@
     <button class="nav-item-toggle"></button>
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -266,198 +266,269 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="radosgw_opslog.html">RGW Opslog</a></li>
+    <li>Ceph Troubleshooting</li>
+    <li><a href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_opslog.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/troubleshooting_logging.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Ceph RadosGW Opslog configuration</h1>
+<h1 class="page">Ceph and Logs</h1>
 <div class="sect1">
-<h2 id="_enable_opslog_in_rgw"><a class="anchor" href="#_enable_opslog_in_rgw"></a>1. Enable Opslog in RGW</h2>
+<h2 id="_where_is_ceph_saving_logs"><a class="anchor" href="#_where_is_ceph_saving_logs"></a>Where is Ceph saving logs?</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The first thing we need to do is add the following options to our ceph database
-configuration</p>
+<p>Ceph daemons log to journald by default and Ceph logs are captured by the container runtime environment. They are accessible via journalctl</p>
+</div>
+<div class="paragraph">
+<p>For example, to view the logs for the daemon mon.foo for a cluster with ID 5c5a50ae-272a-455d-99e9-32c6a013e694, the command would be something like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># journalctl -u ceph-5c5a50ae-272a-455d-99e9-32c6a013e694@mon.1</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_logging_to_files"><a class="anchor" href="#_logging_to_files"></a>LOGGING TO FILES</h3>
+<div class="paragraph">
+<p>You can also configure Ceph daemons to log to files instead of to journald if you prefer logs to appear in files (as they did in earlier, pre-cephadm, pre-Octopus versions of Ceph). When Ceph logs to files, the logs appear in /var/log/ceph/&lt;cluster-fsid&gt;.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config set global log_to_file true
+# ceph config set global mon_cluster_log_to_file true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, cephadm sets up log rotation on each host to rotate these files.
+You can configure the logging retention schedule by modifying
+<code>/etc/logrotate.d/ceph.&lt;cluster-fsid&gt;</code></p>
+</div>
+<div class="paragraph">
+<p><code>/var/log/ceph/&lt;cluster-fsid&gt;</code> contains all cluster logs. By default, cephadm logs via stderr and the container runtime.</p>
+</div>
+<div class="paragraph">
+<p>Because a few Ceph daemons (notably, the monitors and prometheus) store a large amount of data in /var/lib/ceph , we recommend moving this directory to its own disk, partition, or logical volume so that it does not fill up the root file system.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disabling_logging_to_journald"><a class="anchor" href="#_disabling_logging_to_journald"></a>DISABLING LOGGING TO JOURNALD</h3>
+<div class="paragraph">
+<p>If you choose to log to files, we recommend disabling logging to journald or else everything will be logged twice. Run the following commands to disable logging to stderr:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config set global log_to_stderr false
+# ceph config set global mon_cluster_log_to_stderr false
+# ceph config set global log_to_journald false
+# ceph config set global mon_cluster_log_to_journald false</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cephadm_logs"><a class="anchor" href="#_cephadm_logs"></a>Cephadm Logs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cephadm writes logs to the cephadm cluster log channel. You can monitor Ceph’s activity in real time by reading the logs as they fill up. Run the following command to see the logs in real time</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph -W cephadm</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, this command shows info-level events and above. To see debug-level messages as well as info-level events, run the following commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config set mgr mgr/cephadm/log_to_cluster_level debug
+# ceph -W cephadm --watch-debug</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can see recent events by running the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph log last cephadm</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If your Ceph cluster has been configured to log events to files, there will exist a cephadm log file called ceph.cephadm.log on all monitor hosts (see Ceph daemon control for a more complete explanation of this).</p>
+</div>
+<div class="sect2">
+<h3 id="_cephadm_per_service_event_logs"><a class="anchor" href="#_cephadm_per_service_event_logs"></a>Cephadm per service event logs</h3>
+<div class="paragraph">
+<p>In order to simplify debugging failed daemon deployments, cephadm stores events on a per-service and per-daemon basis. To view the list of events for a specific service, run the following example command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ceph orch ls --service_name=alertmanager --format yaml
+  service_type: alertmanager
+  service_name: alertmanager
+  placement:
+    hosts:
+    - unknown_host
+[...]
+  events:
+  - 2022-02-01T12:09:25.264584 service:alertmanager [ERROR] "Failed to apply: \
+   Cannot place &lt;AlertManagerSpec for service_name=alertmanager&gt; on \
+   unknown_host: Unknown hosts"'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As opposed to a specific service, to view the list of events for a specific daemon, for example, run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ceph orch ceph --service-type mds \
+ --daemon-id=hostname.ppdhsz --format yaml
+  daemon_type: mds
+  daemon_id: cephfs.hostname.ppdhsz
+  hostname: hostname
+[...]
+  events:
+  - 2022-02-01T08:59:43.845866 daemon:mds.cephfs.hostname.ppdhsz [INFO] \
+   "Reconfigured mds.cephfs.hostname.ppdhsz on host 'hostname'"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cephadm_image_versions_being_used"><a class="anchor" href="#_cephadm_image_versions_being_used"></a>Cephadm Image versions being used</h3>
+<div class="listingblock">
+<div class="content">
+<pre>ceph config get mgr mgr/cephadm/OPTION_NAME</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Options being:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>rgw_enable_ops_log:</strong> Enable/Disable rgw_ops_log.</p>
+<p>container_image_base</p>
 </li>
 <li>
-<p><strong>rgw_ops_log_rados:</strong> Whether the operations log should be written to
-the Ceph Storage Cluster backend.
-the following HTTP headers:</p>
+<p>container_image_prometheus</p>
 </li>
 <li>
-<p><strong>rgw_ops_log_socket_path:</strong> Socket path where Ceph RadosGW <code>ops_log</code>
-will be stored.</p>
+<p>container_image_node_exporter</p>
+</li>
+<li>
+<p>container_image_alertmanager</p>
+</li>
+<li>
+<p>container_image_grafana</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>We add the options to the client.rgw ceph database configuration, and restart
-the RGW instances</p>
-</div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre># ceph config set client.rgw rgw_enable_ops_log true
-# ceph config set client.rgw rgw_ops_log_rados false
-# ceph config set client.rgw rgw_ops_log_socket_path /var/run/ceph/opslog
-# ceph config dump | grep client.rgw
-    client.rgw                                   advanced  rgw_enable_ops_log                     true
-    client.rgw                                   advanced  rgw_ops_log_rados                      false
-    client.rgw                                   advanced  rgw_ops_log_socket_path                /var/run/ceph/opslog
-# ceph orch ls | grep rgw.objectgw
-rgw.objectgw               ?:8080           1/1  3m ago     2h   count:1;label:rgw
+<pre># ceph config get mgr mgr/cephadm/container_image_base
+registry.redhat.io/rhceph/rhceph-5-rhel8:latest</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ceph_subsystems_logs"><a class="anchor" href="#_ceph_subsystems_logs"></a>Ceph subsystems logs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each subsystem has a logging level for its output logs, and for its logs in-memory. You may set different values for each of these subsystems by setting a log file level and a memory level for debug logging. Ceph’s logging levels operate on a scale of 1 to 20, where 1 is terse and 20 is verbose 1 . In general, the logs in-memory are not sent to the output log unless:</p>
+</div>
+<div class="paragraph">
+<p>a fatal signal is raised or an assert in source code is triggered or upon requested. Please consult document on admin socket for more details.</p>
+</div>
+<div class="paragraph">
+<p>A debug logging setting can take a single value for the log level and the memory level, which sets them both as the same value. For example, if you specify debug ms = 5, Ceph will treat it as a log level and a memory level of 5. You may also specify them separately. The first setting is the log level, and the second setting is the memory level. You must separate them with a forward slash (/). For example, if you want to set the ms subsystem’s debug logging level to 1 and its memory level to 5, you would specify it as debug ms = 1/5. For example:</p>
+</div>
+<div class="paragraph">
+<p>You can increase log verbosity during runtime in different ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph tell osd.0 config set debug_osd 20</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using the admin socket from inside the affected service container</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph --admin-daemon /var/run/ceph/ceph-client.rgw.&lt;name&gt;.asok config set debug_rgw 20</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Making the verbose/debug change permanent, so it persists after a restart</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config set client.rgw debug_rgw 20
 # ceph orch restart rgw.objectgw
-Scheduled to restart rgw.objectgw.ceph-mon02.hxvmmy on host 'ceph-mon02'</pre>
+Scheduled to restart rgw.objectgw.ceph-mon02.xwixkr on host 'ceph-mon02'</pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-the path we selected for the socket is inside the container
-<code>/var/run/ceph/opslog</code> , on the host, it translates to <code>/var/run/ceph/$CLUSTERFSID/opslog</code>
-</td>
-</tr>
-</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_getting_logs_from_containers_at_startup"><a class="anchor" href="#_getting_logs_from_containers_at_startup"></a>Getting logs from containers at startup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You might need to investigate why a cephadm command failed or why a certain service no longer runs properly.</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s create a bucket and copy a file to generate some operations for the
-opslog to capture</p>
+<p>We can use the <code>cephadm logs</code> to get logs from the containers running ceph services</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#  aws --endpoint http://ceph-mon02:8080 s3 mb s3://demobucket --region default
-make_bucket: demobucket
-#  aws --endpoint http://ceph-mon02:8080 s3 cp /etc/hosts s3://demobucket/
-upload: ../etc/hosts to s3://demobucket/hosts</code></pre>
+<pre># cephadm ls | grep mgr
+        "name": "mgr.ceph-mon01.ndicbs",
+        "systemd_unit": "ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989@mgr.ceph-mon01.ndicbs",
+        "service_name": "mgr",
+# cephadm logs --name mgr.ceph-mon01.ndicbs
+Inferring fsid 3c6182ba-9b1d-11ed-87b3-2cc260754989
+-- Logs begin at Tue 2023-01-24 04:05:12 EST, end at Tue 2023-01-24 05:34:07 EST. --
+Jan 24 04:05:21 ceph-mon01 systemd[1]: Starting Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989...
+Jan 24 04:05:25 ceph-mon01 podman[1637]:
+Jan 24 04:05:26 ceph-mon01 bash[1637]: 36f6ae35866d0001688643b6332ba0c986645c7fba90d60062e6a4abcd6c8123
+Jan 24 04:05:26 ceph-mon01 systemd[1]: Started Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989.
+Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d&gt;
+Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_cerph_service_containers_manually"><a class="anchor" href="#_running_cerph_service_containers_manually"></a>Running Cerph Service containers manually</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cephadm uses wrappers that get executed by systemd to start-up/stop the
+container services, the start wrapper can be found:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># cat /var/lib/ceph/cluster-fsid/service-name/unit.run</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Connect to the node where the RGW daemon is running, in our case, <code>ceph-mon02</code>,
-to check our RadosGW ops log socket.</p>
+<p>To debug a container start-up issue you can disable/stop the systemd unit, and
+manually run</p>
 </div>
-<div class="paragraph">
-<p>On the opslog socket, we have both of the actions logged, creating the bucket <code>demobucket</code> and uploading a file to the bucket</p>
-</div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre># dnf install nc -y
-# nc -U --recv-only  /var/run/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/opslog
-[{"bucket":"demobucket","time":"2023-01-11T20:20:49.452139Z","time_local":"2023-01-11T20:20:49.452139+0000","remote_addr":"172.16.7.64","user":"user1","operation":"create_bucket","uri":"PUT /demobucket HTTP/1.1","http_status":"200","error_code":"","bytes_sent":0,"bytes_received":0,"object_size":0,"total_time":2388,"user_agent":"aws-cli/2.9.13 Python/3.9.11 Linux/4.18.0-425.3.1.el8.x86_64 exe/x86_64.rhel.8 prompt/off command/s3.mb","referrer":"","trans_id":"tx00000c578315716012330-0063bf1a21-5f32-default","authentication_type":"Local","access_key_id":"S3user1","temp_url":false},
-{"bucket":"demobucket","time":"2023-01-11T20:21:56.714423Z","time_local":"2023-01-11T20:21:56.714423+0000","remote_addr":"172.16.7.64","user":"user1","operation":"put_obj","uri":"PUT /demobucket/hosts HTTP/1.1","http_status":"200","error_code":"","bytes_sent":0,"bytes_received":1354,"object_size":1354,"total_time":1297,"user_agent":"aws-cli/2.9.13 Python/3.9.11 Linux/4.18.0-425.3.1.el8.x86_64 exe/x86_64.rhel.8 prompt/off command/s3.cp","referrer":"","trans_id":"tx00000529241f6b609d1b1-0063bf1a64-5f32-default","authentication_type":"Local","access_key_id":"S3user1","temp_url":false},</pre>
+<pre># bash -x /var/lib/ceph/cluster-fsid/service-name/unit.run</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Currently, RadosGW <code>ops_log</code> is stored in a socket. We would like to
-send these logs to a file in our server or even to the log aggregation server.</p>
-</div>
-<div class="paragraph">
-<p>As a workaround until the feature described above is implemented, we can:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a systemd unit:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># vim /etc/systemd/system/rgwopslog.service
-[Unit]
-Description=RGW opslog
-After=network.target
-
-[Service]
-ExecStartPre=/bin/bash -c 'until ss -lnt |grep 8080; do sleep 1; done;'
-ExecStart=/bin/bash -c "/usr/bin/nc -U  --recv-only /var/run/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/opslog &gt;&gt; /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a task to rotate the opslog:</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># vim /etc/logrotate.d/opslogs
-/var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log {
-  su ceph ceph
-  rotate 4
-  daily
-  dateext
-  compress
-  postrotate
-    systemctl restart rgwopslog
-  endscript
-  missingok
-  notifempty
-}</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Lets test the configuration forcing a log rotation in debug mode</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># logrotate  -d -f  /etc/logrotate.d/opslogs
-rotating pattern: /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log  forced from the command line (4 rotations)
-empty log files are not rotated, old logs are removed
-switching euid to 167 and egid to 167
-considering log /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log
-Creating new state
-  Now: 2023-01-11 17:22
-  Last rotated at 2023-01-11 17:00
-  log needs rotating
-rotating log /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log, log-&gt;rotateCount is 4
-dateext suffix '-20230111'
-glob pattern '-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-glob finding old rotated logs failed
-renaming /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log to /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log-20230111
-running postrotate script
-running script with arg /var/log/ceph/274ba756-91d7-11ed-aa4c-2cc260754989/rgwops.log: "
-    systemctl restart rgwopslog
-"
-compressing log with: /bin/gzip
-switching euid to 0 and egid to 0</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>The RadosGW `ops_log` can become quickly very big, thus if there
-is a concern about the space usage in the system, we recommend rotating
-the RadosGW `ops_log` based on the file size.</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>Even when using STS temporary tokens assuming roles, the
-`ops_log` can identify and log the original user starting the
-the transaction, not the temporal token itself.</pre>
-</div>
+<p>If needed you can make a copy on the unit.run wrapper and modify it as required
+to further debug the issue.</p>
 </div>
 </div>
 </div>

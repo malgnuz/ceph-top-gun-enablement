@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -310,7 +319,7 @@
 </li>
 <li>
 <p>Mount the Filesystem with a client on the <code>workstation</code> and create the
-following tree</p>
+the following tree</p>
 <div class="ulist">
 <ul>
 <li>
@@ -348,17 +357,28 @@ following tree</p>
 <div class="ulist">
 <ul>
 <li>
-<p>The <code>/data/archive</code> folder is going to be used for long lived file archival,very low number of metadata operations required, performance is not an issue.</p>
+<p>The <code>/data/archive</code> folder is going to be used for long-lived file archival, a very low number of metadata operations is required, and performance is not an issue.</p>
 <div class="ulist">
 <ul>
 <li>
 <p>Create a new EC pool called <code>fs_data_archive_ec</code> with 2+1 and host failure domain</p>
 </li>
-<li>
-<p>Assing the new EC pool <code>fs_data_archive_ec</code> to folder <code>/data/archive</code></p>
+</ul>
+</div>
 </li>
 </ul>
 </div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>EC 2+1 schema is not supported for production workloads, check-out supported configurations <a href="https://access.redhat.com/articles/1548993">here</a></p>
+</div>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Assing the new EC pool <code>fs_data_archive_ec</code> to folder <code>/data/archive</code></p>
 </li>
 </ul>
 </div>
@@ -377,7 +397,11 @@ following tree</p>
 <p>Add a new Active MDS daemon and manually ping it to the <code>/data/work</code></p>
 </li>
 <li>
-<p>Double the size of the assgined MDS Daemon Cache</p>
+<p>Double the size of the assigned MDS Daemon Cache</p>
+</li>
+<li>
+<p>Each Active MDS needs a backup MDS daemon, so you will need to add a new MDS
+as a backup for the new ACTIVE MDS you created</p>
 </li>
 </ul>
 </div>
@@ -411,11 +435,11 @@ following tree</p>
 <div class="ulist">
 <ul>
 <li>
-<p>We need to give <code>user1</code> priviledges to configure quotas on the <code>/data/users</code> folder</p>
+<p>We need to give <code>user1</code> privileges to configure quotas on the <code>/data/users</code> folder</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Create user1 and assinged the needed client caps to assign quotas</p>
+<p>Create user1 and assigned the needed client caps to assign quotas</p>
 </li>
 <li>
 <p>As user1 set the quota to 100MB for the <code>/data/users</code> folder</p>

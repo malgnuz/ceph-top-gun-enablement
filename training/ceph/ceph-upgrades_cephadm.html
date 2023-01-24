@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -288,12 +297,12 @@ Ceph Storage from 5.0 and higher</p>
 <p>Each daemon is restarted only after Ceph indicates that the cluster will remain available.</p>
 </li>
 <li>
-<p>The storage cluster health status is likely to switch to HEALTH_WARNING during the upgrade. When the upgrade is complete, the health status should switch back to HEALTH_OK.</p>
+<p>The storage cluster health status is likely to switch to HEALTH_WARNING during the upgrade. When the upgrade is complete, the health status should switch to HEALTH_OK.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>Cephadm strictly enforces an order for the upgrade of daemons that is still present in staggered upgrade scenarios. The current upgrade order is:</p>
+<p>Cephadm strictly enforces an order to upgrade daemons that is still present in staggered upgrade scenarios. The current upgrade order is:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -349,9 +358,9 @@ Ceph Storage from 5.0 and higher</p>
 <h2 id="_lab_pre_req"><a class="anchor" href="#_lab_pre_req"></a>2. Lab pre-req</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You will need to have a running 5.2 cluster, if you use the latest image
-available you will get 5.3, to deploy with the specific 5.2 container image
-tag you need to specify the <code>--image</code> parameter in the bootstrap command</p>
+<p>You will need a running 5.2 cluster. If you use the latest image
+available, you will get 5.3. To deploy with the specific 5.2 container image
+tag, you need to specify the <code>--image</code> parameter in the bootstrap command</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -604,7 +613,7 @@ Error EINVAL: Need at least 2 running mgr daemons for upgrade
 </div>
 <div class="paragraph">
 <p>cephadm will check that it can upgrade every component before starting without
-affecting the service, we can see that in this example it&#8217;s complaning that it
+affecting the service, we can see that in this example it&#8217;s complaining that it
 only has one manager so he can&#8217;t failover the service during upgrade</p>
 </div>
 <div class="paragraph">
