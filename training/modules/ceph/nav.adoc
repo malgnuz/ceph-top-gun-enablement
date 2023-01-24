@@ -46,6 +46,7 @@
 * xref:ceph_rgw_challenge.adoc[Challenge RGW]
 
 .Ceph Troubleshooting 
+* xref:troubleshooting_logging.adoc[Troubleshooting Logs Debug Mode]
 * xref:trouble-shooting-nearfull-osds.adoc[Troubleshooting nearfull OSDs]
 * xref:troubleshooting_bluestore.adoc[Troubleshooting Bluestore issues]
 * xref:trouble-shooting-large-omap-objects.adoc[Troubleshooting Large Omap Objects]

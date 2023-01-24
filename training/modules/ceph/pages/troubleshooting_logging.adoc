@@ -63,7 +63,7 @@ You can see recent events by running the following command:
 If your Ceph cluster has been configured to log events to files, there will exist a cephadm log file called ceph.cephadm.log on all monitor hosts (see Ceph daemon control for a more complete explanation of this).
 
 
-== Cephadm per service event logs
+=== Cephadm per service event logs
 
 In order to simplify debugging failed daemon deployments, cephadm stores events on a per-service and per-daemon basis. To view the list of events for a specific service, run the following example command:
 
@@ -93,6 +93,25 @@ ceph orch ceph --service-type mds \
   events:
   - 2022-02-01T08:59:43.845866 daemon:mds.cephfs.hostname.ppdhsz [INFO] \
    "Reconfigured mds.cephfs.hostname.ppdhsz on host 'hostname'"
+----
+
+=== Cephadm Image versions being used
+
+----
+ceph config get mgr mgr/cephadm/OPTION_NAME
+----
+
+Options being:
+
+* container_image_base
+* container_image_prometheus
+* container_image_node_exporter
+* container_image_alertmanager
+* container_image_grafana
+
+----
+# ceph config get mgr mgr/cephadm/container_image_base
+registry.redhat.io/rhceph/rhceph-5-rhel8:latest
 ----
 
 == Ceph subsystems logs
@@ -146,3 +165,20 @@ Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mo
 ----
 
 
+== Running Cerph Service containers manually
+Cephadm uses wrappers that get executed by systemd to start-up/stop the
+container services, the start wrapper can be found:
+
+----
+# cat /var/lib/ceph/cluster-fsid/service-name/unit.run
+----
+
+To debug a container start-up issue you can disable/stop the systemd unit, and
+manually run
+
+----
+# bash -x /var/lib/ceph/cluster-fsid/service-name/unit.run
+----
+
+If needed you can make a copy on the unit.run wrapper and modify it as required
+to further debug the issue.

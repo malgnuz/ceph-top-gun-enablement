@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -278,21 +287,37 @@
 <p>Review the the Ceph deployment with Cephadm</p>
 </li>
 <li>
-<p>Setting specific cpu/memory targets for the ceph containers</p>
+<p>Setting specific CPU/memory targets for the ceph containers</p>
 </li>
 <li>
 <p>Review the Pool and replica concepts.</p>
 </li>
 <li>
-<p>Review scaling-out the cluster with mode nodes</p>
+<p>Review scaling out the cluster with mode nodes</p>
 </li>
 <li>
 <p>Review PG autoscaler configuration</p>
 </li>
 <li>
-<p>Review the configuration of segregated physicall pools</p>
+<p>Review the configuration of segregated physical pools</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To increase the difficulty of the challenge you can do a disconnected
+deployment of ceph and the observavility stack, you can use the workstation
+node as the container registry.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -323,7 +348,7 @@
 </li>
 <li>
 <p>The cluster will be deployed using a specification file, to include the four
-nodes during initial bootstrap</p>
+nodes during the initial bootstrap</p>
 </li>
 <li>
 <p>Only one OSD per Node is required</p>
@@ -332,7 +357,7 @@ nodes during initial bootstrap</p>
 <p>Limit the amount of memory an osd can consume to 2GB</p>
 </li>
 <li>
-<p>Limit the amount of resources the MGR can use: 1cpu/1gb of Ram</p>
+<p>Limit the number of resources the MGR can use: 1cpu/1GB of Ram</p>
 <div class="ulist">
 <ul>
 <li>
@@ -386,7 +411,7 @@ nodes during initial bootstrap</p>
 <p>Nodes <code>ceph-node01,ceph-node02,ceph-node03</code> will configure one OSD per node</p>
 </li>
 <li>
-<p>Move the manager services so we have one MGR on each DC.</p>
+<p>Move the MGR services so we have one MGR on each DC.</p>
 </li>
 </ul>
 </div>
@@ -453,7 +478,7 @@ nodes during initial bootstrap</p>
 <div class="ulist">
 <ul>
 <li>
-<p>We need to add a dedicated data pool for RGW, that has to be physically segregated from the rest of cluster data</p>
+<p>We need to add a dedicated data pool for RGW, that has to be physically segregated from the rest of the cluster data</p>
 <div class="ulist">
 <ul>
 <li>
@@ -463,10 +488,10 @@ nodes during initial bootstrap</p>
 <p>We will configure 2 OSD&#8217;s per drive, With Encryption enabled at the OSD level.</p>
 </li>
 <li>
-<p>We need to use a specific device class for the new osds that we wan to segregate (take a look at <code>ceph osd crush class</code>, cephadm in 5.3 doesn&#8217;t support specifiying a class during bootstrap)</p>
+<p>We need to use a specific device class for the new osds that we want to segregate (take a look at <code>ceph osd crush class</code>, cephadm in 5.3 doesn&#8217;t support specifying a class during bootstrap)</p>
 </li>
 <li>
-<p>Create a pool called <code>rgw-security</code> with <code>replica 3</code> , it will use a rule that uses the new device classes we created</p>
+<p>Create a pool called <code>rgw-security</code> with <code>replica 3</code>, it will use a rule that uses the new device classes we created</p>
 </li>
 </ul>
 </div>

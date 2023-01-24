@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <span class="nav-text">xerf:ceph_configuration.adoc[Ceph Configuration]</span>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -200,6 +203,9 @@
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -207,6 +213,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
   </li>
@@ -312,7 +321,7 @@
 <p><strong>Placement</strong> – Logical separation of data within the same zone.</p>
 </div>
 <div class="paragraph">
-<p><strong>Storage Class</strong> – Storage classes are used to customize the placement of object data. S3 Bucket Lifecycle rules can automate the transition of objects between storage classes.</p>
+<p><strong>Storage Class</strong> – Storage classes are used to customise the placement of object data. S3 Bucket Lifecycle rules can automate the transition of objects between storage classes.</p>
 </div>
 </div>
 </div>
@@ -320,14 +329,14 @@
 <h2 id="_radosgw_cloud_transition_lab"><a class="anchor" href="#_radosgw_cloud_transition_lab"></a>3. RadosGW cloud transition Lab</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this Lab we are going to configure RGW cloud transition from our on-prem
+<p>In this Lab, we are going to configure RGW cloud transition from our on-prem
 ceph cluster to an AWS S3 bucket, objects will transition to the cloud once
 their life cycle policy expires.</p>
 </div>
 <div class="sect2">
 <h3 id="_ceph_on_premise_cluster_overview"><a class="anchor" href="#_ceph_on_premise_cluster_overview"></a>3.1. Ceph On-premise Cluster overview</h3>
 <div class="paragraph">
-<p>We are going to use one of our currently deployed clusters, that already have
+<p>We are going to use one of our currently deployed clusters, which already have
 RGW services running.</p>
 </div>
 <div class="listingblock">
@@ -343,13 +352,13 @@ rgw.objectgw.ceph-mon02.vyeifa     ceph-mon02  *:8080       running (5h)      86
 </div>
 <div class="paragraph">
 <p>We are going to use <code>rgw.objectgw.ceph-mon02.vyeifa</code> rgw service to configure
-cloud transitions, this RGW is service the <code>default</code> realm and zone.</p>
+cloud transitions, this RGW serves the <code>default</code> realm and zone.</p>
 </div>
 <div class="paragraph">
-<p>By default when we deploy RGW on a Ceph cluster, we get a default zonegroup, zone and placement, from a ceph node with the admin keys available we are going to use the radosgw-admin command to list our zonegroup and zone, both of them with called default</p>
+<p>By default, when we deploy RGW on a Ceph cluster, we get a default zonegroup, zone and placement. From a ceph node with the admin keys available, we are going to use the radosgw-admin command to list our zonegroup and zone, both of them called default</p>
 </div>
 <div class="paragraph">
-<p>List the current zonegroup placement, We have a placement with default placement id, containing the STANDARD storage class.</p>
+<p>List the current zonegroup placement. We have a placement with a default placement id, containing the STANDARD storage class.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -395,7 +404,7 @@ written to it. You can see this storage class contains its dedicated ceph pools.
 </div>
 </div>
 <div class="paragraph">
-<p>We first create an RGW user, with simplified access/secret keys.</p>
+<p>We first create an RGW user with simplified access/secret keys.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -441,7 +450,7 @@ written to it. You can see this storage class contains its dedicated ceph pools.
 </div>
 </div>
 <div class="paragraph">
-<p>We configure the AWS CLI with  the credentials from the previously created transitionuser, we create a bucket(default placement) called transition</p>
+<p>We configure the AWS CLI with  the credentials from the previously created transition user, we create a bucket(default placement) called transition.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -483,8 +492,8 @@ also be available through AWS S3 APIs, so services from AWS will be able to
 consume the Data from the AWS S3 Bucket without any issues.</p>
 </div>
 <div class="paragraph">
-<p>Using AWS S3 credentials(access key and secret) we are going to configure our
-aws cli client, and create the bucket we will configure as our transitioned
+<p>Using AWS S3 credentials(access key and secret), we are going to configure our
+AWS cli client, and create the bucket we will configure as our transitioned
 objects destination</p>
 </div>
 </div>
@@ -500,7 +509,7 @@ objects destination</p>
 <h3 id="_ceph_on_premise_cluster_lifecycle_policy_configuration"><a class="anchor" href="#_ceph_on_premise_cluster_lifecycle_policy_configuration"></a>3.4. Ceph On-premise Cluster Lifecycle Policy configuration</h3>
 <div class="paragraph">
 <p>Create a new storage class on the default placement within the default
-zonegroup, we are using the special rgw <code>--tier-type=cloud-s3</code> , to configure the
+zonegroup, we are using the special rgw <code>--tier-type=cloud-s3</code>, to configure the
 storage class against our previously configured bucket in AWS s3.</p>
 </div>
 <div class="listingblock">
@@ -523,7 +532,7 @@ storage class against our previously configured bucket in AWS s3.</p>
 </div>
 <div class="paragraph">
 <p>The configuration of the cloud-s3 storage classes we called AWS can be done
-using the <code>radosgw-admin zonegroup placement modify command</code>, with the
+using the <code>radosgw-admin zonegroup placement modify command</code> with the
 --tier-config parameter we can specify using <code>key,value</code> pairs the config of the
 AWS S3 endpoint &amp; account credentials we gathered previously:</p>
 </div>
@@ -543,7 +552,7 @@ AWS S3 endpoint &amp; account credentials we gathered previously:</p>
 <td class="content">
 <div class="paragraph">
 <p>We are using <code>target_path='rgwtransition'</code> to set a specific bucket in the
-cloudprovider that we pre-created, The target path specifies a prefix to which the source ‘bucket-name/object-name’ is appended. If not specified the target_path created is “rgwx-${zonegroup}-${storage-class}-cloud-bucket”.</p>
+cloudprovider that we pre-created. The target path specifies a prefix to which the source ‘bucket-name/object-name’ is appended. If not specified the target_path created is “rgwx-${zonegroup}-${storage-class}-cloud-bucket”.</p>
 </div>
 </td>
 </tr>
@@ -574,14 +583,14 @@ days will be transitioned to the cloud storage class called <code>AWS</code></p>
                     "StorageClass": "AWS"
                 }
             ],
-            "ID": "Transition Objects in bucket to AWS Blob after 30 days"
+            "ID": "Transition Objects in thebucket to AWS Blob after 30 days"
         }
     ]
         }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Using the AWS cli and the transitionuser profile, we will apply/put the bucket-lifecycle-configuration using the file transition.json we created in the previous step.</p>
+<p>Using the AWS cli and the <code>transitionuser</code> profile, we will apply/put the bucket-lifecycle-configuration using the file transition.json we created in the previous step.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -591,7 +600,7 @@ days will be transitioned to the cloud storage class called <code>AWS</code></p>
 {
     "Rules": [
         {
-            "ID": "Transition Objects in bucket to S3 AWS after 30 days",
+            "ID": "Transition Objects in the bucket to S3 AWS after 30 days",
             "Prefix": "",
             "Status": "Enabled",
             "Transitions": [
@@ -646,9 +655,9 @@ been processed, once processed, it will move into the COMPLETED state</p>
     },
     "rule_map": [
         {
-            "id": "Transition Objects in bucket to AWS after 30 days",
+            "id": "Transition Objects inthe bucket to AWS after 30 days",
             "rule": {
-                "id": "Transition Objects in bucket to AWS after 30 days",
+                "id": "Transition Objects in the bucket to AWS after 30 days",
                 "prefix": "",
                 "status": "Enabled",
                 "expiration": {
@@ -737,65 +746,65 @@ d9c4f708-5598-4c44-9d36-849552a08c4d.169377.1_transition5</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$  radosgw-admin lc process</code></pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$  radosgw-admin lc process</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If we now run the radosgw-admin lc list we should the LifeCycle for our transition bucket in a completed state:</p>
+<p>If we now run the radosgw-admin lc list, we should have the LifeCycle for our transition bucket in a completed state:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ radosgw-admin lc list
 
 [
-    {
+    {
 
-        "bucket": ":transition:d9c4f708-5598-4c44-9d36-849552a08c4d.170017.5",
-        "started": "Mon, 31 Oct 2022 16:52:56 GMT",
-        "status": "COMPLETE"
-    }
+        "bucket": ":transition:d9c4f708-5598-4c44-9d36-849552a08c4d.170017.5",
+        "started": "Mon, 31 Oct 2022 16:52:56 GMT",
+        "status": "COMPLETE"
+    }
 ]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If we now list the objects available in the transition bucket on our on-premise cluster, we can see that the objects are 0 in size, this is because they have been transitioned to the cloud but the metadata/head of the object still is available because of the use of the "retain_head_object": "true" parameter when creating the cloud storage class, so we can list the objects but NOT download/copy them.</p>
+<p>If we now list the objects available in the transition bucket on our on-premise cluster, we can see that the objects are 0 in size. This is because they have been transitioned to the cloud. However, the metadata/head of the object still is available because of the use of the "retain_head_object": "true" parameter when creating the cloud storage class, so we can list the objects but NOT download/copy them.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ aws s3 --profile rgw  --endpoint http://ceph-mon02:8080 --region default ls s3://transition
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ aws s3 --profile rgw  --endpoint http://ceph-mon02:8080 --region default ls s3://transition
 
-2022-10-31 17:52:56          0 transition1
-2022-10-31 17:51:59          0 transition2
-2022-10-31 17:51:59          0 transition3
-2022-10-31 17:51:58          0 transition4
-2022-10-31 17:51:59          0 transition5</code></pre>
+2022-10-31 17:52:56          0 transition1
+2022-10-31 17:51:59          0 transition2
+2022-10-31 17:51:59          0 transition3
+2022-10-31 17:51:58          0 transition4
+2022-10-31 17:51:59          0 transition5</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>If we check the head of the object using the s3api we can see that the storage
-class for this object is now AWS so this object has been transitioned into the cloud provider:</p>
+class for this object is now AWS, so this object has been transitioned into the cloud provider:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ aws s3api --profile rgw  --endpoint http://ceph-mon02:8080 --region default head-object --key transition1 --bucket transition
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ aws s3api --profile rgw  --endpoint http://ceph-mon02:8080 --region default head-object --key transition1 --bucket transition
 
 {
 
-    "AcceptRanges": "bytes",
-    "LastModified": "2022-10-31T16:52:56+00:00",
-    "ContentLength": 0,
-    "ETag": "\"46ecb42fd0def0e42f85922d62d06766\"",
-    "ContentType": "binary/octet-stream",
-    "Metadata": {},
-    "StorageClass": "AWS"
+    "AcceptRanges": "bytes",
+    "LastModified": "2022-10-31T16:52:56+00:00",
+    "ContentLength": 0,
+    "ETag": "\"46ecb42fd0def0e42f85922d62d06766\"",
+    "ContentType": "binary/octet-stream",
+    "Metadata": {},
+    "StorageClass": "AWS"
 
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>If we check in AWS we can see that the objects are available in AWS S3. Due to
-API limitations there is no way to preserve original object modification time
-and ETag but they get stored as metadata attributes on the destination objects.</p>
+API limitations there is no way to preserve the original object modification time
+and ETag, but they get stored as metadata attributes on the destination objects.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -818,7 +827,7 @@ and ETag but they get stored as metadata attributes on the destination objects.<
 </div>
 </div>
 <div class="paragraph">
-<p>To avoid object names collision across various buckets, source bucket name is prepended to the target object name. If the object is versioned, object versionid is appended to the end.</p>
+<p>To avoid object names collision across various buckets, the source bucket name is prepended to the target object name. If the object is versioned, the object version id is appended to the end.</p>
 </div>
 <div class="paragraph">
 <p>Below is the sample object name format:</p>
@@ -827,12 +836,12 @@ and ETag but they get stored as metadata attributes on the destination objects.<
 <p><code>s3://&lt;target_path&gt;/&lt;source_bucket_name&gt;/&lt;source_object_name&gt;(-&lt;source_object_version_id&gt;)</code></p>
 </div>
 <div class="paragraph">
-<p>For versioned and locked objects, similar semantics as that of LifecycleExpiration are applied as stated below.</p>
+<p>For versioned and locked objects, similar semantics as that of LifecycleExpiration are applied below.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>If the object is current, post transitioning to cloud, it is made noncurrent with delete marker created.</p>
+<p>If the object is current, post transitioning to the cloud, it is made noncurrent with a delete marker created.</p>
 </li>
 <li>
 <p>If the object is noncurrent and is locked, its transition is skipped.</p>
