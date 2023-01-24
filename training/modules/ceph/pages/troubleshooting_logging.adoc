@@ -1,0 +1,148 @@
+= Ceph and Logs
+
+== Where is Ceph saving logs?
+
+Ceph daemons log to journald by default and Ceph logs are captured by the container runtime environment. They are accessible via journalctl
+
+For example, to view the logs for the daemon mon.foo for a cluster with ID 5c5a50ae-272a-455d-99e9-32c6a013e694, the command would be something like:
+
+----
+# journalctl -u ceph-5c5a50ae-272a-455d-99e9-32c6a013e694@mon.1
+----
+
+=== LOGGING TO FILES
+
+You can also configure Ceph daemons to log to files instead of to journald if you prefer logs to appear in files (as they did in earlier, pre-cephadm, pre-Octopus versions of Ceph). When Ceph logs to files, the logs appear in /var/log/ceph/<cluster-fsid>.
+
+----
+# ceph config set global log_to_file true
+# ceph config set global mon_cluster_log_to_file true
+----
+
+By default, cephadm sets up log rotation on each host to rotate these files.
+You can configure the logging retention schedule by modifying
+`/etc/logrotate.d/ceph.<cluster-fsid>`
+
+`/var/log/ceph/<cluster-fsid>` contains all cluster logs. By default, cephadm logs via stderr and the container runtime.
+
+Because a few Ceph daemons (notably, the monitors and prometheus) store a large amount of data in /var/lib/ceph , we recommend moving this directory to its own disk, partition, or logical volume so that it does not fill up the root file system.
+
+=== DISABLING LOGGING TO JOURNALD
+
+If you choose to log to files, we recommend disabling logging to journald or else everything will be logged twice. Run the following commands to disable logging to stderr:
+
+----
+# ceph config set global log_to_stderr false
+# ceph config set global mon_cluster_log_to_stderr false
+# ceph config set global log_to_journald false
+# ceph config set global mon_cluster_log_to_journald false
+----
+
+
+== Cephadm Logs
+
+Cephadm writes logs to the cephadm cluster log channel. You can monitor Ceph’s activity in real time by reading the logs as they fill up. Run the following command to see the logs in real time
+
+----
+# ceph -W cephadm
+----
+
+By default, this command shows info-level events and above. To see debug-level messages as well as info-level events, run the following commands:
+
+----
+# ceph config set mgr mgr/cephadm/log_to_cluster_level debug
+# ceph -W cephadm --watch-debug
+----
+
+You can see recent events by running the following command:
+
+----
+# ceph log last cephadm
+----
+
+If your Ceph cluster has been configured to log events to files, there will exist a cephadm log file called ceph.cephadm.log on all monitor hosts (see Ceph daemon control for a more complete explanation of this).
+
+
+== Cephadm per service event logs
+
+In order to simplify debugging failed daemon deployments, cephadm stores events on a per-service and per-daemon basis. To view the list of events for a specific service, run the following example command:
+
+----
+ceph orch ls --service_name=alertmanager --format yaml
+  service_type: alertmanager
+  service_name: alertmanager
+  placement:
+    hosts:
+    - unknown_host
+[...]
+  events:
+  - 2022-02-01T12:09:25.264584 service:alertmanager [ERROR] "Failed to apply: \
+   Cannot place <AlertManagerSpec for service_name=alertmanager> on \
+   unknown_host: Unknown hosts"'
+----
+
+As opposed to a specific service, to view the list of events for a specific daemon, for example, run the following command:
+
+----
+ceph orch ceph --service-type mds \
+ --daemon-id=hostname.ppdhsz --format yaml
+  daemon_type: mds
+  daemon_id: cephfs.hostname.ppdhsz
+  hostname: hostname
+[...]
+  events:
+  - 2022-02-01T08:59:43.845866 daemon:mds.cephfs.hostname.ppdhsz [INFO] \
+   "Reconfigured mds.cephfs.hostname.ppdhsz on host 'hostname'"
+----
+
+== Ceph subsystems logs
+
+Each subsystem has a logging level for its output logs, and for its logs in-memory. You may set different values for each of these subsystems by setting a log file level and a memory level for debug logging. Ceph’s logging levels operate on a scale of 1 to 20, where 1 is terse and 20 is verbose 1 . In general, the logs in-memory are not sent to the output log unless:
+
+a fatal signal is raised or an assert in source code is triggered or upon requested. Please consult document on admin socket for more details.
+
+A debug logging setting can take a single value for the log level and the memory level, which sets them both as the same value. For example, if you specify debug ms = 5, Ceph will treat it as a log level and a memory level of 5. You may also specify them separately. The first setting is the log level, and the second setting is the memory level. You must separate them with a forward slash (/). For example, if you want to set the ms subsystem’s debug logging level to 1 and its memory level to 5, you would specify it as debug ms = 1/5. For example:
+
+You can increase log verbosity during runtime in different ways:
+
+----
+# ceph tell osd.0 config set debug_osd 20
+----
+
+Using the admin socket from inside the affected service container 
+
+----
+# ceph --admin-daemon /var/run/ceph/ceph-client.rgw.<name>.asok config set debug_rgw 20
+----
+
+Making the verbose/debug change permanent, so it persists after a restart
+
+----
+# ceph config set client.rgw debug_rgw 20
+# ceph orch restart rgw.objectgw
+Scheduled to restart rgw.objectgw.ceph-mon02.xwixkr on host 'ceph-mon02'
+----
+
+== Getting logs from containers at startup
+
+You might need to investigate why a cephadm command failed or why a certain service no longer runs properly.
+
+We can use the `cephadm logs` to get logs from the containers running ceph services
+
+----
+# cephadm ls | grep mgr
+        "name": "mgr.ceph-mon01.ndicbs",
+        "systemd_unit": "ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989@mgr.ceph-mon01.ndicbs",
+        "service_name": "mgr",
+# cephadm logs --name mgr.ceph-mon01.ndicbs
+Inferring fsid 3c6182ba-9b1d-11ed-87b3-2cc260754989
+-- Logs begin at Tue 2023-01-24 04:05:12 EST, end at Tue 2023-01-24 05:34:07 EST. --
+Jan 24 04:05:21 ceph-mon01 systemd[1]: Starting Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989...
+Jan 24 04:05:25 ceph-mon01 podman[1637]:
+Jan 24 04:05:26 ceph-mon01 bash[1637]: 36f6ae35866d0001688643b6332ba0c986645c7fba90d60062e6a4abcd6c8123
+Jan 24 04:05:26 ceph-mon01 systemd[1]: Started Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989.
+Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d>
+Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d>
+----
+
+

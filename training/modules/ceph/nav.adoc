@@ -49,6 +49,7 @@
 * xref:trouble-shooting-nearfull-osds.adoc[Troubleshooting nearfull OSDs]
 * xref:troubleshooting_bluestore.adoc[Troubleshooting Bluestore issues]
 * xref:trouble-shooting-large-omap-objects.adoc[Troubleshooting Large Omap Objects]
+* xref:troubleshooting_break_and_fix.adoc[Troubleshooting Break & Fix Hands-on]
 
 .Ceph Benchmarking
 * xref:ceph_performance_example.adoc[Setting the Inital Baseline]

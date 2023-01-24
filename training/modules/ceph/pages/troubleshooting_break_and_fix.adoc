@@ -1,0 +1,40 @@
+= Troubleshooting with Break and Fix Exercises
+
+== Prepare the Environment
+
+To be able to complete the Break & Fix exercises we need to fulfil certain pre-reqs:
+
+. Deploy the ceph cluster `ceph-mon0X`.
+. Use the script available in the admin node `ceph-mon01` called `/root/one_step_cluster_deploy.sh`
+
+Once the cluster is deployed and in a healthy state, you will have ceph,rgw and
+mds services running
+
+----
+# ceph -s
+  cluster:
+    id:     3c6182ba-9b1d-11ed-87b3-2cc260754989
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph-mon01,ceph-mon02,ceph-mon03 (age 22m)
+    mgr: ceph-mon01.ndicbs(active, since 22m)
+    mds: 1/1 daemons up
+    osd: 3 osds: 3 up (since 22m), 3 in (since 13h)
+    rgw: 1 daemon active (1 hosts, 1 zones)
+...
+----
+
+At this point from the `workstation` node, run the `break_and_fix.yaml` playbook
+
+----
+ansible-playbook -i /root/cluster2 /root/cephadmdeploy/ansible-cephadm-deploy/break-fix.yaml
+----
+
+After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing
+
+* Take a look at the cluster health in detail
+* Increase debug log verbosity if needed
+* Take a look at the container logs during the startup
+* ceph pg PG.NUM query can help identify the problem
+* Once problems have been fixed restart the affected daemons if needed
