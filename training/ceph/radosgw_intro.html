@@ -101,6 +101,9 @@
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -305,34 +308,27 @@
 <div class="sect1">
 <h2 id="_introducing_object_storage"><a class="anchor" href="#_introducing_object_storage"></a>1. Introducing Object Storage</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Object storage stores data as discrete items, each individually called an object. Unlike files in a file
-system, objects are not organised in a tree of directories and subdirectories. Instead, objects are
-stored in a flat namespace. Each object is retrieved using the object&#8217;s unique object ID, also
-known as an object key.</p>
-</div>
-<div class="paragraph">
-<p>Applications do not use normal file-system operations to access object data. Instead, applications
-access a REST API to send and receive objects. Red Hat Ceph Storage supports the two most
-common object APIs, Amazon S3 (Simple Storage Service) and OpenStack Swift (OpenStack
-Object Storage).</p>
-</div>
-<div class="paragraph">
-<p>Amazon S3 calls the flat namespace for object storage a bucket, while OpenStack Swift calls it
-a container. Because a namespace is flat, neither buckets nor containers can be nested. Ceph
-typically uses the term bucket, as does this lecture.
-A single user account can be configured to access multiple buckets on the same storage
-cluster. Buckets can each have different access permissions and be used to store objects for
-different use cases.</p>
-</div>
-<div class="paragraph">
-<p>The advantage of object storage is that it is easy to use, expand, and scale. Because each object
-has a unique ID, it can be stored or retrieved without the user knowing the object&#8217;s location.
-Without the directory hierarchy, relationships between objects are simplified.
-Objects, similar to files, contain a binary data stream and can grow to arbitrarily large sizes.
-Objects also contain metadata about the object data and natively support extended metadata
-information, typically in key-value pairs. You can also create metadata keys
-and store custom information in the object as key values.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Object storage is a type of data storage that stores data as objects, with each object having a unique identifier and metadata associated with it. The objects are typically stored across a cluster of commodity servers, and are accessed through a RESTful API. Object storage is different from traditional file and block storage, which store data in a hierarchical file system or as blocks on a storage device.</p>
+</li>
+<li>
+<p>Object storage is highly scalable, meaning it can easily handle large amounts of data and accommodate growth as needed. It allows you to store, retrieve and delete large amounts of unstructured data. The data can be accessed from anywhere, at any time, by any device that supports the RESTful API.</p>
+</li>
+<li>
+<p>Object storage is also designed to be highly durable and fault-tolerant. It uses techniques such as data replication and erasure coding to ensure that data is stored redundantly and can be recovered in the event of a failure. This makes it suitable for use cases such as archiving, backup and disaster recovery.</p>
+</li>
+<li>
+<p>Object storage is also cost-effective, it uses commodity hardware, which is less expensive than specialized storage hardware used in other types of storage systems.</p>
+</li>
+<li>
+<p>Object storage systems usually have built-in features such as data versioning, data tiering, and data lifecycle management.</p>
+</li>
+<li>
+<p>Object storage can be used for a variety of use cases, including archiving, backup and disaster recovery, media and entertainment, and big data analytics.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
