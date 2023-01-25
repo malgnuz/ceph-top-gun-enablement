@@ -12,6 +12,7 @@
 * xref:ceph_cli_intro.adoc[Ceph CLI basic commands]
 * xerf:ceph_configuration.adoc[Ceph Configuration]
 * xref:ceph_pools.adoc[Ceph storage pools config]
+* xref:ceph_pgs.adoc[Ceph Health and PGs]
 * xref:ceph_bluestore.adoc[Ceph OSD Bluestore]
 * xref:ceph_recovery.adoc[Ceph OSD Failure/Recovery]
 * xref:ceph-upgrades_cephadm.adoc[Upgrade Ceph with Cephadm]

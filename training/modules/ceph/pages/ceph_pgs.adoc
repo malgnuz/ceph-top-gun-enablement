@@ -1,0 +1,91 @@
+= Cluster Health and PGs 
+
+== Introduction
+
+It's important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.
+
+Placement Group (PG) in Ceph is a group of objects that are stored together on the same set of storage devices, known as an OSD (Object Storage Device) cluster. The purpose of a PG is to manage data placement and replication within a Ceph storage cluster. Each object in the Ceph cluster is associated with a specific PG, and each PG is responsible for replicating and distributing its associated objects across multiple OSDs.
+
+PGs are organized into pools, and each pool can have multiple PGs. The number of PGs in a pool is determined by the size of the pool and the desired level of data redundancy. When data is written to a Ceph cluster, it is striped across multiple PGs within a given pool, and each PG then replicates that data across multiple OSDs. This allows for data to be distributed across multiple devices and locations, providing high availability and fault tolerance.
+
+== PG states
+
+- "creating" - The PG is being created for the first time and is not yet ready for use.
+- "active+clean" - The PG is fully functional and has all of its data replicated and available.
+- "active+undersized" - The PG is fully functional but does not have enough replicas of its data.
+- "active+degraded" - The PG is fully functional but one or more replicas of its data is missing or unavailable.
+- "active+stale" - The PG is fully functional but one or more replicas of its data is stale and needs to be updated.
+- "peering" - The PG is in the process of adjusting its placement and replication settings.
+- "recovering" - The PG is in the process of recovering missing or unavailable data.
+- "backfill" - The PG is in the process of adding new replicas to its data.
+- "incomplete" - The PG does not have enough replicas to function and is waiting for additional nodes to join the cluster.
+- "stale" - The PG is not currently in use and its data is being moved to other PGs.
+
+It's important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.
+
+== PGs and Pools
+
+A pool is a logical collection of PGs, and it is used to manage the data replication and distribution for a specific set of objects. Each pool can have a different number of PGs, and a different replication factor, depending on the desired level of data redundancy. The number of PGs in a pool is determined by the size of the pool and the desired level of data redundancy.
+
+In summary, PGs are responsible for managing the data placement and replication within a Ceph cluster, OSDs are the daemons that run on the storage nodes and are responsible for managing the data stored on those nodes, and pools are the logical collections of PGs that are used to manage the data replication and distribution for a specific set of objects. Each object in the Ceph cluster is associated with a specific PG, which is a part of a specific pool, and each PG is responsible for replicating and distributing its associated objects across multiple OSDs.
+
+== PGs and Peering
+
+The peering process of OSDs in Ceph is the process by which new OSDs are added to an existing cluster, or existing OSDs are removed from a cluster. The peering process is responsible for adjusting the placement and replication settings of the Placement Groups (PGs) to ensure that data is properly distributed and replicated across all OSDs in the cluster.
+
+When a new OSD is added to a cluster, it first joins the cluster as an "out" OSD, which means that it is not yet part of the cluster's active set. The new OSD then begins the process of peering with other OSDs in the cluster.
+
+During the peering process, the new OSD first synchronizes its data with the existing OSDs in the cluster. This is done by replicating any missing data from the existing OSDs, and removing any stale data from the new OSD.
+
+Once the new OSD's data is in sync with the existing OSDs, the cluster's Placement Groups (PGs) are adjusted to include the new OSD. This is done by the CRUSH (Controlled Replication Under Scalable Hashing) algorithm, which is used to determine the optimal data placement and replication settings for the PGs in the cluster.
+
+During the peering process, PGs may temporarily enter the "peering" state, which means that they are in the process of adjusting their placement and replication settings to include the new OSD.
+
+Once the peering process is complete, the new OSD becomes part of the cluster's active set and is fully functional. The newly added OSD can then participate in the replicaion of data and can be considered as a normal OSD.
+
+Removing an OSD from a Ceph cluster is a similar process. The OSD is first marked as "out", and the CRUSH algorithm is used to adjust the placement and replication settings of the PGs to exclude the OSD. Once the OSD is removed, the cluster's PGs may temporarily enter the "peering" state as they adjust their placement and replication settings.
+
+It's important to note that during the peering process, the cluster may experience performance issues or data unavailability. Therefore, it's recommended to plan and schedule the process during a maintenance window or when the cluster is less busy.
+
+== Troubleshooting PGs
+
+Troubleshooting placement group (PG) issues in a Ceph cluster can be a complex process, but there are several tools and techniques that can help.
+
+* Monitor PG states: One of the first things to check when troubleshooting PG
+issues is the state of the PGs in the cluster. The `ceph pg dump` command can
+be used to view the state of all PGs in the cluster, and `ceph pg <pgid> state` can be used to view the state of a specific PG.
+
+* Check for Stuck PGs: If a PG is stuck in a particular state, it can cause
+performance issues or data unavailability. Use the command `ceph pg dump
+--format json-pretty` to check for stuck PGs.
+
+* Check for degraded objects: If a PG is in a degraded state, it means that one
+or more replicas of the data is missing or unavailable. You can use the `ceph
+object map <objectname>` command to check for degraded objects.
+
+* Check for failed OSDs: Failed OSDs can cause issues with data replication and
+availability. Use the `ceph osd tree` command to check the status of all OSDs in the cluster
+
+* Check for slow OSDs: Slow OSDs can also cause issues with data replication and
+availability. Use `ceph osd perf` command to check the performance of all OSDs in the cluster.
+
+* Check for errors in log files: Reviewing log files can often provide additional
+information about the cause of a problem. The `ceph -s` command can be used to view the overall status of the cluster, including any errors or warnings that have been logged.
+
+* Check for network issues: Network issues can cause delays or disruptions in data replication and availability. To check for network issues, you can use tools like ping, traceroute, and netstat.
+
+It's important to identify and resolve PG issues as soon as possible to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner.
+
+== Cluster Health Status
+
+* *HEALTH_OK:* This indicates that the cluster is fully operational and all of its components are working as expected.
+
+* *HEALTH_WARN:* This indicates that there may be some issues with the cluster, but they do not currently affect its overall functionality. For example, some OSDs may be down or some monitors may be unreachable, but the cluster is still able to function.
+
+* *HEALTH_ERR:* This indicates that there are serious issues with the cluster that are affecting its functionality. For example, a critical number of OSDs may be down or there may be a problem with the metadata servers.
+
+* *HEALTH_FAILED:* This indicates that the cluster is not operational and that data may be at risk. This can happen if all of the monitors are down or if there is a problem with the entire cluster that cannot be easily resolved.
+
+* *HEALTH_UNKNOWN:* This indicates that the status of the cluster is unknown. This can happen if the cluster is not configured properly or if there is a problem with the communication between the different components.
+
+It is important to monitor the health status of a Ceph cluster regularly, and to take appropriate action if the status changes to HEALTH_ERR or HEALTH_FAILED. This may involve adding or replacing hardware, adjusting the configuration of the cluster, or performing other types of maintenance to keep the cluster running smoothly.
