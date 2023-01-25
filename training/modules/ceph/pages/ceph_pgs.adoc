@@ -1,8 +1,23 @@
 = Cluster Health and PGs 
 
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
 == Introduction
 
-It's important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.
+It's important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner.
 
 Placement Group (PG) in Ceph is a group of objects that are stored together on the same set of storage devices, known as an OSD (Object Storage Device) cluster. The purpose of a PG is to manage data placement and replication within a Ceph storage cluster. Each object in the Ceph cluster is associated with a specific PG, and each PG is responsible for replicating and distributing its associated objects across multiple OSDs.
 
