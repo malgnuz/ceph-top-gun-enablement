@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Ceph RadosGW Challenge :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_rgw_challenge.html">
+    <title>Cluster Health and PGs :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_pgs.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -100,7 +100,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -196,7 +196,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
   </li>
 </ul>
@@ -269,362 +269,183 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="ceph_rgw_challenge.html">Challenge RGW</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_pgs.html">Ceph Health and PGs</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_rgw_challenge.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_pgs.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Ceph RadosGW Challenge</h1>
+<h1 class="page">Cluster Health and PGs</h1>
 <div class="sect1">
-<h2 id="_goals"><a class="anchor" href="#_goals"></a>1. Goals</h2>
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Deploy RGW in HA mode</p>
-</li>
-<li>
-<p>Work with Placement Targets and Storage Classes</p>
-</li>
-<li>
-<p>Use Life Cycle policies to transition object to other tiers</p>
-</li>
-<li>
-<p>Work with bucket policies</p>
-</li>
-<li>
-<p>Configure basic STS authentication</p>
-</li>
-<li>
-<p>Secure the RGW endpoint with SSL</p>
-</li>
-<li>
-<p>Audit all S3 operations in RGW</p>
-</li>
-<li>
-<p>Configure a Multisite Replicated</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>It&#8217;s important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.</p>
+</div>
+<div class="paragraph">
+<p>Placement Group (PG) in Ceph is a group of objects that are stored together on the same set of storage devices, known as an OSD (Object Storage Device) cluster. The purpose of a PG is to manage data placement and replication within a Ceph storage cluster. Each object in the Ceph cluster is associated with a specific PG, and each PG is responsible for replicating and distributing its associated objects across multiple OSDs.</p>
+</div>
+<div class="paragraph">
+<p>PGs are organized into pools, and each pool can have multiple PGs. The number of PGs in a pool is determined by the size of the pool and the desired level of data redundancy. When data is written to a Ceph cluster, it is striped across multiple PGs within a given pool, and each PG then replicates that data across multiple OSDs. This allows for data to be distributed across multiple devices and locations, providing high availability and fault tolerance.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_deploy_rgw_services"><a class="anchor" href="#_deploy_rgw_services"></a>2. Deploy RGW services</h2>
+<h2 id="_pg_states"><a class="anchor" href="#_pg_states"></a>PG states</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
-<p>Create a realm called <code>single</code>, add a zonegroup called <code>singlezg</code>, and a master zone called <code>singlezone</code></p>
+<p>"creating" - The PG is being created for the first time and is not yet ready for use.</p>
 </li>
 <li>
-<p>Deploy two RGW services, using the above-mentioned realm and zone, on port 8080</p>
+<p>"active+clean" - The PG is fully functional and has all of its data replicated and available.</p>
 </li>
 <li>
-<p>Create a test user called <code>user1</code>, and test rgw setup by creating a bucket * called <code>bucket1</code> and object with S3 client</p>
+<p>"active+undersized" - The PG is fully functional but does not have enough replicas of its data.</p>
+</li>
+<li>
+<p>"active+degraded" - The PG is fully functional but one or more replicas of its data is missing or unavailable.</p>
+</li>
+<li>
+<p>"active+stale" - The PG is fully functional but one or more replicas of its data is stale and needs to be updated.</p>
+</li>
+<li>
+<p>"peering" - The PG is in the process of adjusting its placement and replication settings.</p>
+</li>
+<li>
+<p>"recovering" - The PG is in the process of recovering missing or unavailable data.</p>
+</li>
+<li>
+<p>"backfill" - The PG is in the process of adding new replicas to its data.</p>
+</li>
+<li>
+<p>"incomplete" - The PG does not have enough replicas to function and is waiting for additional nodes to join the cluster.</p>
+</li>
+<li>
+<p>"stale" - The PG is not currently in use and its data is being moved to other PGs.</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>It&#8217;s important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_deploy_a_securedssl_ingress_service_to_provide_ha"><a class="anchor" href="#_deploy_a_securedssl_ingress_service_to_provide_ha"></a>3. Deploy a secured(SSL) Ingress service to provide HA</h2>
+<h2 id="_pgs_and_pools"><a class="anchor" href="#_pgs_and_pools"></a>PGs and Pools</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Deploy an ingress service using ip <code>192.168.56.100</code> that will load-balance client requests between both of the deployed RGW services</p>
-</li>
-<li>
-<p>Configure SSL, the SSL termination must be done at the Ingress/HAproxy level</p>
-<div class="ulist">
-<ul>
-<li>
-<p>You can use certificates available on /root/certificates of the admin nodes,
-or create your own custom certificates, the SAN of the provided certs covers <code>s3.example.com</code> and <code>s3zone1.example.com</code></p>
-</li>
-</ul>
+<div class="paragraph">
+<p>A pool is a logical collection of PGs, and it is used to manage the data replication and distribution for a specific set of objects. Each pool can have a different number of PGs, and a different replication factor, depending on the desired level of data redundancy. The number of PGs in a pool is determined by the size of the pool and the desired level of data redundancy.</p>
 </div>
-</li>
-</ul>
+<div class="paragraph">
+<p>In summary, PGs are responsible for managing the data placement and replication within a Ceph cluster, OSDs are the daemons that run on the storage nodes and are responsible for managing the data stored on those nodes, and pools are the logical collections of PGs that are used to manage the data replication and distribution for a specific set of objects. Each object in the Ceph cluster is associated with a specific PG, which is a part of a specific pool, and each PG is responsible for replicating and distributing its associated objects across multiple OSDs.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_add_a_new_placement_target_to_zonegroup_singlezg"><a class="anchor" href="#_add_a_new_placement_target_to_zonegroup_singlezg"></a>4. Add a new placement target to zonegroup <code>singlezg</code></h2>
+<h2 id="_pgs_and_peering"><a class="anchor" href="#_pgs_and_peering"></a>PGs and Peering</h2>
 <div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Create dedicated EC pools for the placement target</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a new EC pool called <code>singlezone.rgw.ssd.buckets.data</code> pg count 32, with 2+1 EC and host failure domain
-WARNING: EC 2+1 Setting is not supported in production, just for lab testing, check-out valid configurations <a href="https://access.redhat.com/articles/1548993">here</a></p>
-<div class="ulist">
-<ul>
-<li>
-<p>Enable Bluestore compression: aggressive, snappy</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>The peering process of OSDs in Ceph is the process by which new OSDs are added to an existing cluster, or existing OSDs are removed from a cluster. The peering process is responsible for adjusting the placement and replication settings of the Placement Groups (PGs) to ensure that data is properly distributed and replicated across all OSDs in the cluster.</p>
 </div>
-</li>
-<li>
-<p>Create a new replicated pool <code>singlezone.rgw.ssd.buckets.index</code> pg count: 8, replica 3 and host failure domain</p>
-</li>
-<li>
-<p>Create a new replicated pool <code>singlezone.rgw.ssd.buckets.non-ec</code> pg count: 8, replica 3 and host failure domain</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>When a new OSD is added to a cluster, it first joins the cluster as an "out" OSD, which means that it is not yet part of the cluster&#8217;s active set. The new OSD then begins the process of peering with other OSDs in the cluster.</p>
 </div>
-</li>
-<li>
-<p>Create a Placement target called rgwec</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Users should be able to store data on the new placement target using a reference tag when they create their buckets</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>During the peering process, the new OSD first synchronizes its data with the existing OSDs in the cluster. This is done by replicating any missing data from the existing OSDs, and removing any stale data from the new OSD.</p>
 </div>
-</li>
-</ul>
+<div class="paragraph">
+<p>Once the new OSD&#8217;s data is in sync with the existing OSDs, the cluster&#8217;s Placement Groups (PGs) are adjusted to include the new OSD. This is done by the CRUSH (Controlled Replication Under Scalable Hashing) algorithm, which is used to determine the optimal data placement and replication settings for the PGs in the cluster.</p>
+</div>
+<div class="paragraph">
+<p>During the peering process, PGs may temporarily enter the "peering" state, which means that they are in the process of adjusting their placement and replication settings to include the new OSD.</p>
+</div>
+<div class="paragraph">
+<p>Once the peering process is complete, the new OSD becomes part of the cluster&#8217;s active set and is fully functional. The newly added OSD can then participate in the replicaion of data and can be considered as a normal OSD.</p>
+</div>
+<div class="paragraph">
+<p>Removing an OSD from a Ceph cluster is a similar process. The OSD is first marked as "out", and the CRUSH algorithm is used to adjust the placement and replication settings of the PGs to exclude the OSD. Once the OSD is removed, the cluster&#8217;s PGs may temporarily enter the "peering" state as they adjust their placement and replication settings.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s important to note that during the peering process, the cluster may experience performance issues or data unavailability. Therefore, it&#8217;s recommended to plan and schedule the process during a maintenance window or when the cluster is less busy.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"><a class="anchor" href="#_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"></a>5. Configure a LifeCycle policy to transition objects to a COLD Storage Class</h2>
+<h2 id="_troubleshooting_pgs"><a class="anchor" href="#_troubleshooting_pgs"></a>Troubleshooting PGs</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Troubleshooting placement group (PG) issues in a Ceph cluster can be a complex process, but there are several tools and techniques that can help.</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new RGW data pool used for storing Cold Data</p>
-<div class="ulist">
-<ul>
+<p>Monitor PG states: One of the first things to check when troubleshooting PG
+issues is the state of the PGs in the cluster. The <code>ceph pg dump</code> command can
+be used to view the state of all PGs in the cluster, and <code>ceph pg &lt;pgid&gt; state</code> can be used to view the state of a specific PG.</p>
+</li>
 <li>
-<p>Create a new EC pool called <code>singlezone.rgw.cold.buckets.data</code> pg count 16, with 2+1 EC and host failure domain</p>
+<p>Check for Stuck PGs: If a PG is stuck in a particular state, it can cause
+performance issues or data unavailability. Use the command <code>ceph pg dump
+--format json-pretty</code> to check for stuck PGs.</p>
+</li>
+<li>
+<p>Check for degraded objects: If a PG is in a degraded state, it means that one
+or more replicas of the data is missing or unavailable. You can use the <code>ceph
+object map &lt;objectname&gt;</code> command to check for degraded objects.</p>
+</li>
+<li>
+<p>Check for failed OSDs: Failed OSDs can cause issues with data replication and
+availability. Use the <code>ceph osd tree</code> command to check the status of all OSDs in the cluster</p>
+</li>
+<li>
+<p>Check for slow OSDs: Slow OSDs can also cause issues with data replication and
+availability. Use <code>ceph osd perf</code> command to check the performance of all OSDs in the cluster.</p>
+</li>
+<li>
+<p>Check for errors in log files: Reviewing log files can often provide additional
+information about the cause of a problem. The <code>ceph -s</code> command can be used to view the overall status of the cluster, including any errors or warnings that have been logged.</p>
+</li>
+<li>
+<p>Check for network issues: Network issues can cause delays or disruptions in data replication and availability. To check for network issues, you can use tools like ping, traceroute, and netstat.</p>
 </li>
 </ul>
 </div>
-</li>
-<li>
-<p>Create a new Storage Class called <code>COLD</code> in the DEFAULT Placement Group</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a new bucket called <code>data1</code></p>
-</li>
-<li>
-<p>Configure a Life Cycle policy that will transition objects to the <code>COLD</code> Storage class after 10 days</p>
-</li>
-<li>
-<p>Apply the LCP to the <code>data1</code> bucket</p>
-</li>
-<li>
-<p>Upload some objects and test the LCP is working(Remember rgw_lc_debug_interval to speed things up)</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
+<div class="paragraph">
+<p>It&#8217;s important to identify and resolve PG issues as soon as possible to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_create_a_bucket_life_cycle_policy"><a class="anchor" href="#_create_a_bucket_life_cycle_policy"></a>6. Create a Bucket Life Cycle policy</h2>
+<h2 id="_cluster_health_status"><a class="anchor" href="#_cluster_health_status"></a>Cluster Health Status</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new user called <code>user2</code>, and create a bucket called <code>policy</code> with the following layout:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Policy</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Policy/reads</p>
+<p><strong>HEALTH_OK:</strong> This indicates that the cluster is fully operational and all of its components are working as expected.</p>
 </li>
 <li>
-<p>Policy/write</p>
+<p><strong>HEALTH_WARN:</strong> This indicates that there may be some issues with the cluster, but they do not currently affect its overall functionality. For example, some OSDs may be down or some monitors may be unreachable, but the cluster is still able to function.</p>
+</li>
+<li>
+<p><strong>HEALTH_ERR:</strong> This indicates that there are serious issues with the cluster that are affecting its functionality. For example, a critical number of OSDs may be down or there may be a problem with the metadata servers.</p>
+</li>
+<li>
+<p><strong>HEALTH_FAILED:</strong> This indicates that the cluster is not operational and that data may be at risk. This can happen if all of the monitors are down or if there is a problem with the entire cluster that cannot be easily resolved.</p>
+</li>
+<li>
+<p><strong>HEALTH_UNKNOWN:</strong> This indicates that the status of the cluster is unknown. This can happen if the cluster is not configured properly or if there is a problem with the communication between the different components.</p>
 </li>
 </ul>
 </div>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>Create a Bucket policy that will give <code>user1</code> the following access to bucket <code>policy</code></p>
-<div class="ulist">
-<ul>
-<li>
-<p>Policy/ &#8592;  list objects(not read/GET)</p>
-</li>
-<li>
-<p>Policy/reads &#8592; read(GET)</p>
-</li>
-<li>
-<p>Policy/write &#8592;  write(PUT/DELETE)</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configure_local_database_stsusing_assumerole"><a class="anchor" href="#_configure_local_database_stsusing_assumerole"></a>7. Configure Local Database STS(using AssumeRole)</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>We need to allow <code>user1</code> and <code>user2</code> to assume an IAM role called <code>role1</code> that will give them full access to a bucket called <code>admin</code></p>
-<div class="ulist">
-<ul>
-<li>
-<p>Create a new RGW <code>admin</code> user</p>
-<div class="ulist">
-<ul>
-<li>
-<p>With the <code>admin</code> user create an <code>admin</code> bucket and add 1 object</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>Enable the STS endpoint in the RGW services</p>
-</li>
-<li>
-<p>Create a new IAM role called <code>admin</code></p>
-</li>
-<li>
-<p>Create a Role Policy Document that will allow <code>user1</code> and <code>user2</code> to assume <code>role1</code></p>
-</li>
-<li>
-<p>Create a new role policy that allows <code>user1</code> and <code>user2</code> full access to bucket <code>admin</code></p>
-</li>
-<li>
-<p>Using an AWS client assume the IAM <code>admin</code> role using STS</p>
-</li>
-<li>
-<p>Use the temporal token created to access the <code>admin</code> bucket</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_audit_all_s3_operations"><a class="anchor" href="#_audit_all_s3_operations"></a>8. Audit all S3 operations</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Configure the opslog, so all S3 operations get stored in * /var/log/ceph/<code>FSID</code>/opslog.log</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configure_a_new_realm_that_has_multisite_replication"><a class="anchor" href="#_configure_a_new_realm_that_has_multisite_replication"></a>9. Configure a new realm that has multisite replication</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>New Realm/Zonegroup/Zone</p>
-<div class="ulist">
-<ul>
-<li>
-<p>On site1 the one we already have configured, we need to create:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>A realm called: <code>multi</code></p>
-</li>
-<li>
-<p>A zonegroup called: <code>singlezg1</code></p>
-</li>
-<li>
-<p>A zone called: <code>singlezone1</code></p>
-</li>
-<li>
-<p>New RGW instances and pools for this Realm</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>We need a second Ceph Cluster configured</p>
-<div class="ulist">
-<ul>
-<li>
-<p>The second site ceph deployment needs:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>A realm called: <code>multi</code></p>
-</li>
-<li>
-<p>A zonegroup called: <code>singlezg2</code></p>
-</li>
-<li>
-<p>A zone called: <code>singlezone2</code></p>
-</li>
-<li>
-<p>RGW instances and pools for this Realm</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>Test that the Multisite replication is working between sites.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_enable_per_bucket_replication"><a class="anchor" href="#_enable_per_bucket_replication"></a>10. Enable per-bucket replication</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Disable Full zonegroup replication</p>
-</li>
-<li>
-<p>Create a new bucket called <code>sync1</code></p>
-</li>
-<li>
-<p>Configure symmetrical replication for bucket <code>sync1</code></p>
-</li>
-<li>
-<p>Create a new bucket called <code>sync2</code></p>
-</li>
-<li>
-<p>Configure uni-directional replication from zone <code>singlezone1</code> to <code>singlezone2</code></p>
-</li>
-<li>
-<p>Test bucket granular replication</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>It is important to monitor the health status of a Ceph cluster regularly, and to take appropriate action if the status changes to HEALTH_ERR or HEALTH_FAILED. This may involve adding or replacing hardware, adjusting the configuration of the cluster, or performing other types of maintenance to keep the cluster running smoothly.</p>
 </div>
 </div>
 </div>
