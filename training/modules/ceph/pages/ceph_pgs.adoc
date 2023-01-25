@@ -10,16 +10,16 @@ PGs are organized into pools, and each pool can have multiple PGs. The number of
 
 == PG states
 
-- "creating" - The PG is being created for the first time and is not yet ready for use.
-- "active+clean" - The PG is fully functional and has all of its data replicated and available.
-- "active+undersized" - The PG is fully functional but does not have enough replicas of its data.
-- "active+degraded" - The PG is fully functional but one or more replicas of its data is missing or unavailable.
-- "active+stale" - The PG is fully functional but one or more replicas of its data is stale and needs to be updated.
-- "peering" - The PG is in the process of adjusting its placement and replication settings.
-- "recovering" - The PG is in the process of recovering missing or unavailable data.
-- "backfill" - The PG is in the process of adding new replicas to its data.
-- "incomplete" - The PG does not have enough replicas to function and is waiting for additional nodes to join the cluster.
-- "stale" - The PG is not currently in use and its data is being moved to other PGs.
+- *"creating"* - The PG is being created for the first time and is not yet ready for use.
+- *"active+clean"* - The PG is fully functional and has all of its data replicated and available.
+- *"active+undersized"* - The PG is fully functional but does not have enough replicas of its data.
+- *"active+degraded"* - The PG is fully functional but one or more replicas of its data is missing or unavailable.
+- *"active+stale"* - The PG is fully functional but one or more replicas of its data is stale and needs to be updated.
+- *"peering"* - The PG is in the process of adjusting its placement and replication settings.
+- *"recovering"* - The PG is in the process of recovering missing or unavailable data.
+- *"backfill"* - The PG is in the process of adding new replicas to its data.
+- *"incomplete"* - The PG does not have enough replicas to function and is waiting for additional nodes to join the cluster.
+- *"stale"* - The PG is not currently in use and its data is being moved to other PGs.
 
 It's important to monitor the state of PGs in a Ceph cluster to ensure that data is being properly replicated and that any issues with replication or placement are addressed in a timely manner. Some of the common tools used to monitor the PG states are ceph-pg-status, ceph-pg-dump, and ceph-pg-list.
 
@@ -31,21 +31,60 @@ In summary, PGs are responsible for managing the data placement and replication 
 
 == PGs and Peering
 
-The peering process of OSDs in Ceph is the process by which new OSDs are added to an existing cluster, or existing OSDs are removed from a cluster. The peering process is responsible for adjusting the placement and replication settings of the Placement Groups (PGs) to ensure that data is properly distributed and replicated across all OSDs in the cluster.
+The Golden Rule is that no write operation to any PG is acknowledged to a client until it has been persisted by all members of the acting set for that PG. This means that if we can communicate with at least one member of each acting set since the last successful peering, someone will have a record of every (acknowledged) operation since the last successful peering. This means that it should be possible for the current primary to construct and disseminate a new authoritative history.
 
-When a new OSD is added to a cluster, it first joins the cluster as an "out" OSD, which means that it is not yet part of the cluster's active set. The new OSD then begins the process of peering with other OSDs in the cluster.
+It is also important to appreciate the role of the OSD map (list of all known OSDs and their states, as well as some information about the placement groups) in the peering process:
 
-During the peering process, the new OSD first synchronizes its data with the existing OSDs in the cluster. This is done by replicating any missing data from the existing OSDs, and removing any stale data from the new OSD.
+When OSDs go up or down (or get added or removed) this has the potential to affect the active sets of many placement groups.
 
-Once the new OSD's data is in sync with the existing OSDs, the cluster's Placement Groups (PGs) are adjusted to include the new OSD. This is done by the CRUSH (Controlled Replication Under Scalable Hashing) algorithm, which is used to determine the optimal data placement and replication settings for the PGs in the cluster.
+Before a primary successfully completes the peering process, the OSD map must reflect that the OSD was alive and well as of the first epoch in the current interval.
 
-During the peering process, PGs may temporarily enter the "peering" state, which means that they are in the process of adjusting their placement and replication settings to include the new OSD.
+Changes can only be made after successful peering.
 
-Once the peering process is complete, the new OSD becomes part of the cluster's active set and is fully functional. The newly added OSD can then participate in the replicaion of data and can be considered as a normal OSD.
+Thus, a new primary can use the latest OSD map along with a recent history of past maps to generate a set of past intervals to determine which OSDs must be consulted before we can successfully peer. The set of past intervals is bounded by last epoch started, the most recent past interval for which we know peering completed. The process by which an OSD discovers a PG exists in the first place is by exchanging PG info messages, so the OSD always has some lower bound on last epoch started.
 
-Removing an OSD from a Ceph cluster is a similar process. The OSD is first marked as "out", and the CRUSH algorithm is used to adjust the placement and replication settings of the PGs to exclude the OSD. Once the OSD is removed, the cluster's PGs may temporarily enter the "peering" state as they adjust their placement and replication settings.
+The high level process is for the current PG primary to:
 
-It's important to note that during the peering process, the cluster may experience performance issues or data unavailability. Therefore, it's recommended to plan and schedule the process during a maintenance window or when the cluster is less busy.
+* get a recent OSD map (to identify the members of the all interesting acting sets, and confirm that we are still the primary).
+* generate a list of past intervals since last epoch started. Consider the subset of those for which up_thru was greater than the first interval epoch by the last interval epoch’s OSD map; that is, the subset for which peering could have completed before the acting set changed to another set of OSDs.
+* Successful peering will require that we be able to contact at least one OSD from each of past interval’s acting set.
+* ask every node in that list for its PG info, which includes the most recent write made to the PG, and a value for last epoch started. If we learn about a last epoch started that is newer than our own, we can prune older past intervals and reduce the peer OSDs we need to contact.
+* if anyone else has (in its PG log) operations that I do not have, instruct them to send me the missing log entries so that the primary’s PG log is up to date (includes the newest write)..
+for each member of the current acting set:
+
+** ask it for copies of all PG log entries since last epoch start so that I can verify that they agree with mine (or know what objects I will be telling it to delete).
+
+** If the cluster failed before an operation was persisted by all members of the acting set, and the subsequent peering did not remember that operation, and a node that did remember that operation later rejoined, its logs would record a different (divergent) history than the authoritative history that was reconstructed in the peering after the failure.
+
+** Since the divergent events were not recorded in other logs from that acting set, they were not acknowledged to the client, and there is no harm in discarding them (so that all OSDs agree on the authoritative history). But, we will have to instruct any OSD that stores data from a divergent update to delete the affected (and now deemed to be apocryphal) objects.
+
+** ask it for its missing set (object updates recorded in its PG log, but for which it does not have the new data). This is the list of objects that must be fully replicated before we can accept writes.
+
+* at this point, the primary’s PG log contains an authoritative history of the placement group, and the OSD now has sufficient information to bring any other OSD in the acting set up to date.
+
+* if the primary’s up_thru value in the current OSD map is not greater than or equal to the first epoch in the current interval, send a request to the monitor to update it, and wait until receive an updated OSD map that reflects the change.
+
+* for each member of the current acting set:
+
+** send them log updates to bring their PG logs into agreement with my own (authoritative history) … which may involve deciding to delete divergent objects.
+
+** await acknowledgment that they have persisted the PG log entries.
+
+* at this point all OSDs in the acting set agree on all of the meta-data, and would (in any future peering) return identical accounts of all updates.
+
+** start accepting client write operations (because we have unanimous agreement on the state of the objects into which those updates are being accepted). Note, however, that if a client tries to write to an object it will be promoted to the front of the recovery queue, and the write willy be applied after it is fully replicated to the current acting set.
+
+** update the last epoch started value in our local PG info, and instruct other active set OSDs to do the same.
+
+** start pulling object data updates that other OSDs have, but I do not. We may need to query OSDs from additional past intervals prior to last epoch started (the last time peering completed) and following last epoch clean (the last epoch that recovery completed) in order to find copies of all objects.
+
+** start pushing object data updates to other OSDs that do not yet have them.
+We push these updates from the primary (rather than having the replicas pull them) because this allows the primary to ensure that a replica has the current contents before sending it an update write. It also makes it possible for a single read (from the primary) to be used to write the data to multiple replicas. If each replica did its own pulls, the data might have to be read multiple times.
+
+* once all replicas store the all copies of all objects (that existed prior to the start of this epoch) we can update last epoch clean in the PG info, and we can dismiss all of the stray replicas, allowing them to delete their copies of objects for which they are no longer in the acting set.
+
+* We could not dismiss the strays prior to this because it was possible that one of those strays might hold the sole surviving copy of an old object (all of whose copies disappeared before they could be replicated on members of the current acting set).
+
 
 == Troubleshooting PGs
 
