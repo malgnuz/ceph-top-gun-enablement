@@ -55,6 +55,7 @@
 
 .Ceph Benchmarking
 * xref:ceph_performance_example.adoc[Setting the Inital Baseline]
+* xref:ceph_performance_fio.adoc[Benchmarking Ceph block and File]
 
 .Ceph Stretched
 * xref:rhcs-stretched-deploy.adoc[Ceph Stretch Mode]
