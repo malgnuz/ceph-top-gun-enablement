@@ -476,6 +476,40 @@ be used to view the state of all PGs in the cluster, and <code>ceph pg &lt;pgid&
 performance issues or data unavailability. Use the command <code>ceph pg dump
 --format json-pretty</code> to check for stuck PGs.</p>
 </li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph pg dump_stuck stale
+# ceph pg dump_stuck inactive
+# ceph pg dump_stuck unclean</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you receive an active+clean+inconsistent state, this may happen due to an error during scrubbing. Identify the inconsistent placement group(s) by executing the following:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph health detail
+  HEALTH_ERR 1 pgs inconsistent; 2 scrub errors
+  pg 0.6 is active+clean+inconsistent, acting [0,1,2]
+  2 scrub errors
+
+# rados list-inconsistent-pg rbd
+  ["0.6"]
+
+# rados list-inconsistent-obj 0.6 --format=json-pretty</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Query the cluster to determine exactly why the PG is marked down by executing the following: <code>ceph pg 0.5 query</code></p>
+</li>
 <li>
 <p>Check for degraded objects: If a PG is in a degraded state, it means that one
 or more replicas of the data is missing or unavailable. You can use the <code>ceph

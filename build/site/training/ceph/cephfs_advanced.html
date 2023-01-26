@@ -1372,10 +1372,9 @@ Eviction is a “big hammer”: it&#8217;s for when something has gone wrong, no
 <div class="paragraph">
 <p>Each client has a session with each MDS daemon to which it submits MDS requests.  MDS also stores a small metadata map for each session.  We can list these:</p>
 </div>
-<div class="exampleblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph">
-<p># ceph tell mds.0 client ls
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph tell mds.0 client ls
 2023-01-11T05:44:46.262-0500 7f0803fff700  0 client.144601 ms_handle_reset on v2:192.168.56.24:6800/2208661102
 2023-01-11T05:44:46.284-0500 7f0803fff700  0 client.144659 ms_handle_reset on v2:192.168.56.24:6800/2208661102
 [
@@ -1449,8 +1448,7 @@ Eviction is a “big hammer”: it&#8217;s for when something has gone wrong, no
             "root": "/"
         }
     }
-]</p>
-</div>
+]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1570,10 +1568,25 @@ mds1_inotable
 }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p><strong>Session Map</strong> mds0_sessionmap/mds1_sessionmap. One per MDS rank Internal class
-<code>SessionMapStore</code> Stored as OMAP, keys are <code>entity_name_t</code>, values are
-<code>Session</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Session Map</strong> mds0_sessionmap/mds1_sessionmap.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>One per MDS rank Internal class</p>
+</li>
+<li>
+<p><code>SessionMapStore</code> Stored as OMAP,</p>
+</li>
+<li>
+<p>keys are <code>entity_name_t</code>, values are <code>Session</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1594,9 +1607,15 @@ mds1_inotable
 }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p><strong>Journal Pointer objects</strong> 400.00000000. MDS daemons have the ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.
-<strong>Journal objects</strong> 200.00000000,200.00000001,200.0000000X .Object names increment as the journal grows, multiple objects will exist depending on the length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Journal Pointer objects</strong> 400.00000000. MDS daemons have the ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.</p>
+</li>
+<li>
+<p><strong>Journal objects</strong> 200.00000000,200.00000001,200.0000000X .Object names increment as the journal grows, multiple objects will exist depending on the length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)</p>
+</li>
+</ul>
 </div>
 <div class="sect2">
 <h3 id="_objects_from_data_pool"><a class="anchor" href="#_objects_from_data_pool"></a>12.1. Objects from Data pool</h3>
@@ -1615,8 +1634,19 @@ mds1_inotable
 100000003f0.00000000</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Controlled by <code>file_layout_t</code> , Layout can only be changed on empty files: once data is written it is not moved around.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Controlled by <code>file_layout_t</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Layout can only be changed on empty files: once data is written it is not moved around.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>

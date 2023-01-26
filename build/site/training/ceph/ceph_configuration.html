@@ -284,7 +284,8 @@
 </aside>
 <article class="doc">
 <h1 class="page">Ceph Confguration Parameters</h1>
-<div id="preamble">
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Every Ceph daemon, process, and library accesses its configuration from one of these sources:
@@ -292,10 +293,13 @@
 * The centralized configuration database
 * Configuration file that is stored on the local host</p>
 </div>
+<div class="paragraph">
+<p>One of the first things a Ceph process does on startup is parse the configuration options provided via the command line, environment, and local configuration file. The process will then contact the monitor cluster to retrieve configuration stored centrally for the entire cluster. Once a complete view of the configuration is available, the daemon or process startup will proceed.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_ceph_configuration_sections"><a class="anchor" href="#_ceph_configuration_sections"></a>1. Ceph Configuration Sections</h2>
+<h2 id="_ceph_configuration_sections"><a class="anchor" href="#_ceph_configuration_sections"></a>2. Ceph Configuration Sections</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Ceph organizes configuration settings into groups, whether stored in the configuration file or in
@@ -325,10 +329,13 @@ by creating called sections for individual daemons or clients.</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>Sections may also specify an individual daemon or client name. For example, mon.foo, osd.123, and client.smith are all valid section names.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_the_ceph_centralized_configuration_database"><a class="anchor" href="#_using_the_ceph_centralized_configuration_database"></a>2. Using the Ceph centralized configuration database</h2>
+<h2 id="_using_the_ceph_centralized_configuration_database"><a class="anchor" href="#_using_the_ceph_centralized_configuration_database"></a>3. Using the Ceph centralized configuration database</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The MON cluster manages and stores the centralized configuration database on the MON nodes.
@@ -338,13 +345,94 @@ cluster is running.</p>
 </div>
 <div class="paragraph">
 <p>Use ceph config commands to query the database and view configuration information.
-* ceph config ls, to list all possible configuration settings.
-* ceph config help setting, for help with a particular configuration setting.
-* ceph config dump, to show the cluster configuration database settings.
-* ceph config show $type.$id, to show the database settings for a specific daemon. Use
-show-with-defaults to include default settings.
-* ceph config get $type.$id, to get a specific configuration setting.
-* ceph config set $type.$id, to set a specific configuration setting.</p>
+* <code>ceph config ls</code> to list all possible configuration settings.
+* <code>ceph config help</code> setting, for help with a particular configuration setting.
+* <code>ceph config dump</code>, to show the cluster configuration database settings.
+* <code>ceph config show $type.$id</code>, to show the database settings for a specific
+* daemon. Use <code>show-with-defaults</code> to include default settings.
+* <code>ceph config get $type.$id</code>, to get a specific configuration setting.
+* <code>ceph config set $type.$id</code>, to set a specific configuration setting.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_new_role_of_ceph_conf"><a class="anchor" href="#_the_new_role_of_ceph_conf"></a>4. The new role of ceph.conf</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In recent versions of ceph, the configuration files are stored in the
+centralized configuration database.</p>
+</div>
+<div class="paragraph">
+<p>But a handful of settings still need to be stored in local configuration files
+because they affect the ability to connect to the monitors, authenticate, and
+fetch configuration information. In most cases this is limited to the mon_host
+option.</p>
+</div>
+<div class="paragraph">
+<p><strong>For Example</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /etc/ceph/ceph.conf
+[global]
+	fsid = 7e5c9c9a-9d70-11ed-9c09-2cc26078e4ef
+	mon_host = [v2:192.168.56.61:3300/0,v1:192.168.56.61:6789/0] [v2:192.168.56.62:3300/0,v1:192.168.56.62:6789/0] [v2:192.168.56.63:3300/0,v1:192.168.56.63:6789/0]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_changing_configuration_options_on_the_fly"><a class="anchor" href="#_changing_configuration_options_on_the_fly"></a>5. Changing Configuration options on the fly</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Options can be set temporarily by using the tell or daemon interfaces on the Ceph CLI. These override values are ephemeral, which means that they affect only the current instance of the daemon and revert to persistently configured values when the daemon restarts.</p>
+</div>
+<div class="paragraph">
+<p>From any node in the cluster</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ ceph tell &lt;name&gt; config set &lt;option&gt; &lt;value&gt;
+# ceph tell osd.123 config set debug_osd 20</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also we have <code>ceph daemon</code> from the node were the services is running</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph --admin-daemon /var/run/ceph/ceph-client.rgw.&lt;name&gt;.asok config set debug_rgw 20</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph daemon osd.4 config set debug_osd 20</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_view_run_time_configuration_settings"><a class="anchor" href="#_view_run_time_configuration_settings"></a>6. View Run Time Configuration settings</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>ou can see the current options set for a running daemon with the ceph config show command.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph config show osd.0
+# ceph config show osd.0 debug_osd</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also the default values can be listed</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph config show-with-defaults osd.0</code></pre>
+</div>
 </div>
 </div>
 </div>
