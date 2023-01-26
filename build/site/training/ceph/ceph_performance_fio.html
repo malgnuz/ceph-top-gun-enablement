@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Untitled :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph-object-store-tool.html">
+    <title>Block/File Testing :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_performance_fio.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -229,7 +229,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
   </li>
 </ul>
@@ -270,277 +270,390 @@
 <button class="nav-toggle"></button>
   <a href="../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph Benchmarking</li>
+    <li><a href="ceph_performance_fio.html">Benchmarking Ceph block and File</a></li>
+  </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph-object-store-tool.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_performance_fio.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
+<h1 class="page">Block/File Testing</h1>
 <div class="sect1">
-<h2 id="_internal_bluestore_tools_in_ceph_containers"><a class="anchor" href="#_internal_bluestore_tools_in_ceph_containers"></a>Internal bluestore tools in Ceph containers</h2>
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tools"><a class="anchor" href="#_tools"></a>Tools</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the <a href="https://github.com/cloud-bulldozer/benchmark-operator">BenchMark-Operator</a></p>
+<div class="ulist">
+<ul>
+<li>
+<p>It has all the tools you will need to baseline and benchmark your Ceph Cluster: <code>Iperf3, FIO, Smallfile</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If you don&#8217;t have OCP at your disposal <a href="https://github.com/ceph/cbt">CBT</a> is a</p>
+<div class="ulist">
+<ul>
+<li>
+<p>great framework for benchmarking Ceph, Nice Repo from Karan helping out setting
+up <a href="https://github.com/ksingh7/ceph-cbt">CBT</a></p>
+</li>
+<li>
+<p>Another tool that works fine and that can aggregate FIO data results is
+<a href="https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md">pbench-fio</a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_avoiding_ocp_range_limits_limits_and_quotas"></a>Avoiding OCP range limits, limits and quotas</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Before running any performance test, If using OCP as a client, make sure the namespace where your fio workloads are running does not have limits or quotas.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Delete or disable the following OpenShift features to ensure no resource limitation from the client&#8217;s perspective:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Limitranges.</p>
+</li>
+<li>
+<p>Namespace limits.</p>
+</li>
+<li>
+<p>Namespace quota.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>Client/Load Generators resources</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When troubleshooting Ceph, sometimes we need to use some tools such as
-<code>ceph-objectstore-tool</code> or <code>ceph-bluestore-tool</code>. When working in
-containerized environments this is more complicated as there are a set
-of internal scripts inside the container that automatically start the
-OSD service and the OSD is automatically included in the cluster upon
-start.</p>
+<p>Having Enough client resources to saturate the Ceph cluster is pivotal to
+achieving a positive output of the benchmarking. If the clients don&#8217;t have
+enough firepower to saturate some part of the Ceph cluster, you will not be able
+to know the limits of your ceph cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>Always Drop Caches between tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Almost all of the benchmarking suites have a hook that you can execute before
+each test so all the caches can be dropped, achieving a deterministic result on
+every test.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>Run the tests with a considerable dataset size</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When running tests, consider creating a dataset that is bigger than the RAM
+size, ideally, the total RAM of all nodes would be less than 20% of the total
+size of the test dataset.</p>
 </div>
 <div class="paragraph">
-<p>We have received a procedure from
-<a href="https://access.redhat.com/support/cases/#/case/02801980">Red Hat Support</a>
-where there is no need to modify the official RHCS image.</p>
+<p>With this, we are trying to avoid the Linux filesystem caching
+skewing our results and ending up with a false report of higher performance.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s great to have the numbers IOPS for an empty cluster, but it&#8217;s
+also important to have a more realistic view of how your cluster will perform
+with storage used capacity of around 50/60% that will be closer to a real
+life scenario.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>Run the same test several times</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each test run needs to be run a minimum of three times, using
+the mathematical average across all test runs. This will help us get rid of
+outliers in testing.</p>
 </div>
 <div class="paragraph">
-<p><strong>1. Set <code>noout</code> flag on Ceph cluster</strong></p>
+<p>An example would be:</p>
 </div>
-<div class="literalblock">
+<div class="ulist">
+<ul>
+<li>
+<p>Three test iterations executed for 20 minutes</p>
+</li>
+<li>
+<p>with a two-minute ramp-up time</p>
+<div class="ulist">
+<ul>
+<li>
+<p>for a total of 22-minute per test</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>an iteration or 66 minutes per pass.</p>
+</li>
+<li>
+<p>Before each iteration, the test script clears all Linux filesystem caches.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>Configure a ramp-up time</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before each run, it&#8217;s recommended to have a ramp-up time so every test finds
+the caches at the same point, providing fair results in all the test runs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>Use the same ceph configuration that you will have in production</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When running benchmarks, we are always on a quest to achieve more IOPS, and more Throughput in that ques we can be tempted to modify the ceph configuration in certain ways that will allow increasing the performance, IOPS count, total throughput, but if the configuration we are using during the benchmark is not production friendly we won’t have valuable data in our hands, and example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Removing cephx authentication</p>
+</li>
+<li>
+<p>Using replica x 2, when we will use replica x 3 in prod</p>
+</li>
+<li>
+<p>Disabling bluestore CRC checking</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>Looking for the best fio workload</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First, we must find the best fio workload and ensure all performance tests are executed with the same workload to compare apples with apples.</p>
+</div>
+<div class="paragraph">
+<p>Ideally, we need a fio workload that can saturate the ceph cluster while ensuring low latency and high cluster IOPS. For that reason, we will need to ensure the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Different fio servers are deployed to spread the workload properly.</p>
+</li>
+<li>
+<p>Fio numjobs are set to 8 to ensure concurrency per fio server and increase the load in the ceph cluster.</p>
+</li>
+<li>
+<p>Total number of fio jobs will be: fio servers * fio numjobs</p>
+</li>
+<li>
+<p>Maintain a reasonable number of I/O units to keep in flight against the file (iodepth=8). If we increase this value too much, we will see a huge increase in operation latency while not increasing the cluster IOPS.</p>
+</li>
+<li>
+<p>To increase the number of tests, we have decided to run only one sample per test.</p>
+</li>
+<li>
+<p>To avoid the impact of Ceph thin-provisioning, all tests will prefill the RBD volumes before the test execution.</p>
+</li>
+<li>
+<p>Fio randwrite jobs will be used as the most demanding workload for the ceph cluster.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>After several tests, you should end up with a configuration that gives you the best results for your cluster</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>2 fio servers (one per OCP worker).</p>
+</li>
+<li>
+<p>8 numjobs.</p>
+</li>
+<li>
+<p>IOdepth=8.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is an example FIO file using the FIO RBD engine. No actual operating system mount happens when using this engine.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+With FIO RBD engine, we have to use a job count of 1 per RBD volume.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>$ podman exec ceph-mon-$(hostname -s) ceph osd set noout
-noout is set</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>2. Login to the node hosting the OSD container</strong></p>
-</div>
-<div class="paragraph">
-<p>In our case we are going to act in the node <code>ceph1</code> and the <code>osd.0</code>:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ podman exec ceph-mon-$(hostname -s) ceph osd tree
-ID CLASS WEIGHT  TYPE NAME      STATUS REWEIGHT PRI-AFF
--1       0.17578 root default
--5       0.05859     host ceph1
- 0   hdd 0.02930         osd.0      up  1.00000 1.00000
- 4   hdd 0.02930         osd.4      up  1.00000 1.00000
--7       0.05859     host ceph2
- 1   hdd 0.02930         osd.1      up  1.00000 1.00000
- 3   hdd 0.02930         osd.3      up  1.00000 1.00000
--3       0.05859     host ceph3
- 2   hdd 0.02930         osd.2      up  1.00000 1.00000
- 5   hdd 0.02930         osd.5      up  1.00000 1.00000</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>3. Backup <code>/etc/systemd/system/ceph-osd@.service</code> unit file to <code>/root</code>
-directory</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ cp /etc/systemd/system/ceph-osd@.service /root/ceph-osd@.service.backup</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>4. Move <code>/run/ceph-osd@osd_id.service-cid</code> file to <code>/root</code></strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ mv /run/ceph-osd@0.service-cid /root</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>5. Edit <code>/etc/systemd/system/ceph-osd@.service</code> unit file</strong></p>
-</div>
-<div class="paragraph">
-<p>Add <code>-it --entrypoint /bin/bash</code> option to podman command.</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ vim /etc/systemd/system/ceph-osd@.service
-# Please do not change this file directly since it is managed by Ansible and will be overwritten
-[Unit]
-Description=Ceph OSD
-After=network.target
+<pre>[global]
+ioengine=rbd
+clientname=admin
+pool=rbdpool
+#IO-Depth changes depending on the test
+iodepth=$IODEPTH
+runtime=600
+direct=1
+sync=0
+buffered=0
+#Blocksize changes depending on the test
+bs=$BLOCKSIZE
+#RR,RW, or a mixed workload, this changes depending on the test
+rw=$TYPEOFTEST
+norandommap
+randrepeat=0
+startdelay=15
+rwmixread=70
+invalidate=0	# mandatory
+time_based=1
+refill_buffers
+###compression/dedupe related
+#dedupe compress tests
+#dedupe_percentage=80
+#buffer_compress_percentage=10
+#buffer_pattern=0xdeadface
+ramp_time=180
+write_bw_log=fio
+write_iops_log=fio
+write_lat_log=fio
+log_avg_msec=6000
+write_hist_log=fio
+log_hist_msec=60000
 
-[Service]
-EnvironmentFile=-/etc/environment
-ExecStartPre=-/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
-ExecStartPre=-/usr/bin/podman rm -f ceph-osd-%i
-&lt;ExecStart=/usr/bin/podman run \
-&gt;ExecStart=/usr/bin/podman run -it --entrypoint /bin/bash \
-  -d --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid \
-  --rm \
-  --net=host \
-  --privileged=true \
-  --pid=host \
-  --ipc=host \
-  --cpus=4 \
-  -v /dev:/dev \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v /var/lib/ceph:/var/lib/ceph:z \
-  -v /etc/ceph:/etc/ceph:z \
-  -v /var/run/ceph:/var/run/ceph:z \
-  -v /var/run/udev/:/var/run/udev/ \
-  -v /var/log/ceph:/var/log/ceph:z \
-  -e OSD_BLUESTORE=1 -e OSD_FILESTORE=0 -e OSD_DMCRYPT=0 \
-  -e CLUSTER=ceph \
-  -v /run/lvm/:/run/lvm/ \
-  -e CEPH_DAEMON=OSD_CEPH_VOLUME_ACTIVATE \
-  -e CONTAINER_IMAGE=bastion:5000/rhceph/rhceph-4-rhel8:latest \
-  -e OSD_ID=%i \
-&gt;  -e DEBUG=stayalive \
-  --name=ceph-osd-%i \
-  --log-opt=path="/dev/null" \
-  bastion:5000/rhceph/rhceph-4-rhel8:latest
-ExecStop=-/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
-KillMode=none
-Restart=always
-RestartSec=10s
-TimeoutStartSec=120
-TimeoutStopSec=15
-Type=forking
-PIDFile=/%t/%n-pid
+[rbd_vol00]
+rbdname=template-vol00
+numjobs = 1
+clientname=admin
+pool=rbdpool
 
-[Install]
-WantedBy=multi-user.target</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>6. Reload systemd manager configuration</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ systemctl daemon-reload</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>7. Re-start the OSD service associated with our OSD</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ systemctl restart ceph-osd@0.service</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>8. Login to container associated with our OSD</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$  podman exec -it ceph-osd-0 /bin/bash</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>9. Get osd fsid and activate the OSD to mount OSD LV</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ osd_fsid=$(ceph-volume lvm list |grep -A15 "osd\.0"|grep "osd fsid" | awk '{print $3}')
-$ echo $osd_fsid
-8a398b35-aa13-4363-9652-e2aa6dd1fb8d
-$ ceph-volume lvm activate --bluestore 0 $osd_fsid
-Running command: /usr/bin/mount -t tmpfs tmpfs /var/lib/ceph/osd/ceph-0
-Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0
-Running command: /usr/bin/ceph-bluestore-tool --cluster=ceph prime-osd-dir --dev /dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59 --path /var/lib/ceph/osd/ceph-0 --no-mon-config
-Running command: /usr/bin/ln -snf /dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59 /var/lib/ceph/osd/ceph-0/block
-Running command: /usr/bin/chown -h ceph:ceph /var/lib/ceph/osd/ceph-0/block
-Running command: /usr/bin/chown -R ceph:ceph /dev/dm-0
-Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0
-Running command: /usr/bin/systemctl enable ceph-volume@lvm-0-8a398b35-aa13-4363-9652-e2aa6dd1fb8d
- stderr: Created symlink /etc/systemd/system/multi-user.target.wants/ceph-volume@lvm-0-8a398b35-aa13-4363-9652-e2aa6dd1fb8d.service → /usr/lib/systemd/system/ceph-volume@.service.
-Running command: /usr/bin/systemctl enable --runtime ceph-osd@0
- stderr: Created symlink /run/systemd/system/ceph-osd.target.wants/ceph-osd@0.service → /usr/lib/systemd/system/ceph-osd@.service.
-Running command: /usr/bin/systemctl start ceph-osd@0
- stderr: Running in chroot, ignoring request: start
---&gt; ceph-volume lvm activate successful for osd ID: 0</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>10. Run <code>ceph-objectstore-tool</code> or <code>ceph-bluestore-tool</code> commands</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --op list
-$ ceph-bluestore-tool show-label --dev /dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59
-{
-    "/dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59": {
-        "osd_uuid": "8a398b35-aa13-4363-9652-e2aa6dd1fb8d",
-        "size": 32208060416,
-        "btime": "2021-01-25 07:02:17.277679",
-        "description": "main",
-        "bluefs": "1",
-        "ceph_fsid": "d8a34408-3b5a-4ee3-bd12-b32f6f466c60",
-        "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
-        "mkfs_done": "yes",
-        "osd_key": "AQBHsw5glhbhNhAAXGDN2BdMkXan71OFduMrRA==",
-        "ready": "ready",
-        "require_osd_release": "14",
-        "whoami": "0"
-    }
-}
-$ exit</pre>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_restore_steps"><a class="anchor" href="#_restore_steps"></a>Restore steps</h3>
-<div class="paragraph">
-<p><strong>1. Copy <code>/etc/systemd/system/ceph-osd@.service</code> unit file from <code>/root</code>
-directory</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ cp /etc/systemd/system/ceph-osd@.service /root/ceph-osd@.service.modified
-$ cp /root/ceph-osd@.service.backup /etc/systemd/system/ceph-osd@.service</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>2. Reload systemd manager configuration</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ systemctl daemon-reload</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>3. Move <code>/run/ceph-osd@osd_id.service-cid</code> file to <code>/tmp</code> and restart
-the OSD service associated with our OSD</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ mv /run/ceph-osd@0.service-cid /tmp
-$ systemctl restart ceph-osd@0.service</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>4. Unset <code>noout</code> flag on Ceph cluster</strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ podman exec ceph-mon-$(hostname -s) ceph osd unset noout
-noout is unset</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>5. Ensure Ceph status is in <code>HEALTH_OK</code></strong></p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ podman exec ceph-mon-$(hostname -s) ceph -s
-  cluster:
-    id:     d8a34408-3b5a-4ee3-bd12-b32f6f466c60
-    health: HEALTH_OK
 
-  services:
-    mon: 3 daemons, quorum ceph1,ceph2,ceph3 (age 27h)
-    mgr: ceph2(active, since 27h), standbys: ceph1, ceph3
-    osd: 6 osds: 6 up (since 80s), 6 in (since 80s)
-    rgw: 3 daemons active (ceph1.rgw0, ceph2.rgw0, ceph3.rgw0)
-
-  task status:
-
-  data:
-    pools:   18 pools, 264 pgs
-    objects: 1.24k objects, 56 KiB
-    usage:   6.4 GiB used, 174 GiB / 180 GiB avail
-    pgs:     264 active+clean
-
-  io:
-    client:   341 B/s rd, 0 op/s rd, 0 op/s wr</pre>
+# One section per volume
+[rbd_vol0X]
+rbdname=template-vol0X
+numjobs = 1
+clientname=admin
+pool=rbdpool</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Example RipSAW/Bench-mark operator FIO file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>apiVersion: ripsaw.cloudbulldozer.io/v1alpha1
+kind: Benchmark
+metadata:
+  name: fio-benchmark
+  namespace: my-ripsaw
+spec:
+  elasticsearch:
+    server: elastic-server.com
+    port: 80
+  clustername: test_2servers
+  test_user: fio_user
+  workload:
+    name: "fio_distributed"
+    args:
+      image: registry/fio:latest
+      prefill: true
+      samples: 1
+      servers: 2
+      pin_server: ''
+      jobs:
+        - randwrite
+      bs:
+        - 4KiB
+      numjobs:
+        - 8
+      iodepth: 8
+      read_runtime: 600
+      read_ramp_time: 5
+      filesize: 2GiB
+      log_sample_rate: 5000
+      storageclass: ocs-block
+      storagesize: 200Gi
+      rook_ceph_drop_caches: True
+      rook_ceph_drop_cache_pod_ip: IPPODCACHE
+#######################################
+
+#  EXPERT AREA - MODIFY WITH CAUTION  #
+
+#######################################
+#  global_overrides:
+#     - ioengine=sync
+#    - key=value
+  job_params:
+    - jobname_match: w
+      params:
+        - fsync_on_close=1
+        - create_on_open=1
+    - jobname_match: read
+      params:
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}
+    - jobname_match: rw
+      params:
+        - rwmixread=70
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}
+    - jobname_match: readwrite
+      params:
+        - rwmixread=70
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}</pre>
 </div>
 </div>
 </div>
