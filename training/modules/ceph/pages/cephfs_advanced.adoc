@@ -814,7 +814,7 @@ Eviction is a “big hammer”: it's for when something has gone wrong, not a co
 
 Each client has a session with each MDS daemon to which it submits MDS requests.  MDS also stores a small metadata map for each session.  We can list these:
 
-====
+----
 # ceph tell mds.0 client ls
 2023-01-11T05:44:46.262-0500 7f0803fff700  0 client.144601 ms_handle_reset on v2:192.168.56.24:6800/2208661102
 2023-01-11T05:44:46.284-0500 7f0803fff700  0 client.144659 ms_handle_reset on v2:192.168.56.24:6800/2208661102
@@ -890,7 +890,7 @@ Each client has a session with each MDS daemon to which it submits MDS requests.
         }
     }
 ]
-====
+----
 
 MDS daemons will sometimes evict a client automatically, if the client has not communicated for a period of time.
 
@@ -981,9 +981,10 @@ mds1_inotable
 }
 ----
 
-*Session Map* mds0_sessionmap/mds1_sessionmap. One per MDS rank Internal class
-`SessionMapStore` Stored as OMAP, keys are `entity_name_t`, values are
-`Session`
+* *Session Map* mds0_sessionmap/mds1_sessionmap. 
+** One per MDS rank Internal class
+** `SessionMapStore` Stored as OMAP,
+** keys are `entity_name_t`, values are `Session`
 
 ----
 # cephfs-table-tool all show session 
@@ -1005,8 +1006,8 @@ mds1_inotable
 
 
 
-*Journal Pointer objects* 400.00000000. MDS daemons have the ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.
-*Journal objects* 200.00000000,200.00000001,200.0000000X .Object names increment as the journal grows, multiple objects will exist depending on the length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)
+* *Journal Pointer objects* 400.00000000. MDS daemons have the ability to rewrite their journals safely by writing out a fresh one and then switching the “pointer” object over before purging the old one.
+* *Journal objects* 200.00000000,200.00000001,200.0000000X .Object names increment as the journal grows, multiple objects will exist depending on the length of journal.  200.0000000 remains as journal header (contains expire/trim/write positions)
 
 
 === Objects from Data pool
@@ -1023,7 +1024,8 @@ It follows the patter: <inode number>.<stripe index>
 100000003f0.00000000
 ----
 
-Controlled by `file_layout_t` , Layout can only be changed on empty files: once data is written it is not moved around.
+* Controlled by `file_layout_t` 
+** Layout can only be changed on empty files: once data is written it is not moved around.
 
 
 == MDS Autoscaler

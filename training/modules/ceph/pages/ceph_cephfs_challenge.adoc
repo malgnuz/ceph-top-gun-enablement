@@ -35,10 +35,12 @@ the following tree
 
 * The `/data/archive` folder is going to be used for long-lived file archival, a very low number of metadata operations is required, and performance is not an issue.
 ** Create a new EC pool called `fs_data_archive_ec` with 2+1 and host failure domain
-[WARNING]
+
+[NOTICE]
 ====
 EC 2+1 schema is not supported for production workloads, check-out supported configurations https://access.redhat.com/articles/1548993[here]
 ====
+
 ** Assing the new EC pool `fs_data_archive_ec` to folder `/data/archive`
 
 == Add another Active MDS daemon

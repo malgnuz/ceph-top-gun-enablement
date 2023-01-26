@@ -195,7 +195,7 @@ following details the implementation status of various CephFS features in the
 kernel driver. For more information on the current kernel client, supported
 features check this upstream https://docs.ceph.com/en/quincy/cephfs/kernel-features/[link]
 
-[WARN]
+[NOTICE]
 ====
 The kernel client requires Linux, which is available starting with RHEL 8.
 ====
