@@ -14,11 +14,14 @@
 :toc: left
 :toclevels: 4
 
+== Introduction
 
 Every Ceph daemon, process, and library accesses its configuration from one of these sources:
 * The compiled-in default value
 * The centralized configuration database
 * Configuration file that is stored on the local host
+
+One of the first things a Ceph process does on startup is parse the configuration options provided via the command line, environment, and local configuration file. The process will then contact the monitor cluster to retrieve configuration stored centrally for the entire cluster. Once a complete view of the configuration is available, the daemon or process startup will proceed.
 
 == Ceph Configuration Sections
 
@@ -34,6 +37,8 @@ by creating called sections for individual daemons or clients.
 * The [mds] section stores configuration for the Metadata Servers (MDS).
 * The [client] section stores configuration that applies to all the Ceph clients.
 
+Sections may also specify an individual daemon or client name. For example, mon.foo, osd.123, and client.smith are all valid section names.
+
 
 == Using the Ceph centralized configuration database
 
@@ -43,10 +48,67 @@ permanently and store it in the database. You can change most configuration sett
 cluster is running.
 
 Use ceph config commands to query the database and view configuration information.
-* ceph config ls, to list all possible configuration settings.
-* ceph config help setting, for help with a particular configuration setting.
-* ceph config dump, to show the cluster configuration database settings.
-* ceph config show $type.$id, to show the database settings for a specific daemon. Use
-show-with-defaults to include default settings.
-* ceph config get $type.$id, to get a specific configuration setting.
-* ceph config set $type.$id, to set a specific configuration setting.
+* `ceph config ls` to list all possible configuration settings.
+* `ceph config help` setting, for help with a particular configuration setting.
+* `ceph config dump`, to show the cluster configuration database settings.
+* `ceph config show $type.$id`, to show the database settings for a specific
+* daemon. Use `show-with-defaults` to include default settings.
+* `ceph config get $type.$id`, to get a specific configuration setting.
+* `ceph config set $type.$id`, to set a specific configuration setting.
+
+== The new role of ceph.conf
+
+In recent versions of ceph, the configuration files are stored in the
+centralized configuration database.
+
+But a handful of settings still need to be stored in local configuration files
+because they affect the ability to connect to the monitors, authenticate, and
+fetch configuration information. In most cases this is limited to the mon_host
+option. 
+
+*For Example*
+
+----
+# cat /etc/ceph/ceph.conf
+[global]
+	fsid = 7e5c9c9a-9d70-11ed-9c09-2cc26078e4ef
+	mon_host = [v2:192.168.56.61:3300/0,v1:192.168.56.61:6789/0] [v2:192.168.56.62:3300/0,v1:192.168.56.62:6789/0] [v2:192.168.56.63:3300/0,v1:192.168.56.63:6789/0]
+----
+
+== Changing Configuration options on the fly
+
+Options can be set temporarily by using the tell or daemon interfaces on the Ceph CLI. These override values are ephemeral, which means that they affect only the current instance of the daemon and revert to persistently configured values when the daemon restarts.
+
+From any node in the cluster
+
+----
+$ ceph tell <name> config set <option> <value>
+# ceph tell osd.123 config set debug_osd 20
+----
+
+Also we have `ceph daemon` from the node were the services is running
+
+----
+# ceph --admin-daemon /var/run/ceph/ceph-client.rgw.<name>.asok config set debug_rgw 20
+----
+
+or 
+
+----
+# ceph daemon osd.4 config set debug_osd 20
+----
+
+== View Run Time Configuration settings
+
+ou can see the current options set for a running daemon with the ceph config show command.
+
+----
+# ceph config show osd.0
+# ceph config show osd.0 debug_osd
+----
+
+Also the default values can be listed
+
+----
+# ceph config show-with-defaults osd.0
+----

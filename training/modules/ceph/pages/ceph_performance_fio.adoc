@@ -22,9 +22,9 @@ In this section we will be providing very high level guidelines on how to conduc
 
 * If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the https://github.com/cloud-bulldozer/benchmark-operator[BenchMark-Operator]
 ** It has all the tools you will need to baseline and benchmark your Ceph Cluster: `Iperf3, FIO, Smallfile`
-* If you don't have OCP at your disposal https://github.com/ceph/cbt[CBT] is a
-** great framework for benchmarking Ceph, Nice Repo from Karan helping out setting
-up https://github.com/ksingh7/ceph-cbt[CBT]
+* If you don't have OCP at your disposal:
+** https://github.com/ceph/cbt[CBT] is a great framework for benchmarking Ceph.
+*** Nice Repo from Karan helping out setting up https://github.com/ksingh7/ceph-cbt[CBT]
 ** Another tool that works fine and that can aggregate FIO data results is
 https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md[pbench-fio]
 

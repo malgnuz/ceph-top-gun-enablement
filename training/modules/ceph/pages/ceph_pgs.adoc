@@ -113,6 +113,28 @@ be used to view the state of all PGs in the cluster, and `ceph pg <pgid> state` 
 performance issues or data unavailability. Use the command `ceph pg dump
 --format json-pretty` to check for stuck PGs.
 
+----
+# ceph pg dump_stuck stale
+# ceph pg dump_stuck inactive
+# ceph pg dump_stuck unclean
+----
+
+* If you receive an active+clean+inconsistent state, this may happen due to an error during scrubbing. Identify the inconsistent placement group(s) by executing the following:
+
+----
+# ceph health detail
+  HEALTH_ERR 1 pgs inconsistent; 2 scrub errors
+  pg 0.6 is active+clean+inconsistent, acting [0,1,2]
+  2 scrub errors
+
+# rados list-inconsistent-pg rbd
+  ["0.6"]
+
+# rados list-inconsistent-obj 0.6 --format=json-pretty
+----
+
+* Query the cluster to determine exactly why the PG is marked down by executing the following: `ceph pg 0.5 query`
+
 * Check for degraded objects: If a PG is in a degraded state, it means that one
 or more replicas of the data is missing or unavailable. You can use the `ceph
 object map <objectname>` command to check for degraded objects.
