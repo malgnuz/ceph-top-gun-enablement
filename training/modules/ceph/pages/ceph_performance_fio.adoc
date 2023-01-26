@@ -1,8 +1,22 @@
 = Block/File Testing
 
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
 
 == Introduction
 
+In this section we will be providing very high level guidelines on how to conduct a block/file benchmark of Ceph
 
 == Tools
 
@@ -247,5 +261,4 @@ spec:
         - runtime={{ fiod.read_runtime }}
         - ramp_time={{ fiod.read_ramp_time }}
 ----
-
 
