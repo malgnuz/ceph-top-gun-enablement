@@ -92,6 +92,9 @@
     <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -297,7 +300,7 @@ preparation steps described in then <a href="opentlc_lab_env.html" class="xref p
 </div>
 </div>
 <div class="sect1">
-<h2 id="_run_pre_flight_playbook"><a class="anchor" href="#_run_pre_flight_playbook"></a>Run Pre-Flight Playbook</h2>
+<h2 id="_run_pre_flight_playbook"><a class="anchor" href="#_run_pre_flight_playbook"></a>1. Run Pre-Flight Playbook</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -400,7 +403,7 @@ to use the RHCS downstream repos.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_prepare_the_registry_credentials_file"><a class="anchor" href="#_prepare_the_registry_credentials_file"></a>Prepare the registry credentials file</h2>
+<h2 id="_prepare_the_registry_credentials_file"><a class="anchor" href="#_prepare_the_registry_credentials_file"></a>2. Prepare the registry credentials file</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Because we are using the RHCS downstream container images, we need to
@@ -413,18 +416,18 @@ the needed auth details, if any modifications are needed edit the file.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># cat /root/registry.json
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /root/registry.json
 {
  "url": "registry.redhat.io",
  "username": "user@redhat.com",
  "password": "PAssWord"
-}</pre>
+}</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_create_storage_cluster"><a class="anchor" href="#_create_storage_cluster"></a>Create Storage Cluster</h2>
+<h2 id="_create_storage_cluster"><a class="anchor" href="#_create_storage_cluster"></a>3. Create Storage Cluster</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The <code>cephadm</code> utility performs the following tasks during the bootstrap process:</p>
@@ -476,7 +479,7 @@ cluster
 </div>
 </div>
 <div class="sect1">
-<h2 id="_bootstrap_new_storage_cluster"><a class="anchor" href="#_bootstrap_new_storage_cluster"></a>Bootstrap New Storage Cluster</h2>
+<h2 id="_bootstrap_new_storage_cluster"><a class="anchor" href="#_bootstrap_new_storage_cluster"></a>4. Bootstrap New Storage Cluster</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Bootstrap a storage cluster:</p>
@@ -614,7 +617,7 @@ cluster we have to use SSH tunneling.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_invoke_cephadm_shell_command"><a class="anchor" href="#_invoke_cephadm_shell_command"></a>Invoke <code>cephadm shell</code> Command</h2>
+<h2 id="_invoke_cephadm_shell_command"><a class="anchor" href="#_invoke_cephadm_shell_command"></a>5. Invoke <code>cephadm shell</code> Command</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The <code>cephadm shell</code> command launches a <code>bash</code> shell in a container with all of the Ceph packages installed. This enables you to perform “Day One” cluster setup tasks, such as adding hosts, and to invoke <code>ceph</code> commands.</p>
@@ -700,7 +703,7 @@ Using recent ceph image docker.io/ceph/ceph@sha256:54e95ae1e11404157d7b329d0bef8
 </div>
 </div>
 <div class="sect1">
-<h2 id="_verify_cephadm_bootstrap_process"><a class="anchor" href="#_verify_cephadm_bootstrap_process"></a>Verify <code>cephadm</code> Bootstrap Process</h2>
+<h2 id="_verify_cephadm_bootstrap_process"><a class="anchor" href="#_verify_cephadm_bootstrap_process"></a>6. Verify <code>cephadm</code> Bootstrap Process</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>After the <code>cephadm</code> bootstrap process is complete, you can verify that your new installation is running properly. <code>cephadm</code> installs and configures <code>mon</code>, <code>mgr</code> , <code>crash</code>, <code>prometheus</code>, <code>grafana</code>, <code>alertmanager</code>, and <code>node-exporter</code>.</p>
@@ -779,7 +782,7 @@ prometheus.ceph-node01              ceph-node01.example.com  *:9095       runnin
 </div>
 </div>
 <div class="sect1">
-<h2 id="_add_new_hosts_to_the_ceph_cluster"><a class="anchor" href="#_add_new_hosts_to_the_ceph_cluster"></a>Add New Hosts to the Ceph Cluster</h2>
+<h2 id="_add_new_hosts_to_the_ceph_cluster"><a class="anchor" href="#_add_new_hosts_to_the_ceph_cluster"></a>7. Add New Hosts to the Ceph Cluster</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Bootstrapping the installation of Red Hat Ceph Storage creates a basic single-node storage cluster, consisting of one Monitor daemon and one Manager daemon. You can use <code>cephadm</code> to add more hosts to the newly created storage cluster.</p>
@@ -881,10 +884,10 @@ prometheus.ceph-node01     ceph-node01  *:9095       running (3m)     2m ago   7
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[ceph: root@ceph-node01 /]# ceph orch apply mon --placement='ceph-node01,ceph-node02,ceph-node03'
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[ceph: root@ceph-node01 /]# ceph orch apply mon --placement='ceph-node01,ceph-node02,ceph-node03'
 Scheduled mon update...
 [root@ceph-node01 ~]# ceph -s | grep mon
-    mon: 3 daemons, quorum ceph-node01,ceph-node02,ceph-node03 (age 15s)</pre>
+    mon: 3 daemons, quorum ceph-node01,ceph-node02,ceph-node03 (age 15s)</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -905,7 +908,7 @@ Scheduled mon update...
 </div>
 </div>
 <div class="sect1">
-<h2 id="_add_osds"><a class="anchor" href="#_add_osds"></a>Add OSDs</h2>
+<h2 id="_add_osds"><a class="anchor" href="#_add_osds"></a>8. Add OSDs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>cephadm</code> does not provision an OSD on a device that is not available. A storage device is considered available if meets all of the following conditions:</p>
@@ -1050,8 +1053,8 @@ You have examples on configuration options you can use this <a href="https://doc
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[root@ceph-node01 ~]#  ceph orch daemon add osd ceph-node0[1-3]:/dev/vdb
-Created osd(s) 2 on host 'ceph-node01', Created osd(s) 1 on host 'ceph-node02', Created osd(s) 0 on host 'ceph-node03'</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph-node01 ~]#  ceph orch daemon add osd ceph-node0[1-3]:/dev/vdb
+Created osd(s) 2 on host 'ceph-node01', Created osd(s) 1 on host 'ceph-node02', Created osd(s) 0 on host 'ceph-node03'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1059,10 +1062,10 @@ Created osd(s) 2 on host 'ceph-node01', Created osd(s) 1 on host 'ceph-node02', 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[root@ceph-node01 ~]# ceph orch ps | grep osd
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph-node01 ~]# ceph orch ps | grep osd
 osd.0                      ceph-node03               running (95s)    90s ago  95s    24.7M    4096M  16.2.8-85.el8cp  b2c997ff1898  f2b304ea66f4
 osd.1                      ceph-node02               running (94s)    88s ago  94s    35.4M    4096M  16.2.8-85.el8cp  b2c997ff1898  f4a910345f9f
-osd.2                      ceph-node01               running (94s)    85s ago  93s    30.7M    4096M  16.2.8-85.el8cp  b2c997ff1898  428c6c0289cf</pre>
+osd.2                      ceph-node01               running (94s)    85s ago  93s    30.7M    4096M  16.2.8-85.el8cp  b2c997ff1898  428c6c0289cf</code></pre>
 </div>
 </div>
 <div class="paragraph">

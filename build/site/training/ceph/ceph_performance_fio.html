@@ -92,6 +92,9 @@
     <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -333,7 +336,32 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_avoiding_ocp_range_limits_limits_and_quotas"></a>3. Avoiding OCP range limits, limits and quotas</h2>
+<h2 id="_use_radosbench_only_for_smoketests"><a class="anchor" href="#_use_radosbench_only_for_smoketests"></a>3. Use RadosBench only for Smoketests.</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Rados bench operates on entire objects, which adds additional latency and skews results</p>
+</li>
+<li>
+<p>Rados bench results are unreliable on large writes/reads</p>
+</li>
+<li>
+<p>Rados bench operates on AIOs, meaning it gets bottlenecked by CPU fast and you can’t workaround it</p>
+</li>
+<li>
+<p>You can run only single rados bench per pool on single host</p>
+</li>
+<li>
+<p>But it’s great to verify whether your cluster is operating at more-or-less expected performance, or what
+performance expectations you should have</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_avoiding_ocp_range_limits_limits_and_quotas"></a>4. Avoiding OCP range limits, limits and quotas</h2>
 <div class="sectionbody">
 <div class="admonitionblock important">
 <table>
@@ -366,7 +394,7 @@ Before running any performance test, If using OCP as a client, make sure the nam
 </div>
 </div>
 <div class="sect1">
-<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>4. Client/Load Generators resources</h2>
+<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>5. Client/Load Generators resources</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Having Enough client resources to saturate the Ceph cluster is pivotal to
@@ -377,7 +405,7 @@ to know the limits of your ceph cluster.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>5. Always Drop Caches between tests</h2>
+<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>6. Always Drop Caches between tests</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Almost all of the benchmarking suites have a hook that you can execute before
@@ -387,7 +415,7 @@ every test.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>6. Run the tests with a considerable dataset size</h2>
+<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>7. Run the tests with a considerable dataset size</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When running tests, consider creating a dataset that is bigger than the RAM
@@ -401,7 +429,7 @@ skewing our results and ending up with a false report of higher performance.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>7. Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
+<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>8. Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It&#8217;s great to have the numbers IOPS for an empty cluster, but it&#8217;s
@@ -412,7 +440,7 @@ life scenario.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>8. Run the same test several times</h2>
+<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>9. Run the same test several times</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Each test run needs to be run a minimum of three times, using
@@ -448,7 +476,7 @@ outliers in testing.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>9. Configure a ramp-up time</h2>
+<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>10. Configure a ramp-up time</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Before each run, it&#8217;s recommended to have a ramp-up time so every test finds
@@ -457,7 +485,7 @@ the caches at the same point, providing fair results in all the test runs.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>10. Use the same ceph configuration that you will have in production</h2>
+<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>11. Use the same ceph configuration that you will have in production</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When running benchmarks, we are always on a quest to achieve more IOPS, and more Throughput in that ques we can be tempted to modify the ceph configuration in certain ways that will allow increasing the performance, IOPS count, total throughput, but if the configuration we are using during the benchmark is not production friendly we won’t have valuable data in our hands, and example:</p>
@@ -478,7 +506,7 @@ the caches at the same point, providing fair results in all the test runs.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>11. Looking for the best fio workload</h2>
+<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>12. Looking for the best fio workload</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>First, we must find the best fio workload and ensure all performance tests are executed with the same workload to compare apples with apples.</p>
@@ -509,6 +537,9 @@ the caches at the same point, providing fair results in all the test runs.</p>
 <li>
 <p>Fio randwrite jobs will be used as the most demanding workload for the ceph cluster.</p>
 </li>
+<li>
+<p>Use single image for single client (exclusive lock kills performance)</p>
+</li>
 </ul>
 </div>
 <div class="paragraph">
@@ -538,6 +569,7 @@ the caches at the same point, providing fair results in all the test runs.</p>
 </td>
 <td class="content">
 With FIO RBD engine, we have to use a job count of 1 per RBD volume.
+NOTE: With FIO RBD engine, use single image for single client (exclusive lock kills performance)
 </td>
 </tr>
 </table>

@@ -19,19 +19,19 @@
 
 [WARN]
 ====
-Before performing this hands-on lab you need to go through the LAB env
-preparation steps described in then xref:opentlc_lab_env.adoc[OpenTLC LAB] section 
+Before performing this hands-on lab, you must go through the LAB env
+preparation steps described in the xref:opentlc_lab_env.adoc[OpenTLC LAB] section 
 ====
 
 
 == Run Pre-Flight Playbook
  
 * This Ansible Playbook configures the Ceph repository and prepares the storage cluster for bootstrapping. It also installs some prerequisites, such as `podman`, `lvm2`, `chronyd`, and `cephadm`.
-* The `cephadm-preflight` playbook uses the Ansible inventory file to identify the nodes in the storage cluster. Your Ansible inventory file must contain all of the nodes that are going to be part of the cluster. 
+* The `cephadm-preflight` playbook uses the Ansible inventory file to identify the nodes in the storage cluster. Your Ansible inventory file must contain all the nodes that will be part of the cluster. 
 
 [TIP]
 ====
-As part of the OpenTLC LAB env preparations you have the cephadm-ansible rpm
+As part of the OpenTLC LAB env preparations, you have the cephadm-ansible rpm
 installed an inventory available in `/usr/share/cephadm-ansible/inventory` on the admin node for cluster1 `ceph-mon01`
 ====
 
@@ -43,7 +43,7 @@ Prerequisites
 [IMPORTANT]
 Run the `cephadm-preflight` playbook before you bootstrap the initial host.
 
-If needed edit the inventory file at `/usr/share/cephadm-ansible/inventory`
+If needed, edit the inventory file at `/usr/share/cephadm-ansible/inventory`
 leaving: 
 
 [source,texinfo]
@@ -58,7 +58,7 @@ proxy01.example.com
 ceph-mon01.example.com
 -----
 
-NOTE: In this inventory file we are using additional groups that are not needed
+NOTE: In this inventory file, we are using additional groups that are not needed
 by the preflight cephadm playbook like `[mgmt]` and `[client]` so you can
 remove them.
 
@@ -87,7 +87,7 @@ authenticate against registry.redhat.io to get access to the ceph container
 images.
 
 Then OpenTLC LAB env preparations created a file called `registry.json` on the admin node for cluster1 `ceph-mon01` with
-the needed auth details, if any modifications are needed edit the file.
+the needed auth details, and if any modifications are needed, edit the file.
 
 ----
 # cat /root/registry.json
@@ -155,9 +155,9 @@ Bootstrap complete.
 [TIP]
 ====
 You can also deploy the full ceph cluster deployment with the help of a
-specification yaml file, if you would like to use this option you have an
-example in file: `cat /root/cluster-spec.yaml` on node: `ceph-mon01`, to
-reference the spec file you can use the `--apply-spec /root/cluster-spec.yaml`
+specification yaml file. If you want to use this option, you have an
+example in the file: `cat /root/cluster-spec.yaml` on node: `ceph-mon01`. To
+reference the spec file, you can use the `--apply-spec /root/cluster-spec.yaml`
 ====
 
 [NOTE]
@@ -168,15 +168,17 @@ accessible by any node that uses the storage cluster.
 
 [NOTE]
 =====
-The Ceph dashboard must be accessed by using the Public IP of the `ceph-mon01` host by running `curl ifconfig.co` or by checking the email message you received for the URL to the lab console.
+The Ceph dashboard must be accessed using the Public IP of the `ceph-mon01` host by running `curl ifconfig.co` or by checking the email message you received for the URL to the lab console.
 =====
 
 [WARNING]
 ====
-Currently the OpenTLC ENV only has the 8443 port open to the external world for
+Currently, the OpenTLC ENV only has the 8443 port open to the external world for
 the ceph-mon0X clusters, if we want to access the dashboard for the ceph-mon0X
-cluster we have to use SSH tunneling.
+the cluster, we have to use SSH tunnelling.
 ====
+
+== Expand the Cluster with the UI
 
 Get the Public IP address of `ceph-mon01` to access the dashboard from your browser:
 
@@ -189,8 +191,8 @@ Get the Public IP address of `ceph-mon01` to access the dashboard from your brow
 Go to a browser and enter a URL matching the pattern `https://$IP_ADDRESS:8443`, using the IP address returned in the previous step and accepting the certificate and key in warnings:
 
 * Use the admin username and password provided earlier.
-* The web interface asks you to change the password for upon first login as the
-* admin user to the dashboard[you can avoid this by using the option].
+* The web interface asks you to change the password upon first login as the
+* admin user to the dashboard.
 
 [NOTE]
 ====
@@ -201,17 +203,17 @@ If the admin user does not work, create a new user called `admin1` with a passwo
 
 [TIP]
 ====
-The first time you login to the dashboard it will ask you to reset your admin
-password, you can avoid that by using the --dashboard-password-noupdate paramer
+The first time you log in to the dashboard, it will ask you to reset your admin
+password, you can avoid that by using the --dashboard-password-noupdate parameter
 during bootstrap
 ====
 
-Once you login you will see an initial dashboard screen asking us to expand the
+Once you log in you will see an initial dashboard screen asking us to expand the
 cluster
 
 image::dash1.png[dashboard bootstrap]
 
-because currently we are running in bootstrap mode with a single node
+because currently, we are running in bootstrap mode with a single node
 
 ----
 # ceph -s
@@ -229,7 +231,7 @@ because currently we are running in bootstrap mode with a single node
 
 [IMPORTANT]
 ====
-Before we add hosts via the UI, we need install the storage cluster’s public
+Before we add hosts via the UI, we need to install the storage cluster’s public
 SSH key in the root user’s `authorized_keys` file on the new hosts:
 
 [source,sh]
@@ -251,9 +253,9 @@ the script available in `ceph-mon01`
 ----
 ====
 
-We select expand cluster, and on the following screen we press `Add Host`
+We select to expand the cluster, and on the following screen, we press `Add Host`
 
-We fill in the information requested for each host for example:
+We fill in the information requested for each host, for example:
 
 * *hostname:* ceph-mon02
 * *ip address:* 192.168.56.65
@@ -264,11 +266,66 @@ We have to follow the same steps with the rest of the ceph cluster nodes `ceph-m
 
 image::dash3.png[hosts added]
 
-We click Next and go into the next screen `Create OSDs`
+We click Next and go into the next screen, `Create OSDs`
 
-Depending on the type of disks we have in our nodes, the dashboard will make
-an educated gest of the configuration we want for our OSDs, if we don't agree
+Depending on the type of disks in our nodes, the dashboard will make
+an educated gest of the configuration we want for our OSDs. If we disagree,
 we can go into advanced mode and do a custom configuration of the drives.
 
 image::dash4.png[OSDs select]
 
+Because we have spinning drives, the option cost_capacity is select.
+
+When we click next, we move into the `Services` section, where we can add all the
+services we need for our cluster. Here is an example of adding the RGW
+service
+
+image::dash5.png[Add RGW service]
+
+We can see the current list of services deployed.
+
+image::dash7.png[Global services view]
+
+once we have added all the services we need, we can click next and get a final
+overview of our cluster resources and click on the  `expand cluster` button
+
+image::dash8.png[Final view]
+
+That takes us to the general dashboard cluster view.
+
+image::dash9.png[global view]
+
+We now have a working Ceph cluster.
+
+== Add a new service, MDS.
+
+Let's do a couple of day-two operations; let's add the MDS service so we can
+also serve cephfs client requests. On the left panel, we go into cluster ->
+services.
+
+image::dash10.png[cluster services]
+
+We select create and choose the MDS service.
+
+image::dash11.png[cluster services]
+
+Once it's created, we can see the status from the same page.
+
+image::dash12.png[MDS services]
+
+NOTE: We still need to create the cephfs FS, for example `# ceph fs volume create filesystem1`
+
+
+== Create a Pool for RBD workloads
+
+On the left panel, cluster -> pool, create a pool
+
+image::dash13.png[pool create]
+
+We have to provide the details for the pool, name, application type:RBD,etc
+
+image::dash14.png[pool detais]
+
+We can now check on the pool overview page, our new rbdpool
+
+image::dash15.png[rbd pool]
