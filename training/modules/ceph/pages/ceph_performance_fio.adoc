@@ -28,6 +28,15 @@ In this section we will be providing very high level guidelines on how to conduc
 ** Another tool that works fine and that can aggregate FIO data results is
 https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md[pbench-fio]
 
+== Use RadosBench only for Smoketests.
+
+* Rados bench operates on entire objects, which adds additional latency and skews results
+* Rados bench results are unreliable on large writes/reads
+* Rados bench operates on AIOs, meaning it gets bottlenecked by CPU fast and you can’t workaround it
+* You can run only single rados bench per pool on single host
+* But it’s great to verify whether your cluster is operating at more-or-less expected performance, or what
+performance expectations you should have
+
 == Avoiding OCP range limits, limits and quotas
 
 IMPORTANT: Before running any performance test, If using OCP as a client, make sure the namespace where your fio workloads are running does not have limits or quotas.
@@ -126,6 +135,7 @@ Ideally, we need a fio workload that can saturate the ceph cluster while ensurin
 * To increase the number of tests, we have decided to run only one sample per test.
 * To avoid the impact of Ceph thin-provisioning, all tests will prefill the RBD volumes before the test execution.
 * Fio randwrite jobs will be used as the most demanding workload for the ceph cluster.
+* Use single image for single client (exclusive lock kills performance)
 
 After several tests, you should end up with a configuration that gives you the best results for your cluster
 
@@ -138,7 +148,7 @@ After several tests, you should end up with a configuration that gives you the b
 This is an example FIO file using the FIO RBD engine. No actual operating system mount happens when using this engine. 
 
 NOTE: With FIO RBD engine, we have to use a job count of 1 per RBD volume. 
-
+NOTE: With FIO RBD engine, use single image for single client (exclusive lock kills performance)
 
 ----
 [global]

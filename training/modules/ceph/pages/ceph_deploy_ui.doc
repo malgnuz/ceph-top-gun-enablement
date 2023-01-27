@@ -1,0 +1,274 @@
+= Deploying Ceph from the Dashboard
+
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
+
+
+[WARN]
+====
+Before performing this hands-on lab you need to go through the LAB env
+preparation steps described in then xref:opentlc_lab_env.adoc[OpenTLC LAB] section 
+====
+
+
+== Run Pre-Flight Playbook
+ 
+* This Ansible Playbook configures the Ceph repository and prepares the storage cluster for bootstrapping. It also installs some prerequisites, such as `podman`, `lvm2`, `chronyd`, and `cephadm`.
+* The `cephadm-preflight` playbook uses the Ansible inventory file to identify the nodes in the storage cluster. Your Ansible inventory file must contain all of the nodes that are going to be part of the cluster. 
+
+[TIP]
+====
+As part of the OpenTLC LAB env preparations you have the cephadm-ansible rpm
+installed an inventory available in `/usr/share/cephadm-ansible/inventory` on the admin node for cluster1 `ceph-mon01`
+====
+
+Prerequisites
+* Initial admin host is up and running
+* Ansible Automation Platform is installed on the host
+* Root-level access to all nodes in the storage cluster
+
+[IMPORTANT]
+Run the `cephadm-preflight` playbook before you bootstrap the initial host.
+
+If needed edit the inventory file at `/usr/share/cephadm-ansible/inventory`
+leaving: 
+
+[source,texinfo]
+-----
+# cat /usr/share/cephadm-ansible/inventory
+ceph-mon01.example.com
+ceph-mon02.example.com
+ceph-mon03.example.com
+proxy01.example.com
+
+[admin]
+ceph-mon01.example.com
+-----
+
+NOTE: In this inventory file we are using additional groups that are not needed
+by the preflight cephadm playbook like `[mgmt]` and `[client]` so you can
+remove them.
+
+
+
+[source,sh]
+-----
+[root@ceph-mon01]# ansible-playbook -i /usr/share/cephadm-ansible/inventory /usr/share/cephadm-ansible/cephadm-preflight.yml  --extra-vars "ceph_origin=rhcs" 
+PLAY RECAP ***********************************************************************************************************************************************************************************
+ceph-mon01.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+ceph-mon02.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+ceph-mon03.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+proxy01.example.com        : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+-----
+
+[TIP]
+====
+We are using the `"ceph_origin=rhcs"` ansible variable to specify that we want
+to use the RHCS downstream repos.
+====
+
+== Prepare the registry credentials file
+
+Because we are using the RHCS downstream container images, we need to
+authenticate against registry.redhat.io to get access to the ceph container
+images.
+
+Then OpenTLC LAB env preparations created a file called `registry.json` on the admin node for cluster1 `ceph-mon01` with
+the needed auth details, if any modifications are needed edit the file.
+
+----
+# cat /root/registry.json
+{
+ "url": "registry.redhat.io",
+ "username": "user@redhat.com",
+ "password": "PAssWord"
+}
+----
+
+== Create Storage Cluster
+
+The `cephadm` utility performs the following tasks during the bootstrap process:
+
+* Installs and starts Ceph Monitor and Ceph Manager daemons for a new Red Hat Ceph Storage cluster on the local node as containers.
+* Generates a new SSH key, in the `/etc/ceph/ceph.pub` file by default, for the Ceph storage cluster and adds the SSH key to the root user’s `/root/.ssh/authorized_keys` file.
+* Writes a minimal configuration file needed to communicate with the new cluster to `/etc/ceph/ceph.conf`.
+* Writes a copy of the `client.admin` administrative secret key to `/etc/ceph/ceph.client.admin.keyring`.
+* Deploys a basic monitoring stack with Prometheus, Grafana, and other tools such as `node-exporter` and `alertmanager`.
+
+* Running the bootstrapping process establishes the default user name and password for the initial login to the dashboard. Be sure to change the password after you log in.
+
+Prerequisites
+* An IP address for the first Ceph Monitor container, usually the IP address for the first node in the storage
+cluster
+* Root access to all nodes
+* Login access to `registry.redhat.io`
+* A minimum of 10 GB of free space for `/var/lib/containers/`
+
+[NOTE]
+====
+In this lab environment, you do not have 10 GB of free space, but you can safely ignore warnings related to this.
+====
+
+== Bootstrap New Storage Cluster
+
+Bootstrap a storage cluster:
+
+[source,sh]
+-----
+[root@ceph-mon01]# cephadm \
+	bootstrap \
+	--registry-json /root/registry.json \
+	--mon-ip 192.168.56.64
+
+Verifying podman|docker is present...
+Verifying lvm2 is present...
+Verifying time synchronization is in place...
+Unit chronyd.service is enabled and running
+firewalld ready
+Ceph Dashboard is now available at:
+         URL: https://ceph-mon01.example.com:8443/
+        User: admin
+    Password: PASSWORD
+
+You can access the Ceph CLI with:
+    sudo /usr/sbin/cephadm shell --fsid 99e4add2-d971-11eb-ad7e-2cc260754989 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+Please consider enabling telemetry to help improve Ceph:
+    ceph telemetry on
+:
+Bootstrap complete.
+-----
+
+[TIP]
+====
+You can also deploy the full ceph cluster deployment with the help of a
+specification yaml file, if you would like to use this option you have an
+example in file: `cat /root/cluster-spec.yaml` on node: `ceph-mon01`, to
+reference the spec file you can use the `--apply-spec /root/cluster-spec.yaml`
+====
+
+[NOTE]
+====
+If the storage cluster includes multiple networks and interfaces, be sure to choose a network that is
+accessible by any node that uses the storage cluster.
+====
+
+[NOTE]
+=====
+The Ceph dashboard must be accessed by using the Public IP of the `ceph-mon01` host by running `curl ifconfig.co` or by checking the email message you received for the URL to the lab console.
+=====
+
+[WARNING]
+====
+Currently the OpenTLC ENV only has the 8443 port open to the external world for
+the ceph-mon0X clusters, if we want to access the dashboard for the ceph-mon0X
+cluster we have to use SSH tunneling.
+====
+
+Get the Public IP address of `ceph-mon01` to access the dashboard from your browser:
+
+[source,sh]
+-----
+[root@ceph-mon01 cephadm-ansible]# curl ifconfig.co
+52.117.178.51
+-----
+
+Go to a browser and enter a URL matching the pattern `https://$IP_ADDRESS:8443`, using the IP address returned in the previous step and accepting the certificate and key in warnings:
+
+* Use the admin username and password provided earlier.
+* The web interface asks you to change the password for upon first login as the
+* admin user to the dashboard[you can avoid this by using the option].
+
+[NOTE]
+====
+If you see `ceph-mon02.example.com` as the browser link while trying to access the dashboard, change the IP address to the one provided by the `ceph-mon02` server on your browser.
+
+If the admin user does not work, create a new user called `admin1` with a password stored in a file called `password.txt` using the `ceph dashboard ac-user-create admin1 -i password.txt administrator` command.
+====
+
+[TIP]
+====
+The first time you login to the dashboard it will ask you to reset your admin
+password, you can avoid that by using the --dashboard-password-noupdate paramer
+during bootstrap
+====
+
+Once you login you will see an initial dashboard screen asking us to expand the
+cluster
+
+image::dash1.png[dashboard bootstrap]
+
+because currently we are running in bootstrap mode with a single node
+
+----
+# ceph -s
+  cluster:
+    id:     171d6182-9da1-11ed-8b39-2cc260754989
+    health: HEALTH_WARN
+            mon ceph-mon01 is low on available space
+            OSD count 0 < osd_pool_default_size 3
+
+  services:
+    mon: 1 daemons, quorum ceph-mon01 (age 3h)
+    mgr: ceph-mon01.afpuwu(active, since 3h)
+    osd: 0 osds: 0 up, 0 in
+----
+
+[IMPORTANT]
+====
+Before we add hosts via the UI, we need install the storage cluster’s public
+SSH key in the root user’s `authorized_keys` file on the new hosts:
+
+[source,sh]
+-----
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon01.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon02.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon03.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@proxy02.example.com
+-----
+====
+
+[IMPORTANT]
+====
+For the ceph-mon0X cluster the OSDs nodes need their drives zapped, you can use
+the script available in `ceph-mon01`
+
+----
+# bash zap-disks.sh
+----
+====
+
+We select expand cluster, and on the following screen we press `Add Host`
+
+We fill in the information requested for each host for example:
+
+* *hostname:* ceph-mon02
+* *ip address:* 192.168.56.65
+
+image::dash2.png[add host]
+
+We have to follow the same steps with the rest of the ceph cluster nodes `ceph-mon03` and `proxy02`
+
+image::dash3.png[hosts added]
+
+We click Next and go into the next screen `Create OSDs`
+
+Depending on the type of disks we have in our nodes, the dashboard will make
+an educated gest of the configuration we want for our OSDs, if we don't agree
+we can go into advanced mode and do a custom configuration of the drives.
+
+image::dash4.png[OSDs select]
+
