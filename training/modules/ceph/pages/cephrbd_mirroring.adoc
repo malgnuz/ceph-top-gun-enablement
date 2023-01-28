@@ -1,0 +1,123 @@
+= RBD Mirroring
+
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
+== Introduction
+
+Ceph supports mirroring RBD Images for any purpose you can see fit, the major
+one being disaster recovery. However the mirroring implmentation took different
+options and are specific to the environment (client side) consuming the Ceph
+cluster.
+
+WARNING: Both existing RBD mirroring implementation are asynchronous
+
+== Architecture
+
+The RBD asynchronous mirroring are performed by adding a new daemon to the
+Ceph cluster. This daemon is known as the `rbd-mirror` daemon.
+
+.kRBD Diagram
+image::RBDMirroringArchitecture.png[RBD Mirroring Architecture, align="center"]
+
+In the RBD Mirroring architecture, the `rbd-mirror` daemon is usually deployed
+in the cluster that will receive the mirror of the RBD Image.
+
+The RBD Images that get mirrored are controlled by the following option:
+
+* A Mirror pair of clusters must be first defined
+** The clusters in a pair are known as peer clusters
+* Pool mode mirrroring: All new images created in the pool get mirrored
+* Image mode mirroring: Only the images explicitely set in the pool get mirrored
+
+To enable pool mode mirroring, use  `rbd mirror pool enable {pool-name} {mode}`
+where `{mode}` can be:
+
+* `pool` to enable pool mode mirroring
+* `image` to enable image mode mirroring
+
+NOTE: Red Hat OpenShift Data Foundation uses `image` mode.
+
+To disable miroring use `rbd mirror pool disable {pool-name}`
+
+When using `image` mode mirroring, you must explicitely name the RBD Images that
+are mirrored between the two clusters.
+
+NOTE: When using Red Hat OpenShift Data Foundation Regional DR the `RamenDR`
+pods will toggle the mirroring flag on the RBD Images automatically.
+
+To create a pair of peer cluster you must use the `rbd mirror pool peer bootstrap create [--site-name {local-site-name}] {pool-name}`
+command. This command will create a bootstrap token which can then be imported in the
+remote cluster via the `rbd mirror pool peer bootstrap import [--site-name {local-site-name}] [--direction {rx-only or rx-tx}] {pool-name} {token-path}` command.
+
+NOTE: You can also manually peer the cluster by copying the remote cluster
+`cephx` credentials on the machine where the `rbd` command will be used.
+
+To enable mirroring of an image, use the `rbd mirror image enable {pool-name}/{image-name} {mode}` command.
+`{mode} can be set to:
+
+* `snapshot` to enable snapshot based mirroring
+* `journal` to enable journal based mirroring
+
+NOTE: See subsequent chapters for the differebces between the two modes.
+
+WARNING: When operating a standalone Ceph cluster the RBD Mirroring parameters
+must be applied to each cluster.
+
+== Journal based mirroring
+
+This is the oldest RBD Mirroring technology that was implemented for OpenStack.
+It is compatible only with `librbd` based clients in environments such as
+OpenStack and Proxmox.
+
+IMPORTANT: This mode is not compatible with `krbd` hence not compatible
+with Red Hat OpenShift Data Foundation as of today.
+
+The journal based mirroring follows the following steps:
+
+* Client issues a write against the RBD Image
+* `librbd` writes the IO to the RBD Image
+* `librbd` writes the IO to the RBD journal
+* `librbd` acknowledges the IO to the client
+
+As the journal gets written, the `rbd-mirror` daemon picks up the IO
+from the RBD journal and mirrors the IO onto the remote RBD Image.
+
+WARNING: As the RBD Images are identical between the 2 clusters, writing to the
+remote RBD Image will also cause 2 writes; One to the RBD Image, one to the RBD
+Image journal.
+
+== Snapshot based mirroring
+
+This mirroring method is compatible with both kernel RBD client and `librbd` clients.
+It is the solution implemented for Red Hat OpenShift Data Foundation Regional DR
+capabilities.
+
+Once you have enabled RBD Mirroring `snapshot` mode for the image, you have
+to configure the snapshot scheduling for the RBD Image. This schedule defines
+how often a snapshot of the RBD Image is taken so that the snapshot can be
+mirrored to the target Ceph cluster.
+
+To create a schedule, use the `rbd mirror snapshot schedule add [--pool {pool-name}] [--image {image-name}] {interval} [{start-time}]`
+command. The interval can be specified in days, hours, or minutes using `d`, `h`, `m`
+suffix respectively. The optional start-time can be specified using the ISO 8601 time format.
+
+To list existing schedules for a RBD Image use `rbd mirror schedule ls --pool {pool-name} --recursive`.
+
+To view the status of an existing schedule, use `rbd mirror snapshot schedule status [--pool {pool-name}] [--image {image-name}]`
+to view when the next snapshot will be taken for the RBD Image.
+
+WARNING: Make sure to allow for enough time between 2 snapshot for the entire
+content of the snapshot to be replicated between the two clusters.

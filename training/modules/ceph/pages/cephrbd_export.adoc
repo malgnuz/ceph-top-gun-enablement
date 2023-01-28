@@ -1,0 +1,69 @@
+= RBD Export
+
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
+== Introduction
+
+Ceph supports different import and export functionalities to address the following needs
+
+* Testing new versions using realistic volumes of data
+* Running QA processes using realistic volumes of data 
+* Implement business continuity
+* Decouple backup from the production environment
+
+These functionnalities can be used intra or inter cluster.
+
+These capabilities are:
+
+* `rbd export` to export a RBD Image or snapshot of a RBD Image
+* `rbd export-diff` to export differences between 2 point in time
+* `rbd import` to import a RBD Image or snapshot
+* `rbd import-diff` to import differebces between 2 pint in time
+* `rbd merge-diff` to merge to set of differebces between multiple point in time
+
+Each RBD `export*` command uses the same format and must specify
+
+* `image-spec` or `snap-spec` as the source
+* `destination` as the target that can be ommitted
+** `-` represents the standard output to pipe export and import
+** `{file-name}` to store the data as a flat file
+
+Each RBD `import*` command uses the same format and must specify
+
+* `image-spec` or `snap-spec` as the target
+* `source` as the source
+** `-` represents the standard input to pipe export and import
+** `{file-name}` to read the data from a flat file
+
+During the import process you can indicate the characteristics
+of the target RBD Image where the data is to be injected:
+
+* `--oject-size` to specify the RADOS object size to use
+* `--stripe-unit` to specify the RBD format 2 unit size
+* `--stripe-count` to specify the RBD format 2 count
+* `--image-feature` to enable a specific set of features
+
+WARNING: Remember custom `stripe-size` and `stripe-unit` are 
+not supported by `krbd` clients.
+
+To export and import the content of a RBD Image in a single Linux CLI
+command, you will use the following format `rbd export {pools}/{imgs} - | rbd import - {poolt}/{imgt}`
+
+To merge a set of differebces, use the following command from the Linux
+CLI: `rbd merge-diff {first-set} {second-set} {merged-set}.
+
+NOTE: You can use `-` as the `{merged-set} to pipe multiple `merge-diff` operations.
+
