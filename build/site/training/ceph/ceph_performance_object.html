@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Ceph and Logs :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/troubleshooting_logging.html">
+    <title>Object Storage Benchmarking :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_performance_object.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -208,7 +208,7 @@
     <button class="nav-item-toggle"></button>
     <span class="nav-text">Ceph Troubleshooting</span>
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -235,7 +235,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW S3)</a>
   </li>
 </ul>
@@ -278,269 +278,221 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph Troubleshooting</li>
-    <li><a href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a></li>
+    <li>Ceph Benchmarking</li>
+    <li><a href="ceph_performance_object.html">Benchmarking Ceph Object(RGW S3)</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/troubleshooting_logging.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_performance_object.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Ceph and Logs</h1>
+<h1 class="page">Object Storage Benchmarking</h1>
 <div class="sect1">
-<h2 id="_where_is_ceph_saving_logs"><a class="anchor" href="#_where_is_ceph_saving_logs"></a>Where is Ceph saving logs?</h2>
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ceph daemons log to journald by default and Ceph logs are captured by the container runtime environment. They are accessible via journalctl</p>
+<p>Object storage has long been seen as a solution for the long-term retention of large volumes of archive or inactive data.  Object stores represent a cost-conscious platform for data that is generally streamed or accessed sequentially.  Backup data is an excellent example of this kind of workload.</p>
 </div>
 <div class="paragraph">
-<p>For example, to view the logs for the daemon mon.foo for a cluster with ID 5c5a50ae-272a-455d-99e9-32c6a013e694, the command would be something like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># journalctl -u ceph-5c5a50ae-272a-455d-99e9-32c6a013e694@mon.1</pre>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_logging_to_files"><a class="anchor" href="#_logging_to_files"></a>LOGGING TO FILES</h3>
-<div class="paragraph">
-<p>You can also configure Ceph daemons to log to files instead of to journald if you prefer logs to appear in files (as they did in earlier, pre-cephadm, pre-Octopus versions of Ceph). When Ceph logs to files, the logs appear in /var/log/ceph/&lt;cluster-fsid&gt;.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph config set global log_to_file true
-# ceph config set global mon_cluster_log_to_file true</pre>
-</div>
+<p>Increasingly we see object stores used for high-performance workloads.  New solutions such as AI and analytics require access to data with high throughput, a degree of randomness, and high parallelism.  This profile can also be seen with more traditional applications such as CDNs (Content Data Networks), where multiple parallel streaming is the norm.</p>
 </div>
 <div class="paragraph">
-<p>By default, cephadm sets up log rotation on each host to rotate these files.
-You can configure the logging retention schedule by modifying
-<code>/etc/logrotate.d/ceph.&lt;cluster-fsid&gt;</code></p>
+<p>Storage performance metrics generally cover block-based storage and file systems, with little coverage for object stores (more on this later).  It’s easy to see why this scenario has developed, as block-based storage platforms are generally used for managing traditional OLTP and transactional applications that are latency-sensitive.</p>
 </div>
 <div class="paragraph">
-<p><code>/var/log/ceph/&lt;cluster-fsid&gt;</code> contains all cluster logs. By default, cephadm logs via stderr and the container runtime.</p>
-</div>
-<div class="paragraph">
-<p>Because a few Ceph daemons (notably, the monitors and prometheus) store a large amount of data in /var/lib/ceph , we recommend moving this directory to its own disk, partition, or logical volume so that it does not fill up the root file system.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_disabling_logging_to_journald"><a class="anchor" href="#_disabling_logging_to_journald"></a>DISABLING LOGGING TO JOURNALD</h3>
-<div class="paragraph">
-<p>If you choose to log to files, we recommend disabling logging to journald or else everything will be logged twice. Run the following commands to disable logging to stderr:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph config set global log_to_stderr false
-# ceph config set global mon_cluster_log_to_stderr false
-# ceph config set global log_to_journald false
-# ceph config set global mon_cluster_log_to_journald false</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cephadm_logs"><a class="anchor" href="#_cephadm_logs"></a>Cephadm Logs</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Cephadm writes logs to the cephadm cluster log channel. You can monitor Ceph’s activity in real time by reading the logs as they fill up. Run the following command to see the logs in real time</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph -W cephadm</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>By default, this command shows info-level events and above. To see debug-level messages as well as info-level events, run the following commands:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph config set mgr mgr/cephadm/log_to_cluster_level debug
-# ceph -W cephadm --watch-debug</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can see recent events by running the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph log last cephadm</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If your Ceph cluster has been configured to log events to files, there will exist a cephadm log file called ceph.cephadm.log on all monitor hosts (see Ceph daemon control for a more complete explanation of this).</p>
-</div>
-<div class="sect2">
-<h3 id="_cephadm_per_service_event_logs"><a class="anchor" href="#_cephadm_per_service_event_logs"></a>Cephadm per service event logs</h3>
-<div class="paragraph">
-<p>In order to simplify debugging failed daemon deployments, cephadm stores events on a per-service and per-daemon basis. To view the list of events for a specific service, run the following example command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>ceph orch ls --service_name=alertmanager --format yaml
-  service_type: alertmanager
-  service_name: alertmanager
-  placement:
-    hosts:
-    - unknown_host
-[...]
-  events:
-  - 2022-02-01T12:09:25.264584 service:alertmanager [ERROR] "Failed to apply: \
-   Cannot place &lt;AlertManagerSpec for service_name=alertmanager&gt; on \
-   unknown_host: Unknown hosts"'</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>As opposed to a specific service, to view the list of events for a specific daemon, for example, run the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>ceph orch ceph --service-type mds \
- --daemon-id=hostname.ppdhsz --format yaml
-  daemon_type: mds
-  daemon_id: cephfs.hostname.ppdhsz
-  hostname: hostname
-[...]
-  events:
-  - 2022-02-01T08:59:43.845866 daemon:mds.cephfs.hostname.ppdhsz [INFO] \
-   "Reconfigured mds.cephfs.hostname.ppdhsz on host 'hostname'"</pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_cephadm_image_versions_being_used"><a class="anchor" href="#_cephadm_image_versions_being_used"></a>Cephadm Image versions being used</h3>
-<div class="listingblock">
-<div class="content">
-<pre>ceph config get mgr mgr/cephadm/OPTION_NAME</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Options being:</p>
+<p>In this section we will provide some guiadence of setting up and using two of
+the most popular benchmarking tools:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>container_image_base</p>
+<p><strong>Cosbench</strong></p>
 </li>
 <li>
-<p>container_image_prometheus</p>
-</li>
-<li>
-<p>container_image_node_exporter</p>
-</li>
-<li>
-<p>container_image_alertmanager</p>
-</li>
-<li>
-<p>container_image_grafana</p>
+<p><strong>Warp</strong></p>
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tools"><a class="anchor" href="#_tools"></a>2. Tools</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_cosbench"><a class="anchor" href="#_cosbench"></a>2.1. Cosbench</h3>
+<div class="paragraph">
+<p><a href="https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf" class="bare">https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf</a> has all installation and config information.</p>
+</div>
+<div class="paragraph">
+<p>Installation on Ubuntu:</p>
+</div>
+<div class="paragraph">
+<p>+ apt-get install openjdk-7-headless-jre
++ Download latest COSBench release zip from <a href="https://github.com/intel-cloud/cosbench/releases" class="bare">https://github.com/intel-cloud/cosbench/releases</a>
++ Unzip and extract.
++ Make .sh files executable</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>find . -name '*.sh' -exec chmod +x {} \;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Architecture:</p>
+</div>
+<div class="paragraph">
+<p>+ There is a controller node to drive and aggregate results.
++ There are driver nodes to run test driver processes. Each driver node can host multiple driver processes.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/cos_intro.png" alt="Cos Intro">
+</div>
+</div>
+<div class="paragraph">
+<div class="title">/start_driver.sh – Run this on each driver node. Can do it on master node too if master node is itself the lone driver node.</div>
+<p>Can specify "[num_drivers][IP address of all drivers][base port]" as optional args.
+Each driver then runs at port [base_port + index].
+Default driver base port is 18088.</p>
+</div>
+<div class="paragraph">
+<div class="title">/start_controller.sh – only on master node. Its <em>conf/controller.conf</em> should have entries for each worker node</div>
+<p>in [driver&lt;n&gt;] sections. Default controller port is 19088.</p>
+</div>
+<div class="paragraph">
+<p>Configuration files:</p>
+</div>
+<div class="paragraph">
+<p>+ conf/controller.conf – specifies how many drivers, and URLs of all driver process endpoints.
+  If driver nodes run multiple driver processes, this should have endpoints for every process.</p>
+</div>
+<div class="paragraph">
+<p>+ conf/driver.conf – these are actually overwritten by start-driver.sh. So no point modifying these directly.
+  Instead modify conf/driver_template.conf.</p>
+</div>
+<div class="paragraph">
+<p>Actual testing procedure is configured using a <strong>workload configuration file</strong> in conf/.</p>
+</div>
+<div class="paragraph">
+<p>+ Attached a working Ceph S3 workload configuration - cosbench-ceph-s3-workload.conf - based on the default S3 workload conf conf/s3-config-sample.xml</p>
+</div>
+<div class="paragraph">
+<p>+ Note the &lt;storage&gt; tag attributes.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>+ _endpoint_ should be the RGW host:port. For actual AWS S3 testing, just remove the endpoint attribute and
+  path_style_access can be removed too.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>+ path_style_access=true is extremely important for Ceph S3; Otherwise, the Amazon S3 SDK library used by
+  COSBench defaults to virtual host style access, tries to contact bucket URLs like
+  http://s3testqwer1.cephmon1 and if RGW host is not configured for virtual host addressing,
+  S3 client fails with “Unknown name or service s3testqwer1.cephmon1”</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>+ Another example S3 workload configuration: <a href="http://www.spinics.net/lists/ceph-users/msg28805.html" class="bare">http://www.spinics.net/lists/ceph-users/msg28805.html</a> . The multiple &lt;storage&gt; elements are not necessary – COSBench code seems to inherit global elements in each work stage or work element.</p>
+</div>
+<div class="paragraph">
+<p>+ For actual AWS S3 endpoints:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>+ Bucket names should be globally unique across all S3 users. Since default name s3testqwer&amp;lt;n&amp;gt; is likely to be created by somebody else,
+  COSBench fails with 403 access denied errors with default</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Start a test</strong>: ./cli.sh submit conf/s3test.conf</p>
+</div>
+<div class="paragraph">
+<p><strong>Monitor a test</strong>: From a browser, open <a href="http://&lt;cosbench-controller-node:19088/controller/" class="bare">http://&lt;cosbench-controller-node:19088/controller/</a>. Then open the item under active workload, and drill down into workload, work stage and missions by clicking on “view details”.</p>
+</div>
+<div class="paragraph">
+<p>Troubleshooting:</p>
+</div>
+<div class="paragraph">
+<p>Log files and logging levels:</p>
+</div>
+<div class="paragraph">
+<p>+ log/system.log – the controller`s log.Logging level is set by log_level in [controller] section of conf/controller.conf. Set to DEBUG|INFO
+log/mission/[mission-id].log – Actual worker logs. This is where any S3 client errors are recorded.
+Set “log_level” to DEBUG|INFO in [driver_n_ ] sections of conf/controller.conf
+Set “log_level” to DEBUG|INFO in [driver] section of conf/driver_template.conf.</p>
+</div>
+<div class="paragraph">
+<p>+ "Error 403 Access denied for actual AWS S3 endpoint" - Check if the bucket has a globally unique name.
+  The default s3testqwer&lt;n&gt; bucket names in workload configs are likely to be owned by somebody else already.</p>
+</div>
+<div class="paragraph">
+<p>+ Error
+  "[INFO] [NoneStorage] - performing PUT at /s3testqwer1
+   [WARN] [S3Storage] - below exception encountered when creating bucket s3testqwer1: Unable to execute HTTP request: s3testqwer1.cephmon1&#8230;&#8203;
+   [NoneStorage] - performing PUT at /s3testqwer2/myobjects10
+   [S3Storage] - below exception encountered when creating object myobjects10 at s3testqwer2: Unable to execute HTTP request: s3testqwer2.cephmon1: Name or service not known"</p>
+</div>
+<div class="paragraph">
+<p>The error here is that S3 client is attempting to use virtual host style URLs [<a href="http://bucket.host" class="bare">http://bucket.host</a>]() but Ceph RGW is not configured to handle it by default.
+Instead, tell S3 client to use path style URLs, by suffixing bucket and object names to URL. Set &lt;storage &#8230;&#8203; config=“&#8230;&#8203;.path_style_access=true”&gt; in workload config file.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/cosbench1.png" alt="cos image1">
+</div>
+</div>
+<div class="paragraph">
+<p>Example template for cosbench</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre># ceph config get mgr mgr/cephadm/container_image_base
-registry.redhat.io/rhceph/rhceph-5-rhel8:latest</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;workload name="s3-sample" description="sample benchmark for s3"&gt;
+
+  &lt;storage type="s3" config="accesskey=YOURACCESSKEY;secretkey=YOURSECRETKEY;endpoint=http://cephmon1;path_style_access=true" /&gt;
+
+  &lt;workflow&gt;
+
+    &lt;workstage name="init"&gt;
+      &lt;work type="init" workers="1" config="cprefix=s3testqwer;containers=r(1,2)" /&gt;
+    &lt;/workstage&gt;
+
+    &lt;workstage name="prepare"&gt;
+      &lt;work type="prepare" workers="1" config="cprefix=s3testqwer;containers=r(1,2);objects=r(1,10);sizes=c(64)KB" /&gt;
+    &lt;/workstage&gt;
+
+    &lt;workstage name="main"&gt;
+      &lt;work name="main" workers="8" runtime="30"&gt;
+        &lt;operation type="read" ratio="80" config="cprefix=s3testqwer;containers=u(1,2);objects=u(1,10)" /&gt;
+        &lt;operation type="write" ratio="20" config="cprefix=s3testqwer;containers=u(1,2);objects=u(11,20);sizes=c(64)KB" /&gt;
+      &lt;/work&gt;
+    &lt;/workstage&gt;
+
+    &lt;workstage name="cleanup"&gt;
+      &lt;work type="cleanup" workers="1" config="cprefix=s3testqwer;containers=r(1,2);objects=r(1,20)" /&gt;
+    &lt;/workstage&gt;
+
+    &lt;workstage name="dispose"&gt;
+      &lt;work type="dispose" workers="1" config="cprefix=s3testqwer;containers=r(1,2)" /&gt;
+    &lt;/workstage&gt;
+  &lt;/workflow&gt;
+
+&lt;/workload&gt;</code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_ceph_subsystems_logs"><a class="anchor" href="#_ceph_subsystems_logs"></a>Ceph subsystems logs</h2>
+<h2 id="_links"><a class="anchor" href="#_links"></a>3. Links</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Each subsystem has a logging level for its output logs, and for its logs in-memory. You may set different values for each of these subsystems by setting a log file level and a memory level for debug logging. Ceph’s logging levels operate on a scale of 1 to 20, where 1 is terse and 20 is verbose 1 . In general, the logs in-memory are not sent to the output log unless:</p>
-</div>
-<div class="paragraph">
-<p>a fatal signal is raised or an assert in source code is triggered or upon requested. Please consult document on admin socket for more details.</p>
-</div>
-<div class="paragraph">
-<p>A debug logging setting can take a single value for the log level and the memory level, which sets them both as the same value. For example, if you specify debug ms = 5, Ceph will treat it as a log level and a memory level of 5. You may also specify them separately. The first setting is the log level, and the second setting is the memory level. You must separate them with a forward slash (/). For example, if you want to set the ms subsystem’s debug logging level to 1 and its memory level to 5, you would specify it as debug ms = 1/5. For example:</p>
-</div>
-<div class="paragraph">
-<p>You can increase log verbosity during runtime in different ways:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph tell osd.0 config set debug_osd 20</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Using the admin socket from inside the affected service container</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph --admin-daemon /var/run/ceph/ceph-client.rgw.&lt;name&gt;.asok config set debug_rgw 20</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Making the verbose/debug change permanent, so it persists after a restart</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># ceph config set client.rgw debug_rgw 20
-# ceph orch restart rgw.objectgw
-Scheduled to restart rgw.objectgw.ceph-mon02.xwixkr on host 'ceph-mon02'</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_getting_logs_from_containers_at_startup"><a class="anchor" href="#_getting_logs_from_containers_at_startup"></a>Getting logs from containers at startup</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>You might need to investigate why a cephadm command failed or why a certain service no longer runs properly.</p>
-</div>
-<div class="paragraph">
-<p>We can use the <code>cephadm logs</code> to get logs from the containers running ceph services</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># cephadm ls | grep mgr
-        "name": "mgr.ceph-mon01.ndicbs",
-        "systemd_unit": "ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989@mgr.ceph-mon01.ndicbs",
-        "service_name": "mgr",
-# cephadm logs --name mgr.ceph-mon01.ndicbs
-Inferring fsid 3c6182ba-9b1d-11ed-87b3-2cc260754989
--- Logs begin at Tue 2023-01-24 04:05:12 EST, end at Tue 2023-01-24 05:34:07 EST. --
-Jan 24 04:05:21 ceph-mon01 systemd[1]: Starting Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989...
-Jan 24 04:05:25 ceph-mon01 podman[1637]:
-Jan 24 04:05:26 ceph-mon01 bash[1637]: 36f6ae35866d0001688643b6332ba0c986645c7fba90d60062e6a4abcd6c8123
-Jan 24 04:05:26 ceph-mon01 systemd[1]: Started Ceph mgr.ceph-mon01.ndicbs for 3c6182ba-9b1d-11ed-87b3-2cc260754989.
-Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d&gt;
-Jan 24 04:05:27 ceph-mon01 ceph-3c6182ba-9b1d-11ed-87b3-2cc260754989-mgr-ceph-mon01-ndicbs[1686]: debug 2023-01-24T09:05:27.272+0000 7fe90710d&gt;</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_running_cerph_service_containers_manually"><a class="anchor" href="#_running_cerph_service_containers_manually"></a>Running Cerph Service containers manually</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Cephadm uses wrappers that get executed by systemd to start-up/stop the
-container services, the start wrapper can be found:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># cat /var/lib/ceph/cluster-fsid/service-name/unit.run</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To debug a container start-up issue you can disable/stop the systemd unit, and
-manually run</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># bash -x /var/lib/ceph/cluster-fsid/service-name/unit.run</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If needed you can make a copy on the unit.run wrapper and modify it as required
-to further debug the issue.</p>
+<p><a href="https://old.ceph.com/planet/tooling-for-large-scale-red-hat-ceph-storage-performance-testing/" class="bare">https://old.ceph.com/planet/tooling-for-large-scale-red-hat-ceph-storage-performance-testing/</a></p>
 </div>
 </div>
 </div>
