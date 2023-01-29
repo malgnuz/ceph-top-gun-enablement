@@ -247,6 +247,12 @@
   <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
   </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Stretched</span>
+<ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
   </li>
@@ -327,28 +333,34 @@ the most popular benchmarking tools:</p>
 <div class="sect2">
 <h3 id="_cosbench"><a class="anchor" href="#_cosbench"></a>2.1. Cosbench</h3>
 <div class="paragraph">
-<p><a href="https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf" class="bare">https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf</a> has all installation and config information.</p>
+<p><a href="https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf">Cosbench User Guide</a> has all installation and config information.</p>
 </div>
-<div class="paragraph">
-<p>Installation on Ubuntu:</p>
-</div>
-<div class="paragraph">
-<p>+ apt-get install openjdk-7-headless-jre
-+ Download latest COSBench release zip from <a href="https://github.com/intel-cloud/cosbench/releases" class="bare">https://github.com/intel-cloud/cosbench/releases</a>
-+ Unzip and extract.
-+ Make .sh files executable</p>
-</div>
-<div class="literalblock">
+<div class="sect3">
+<h4 id="_dependencies_installation"><a class="anchor" href="#_dependencies_installation"></a>2.1.1. Dependencies &amp; Installation:</h4>
+<div class="listingblock">
 <div class="content">
-<pre>find . -name '*.sh' -exec chmod +x {} \;</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># yum install nc
+# yum install java-1.8.0-openjdk.x86_64
+# systemctl stop iptables; systemctl disable iptables
+# systemctl stop firewalld; systemctl disable firewalld
+# wget https://github.com/intel-cloud/cosbench/releases/download/v0.4.2.c4/0.4.2.c4.zip
+# unzip 0.4.2.c4.zip
+# cd 0.4.2.c4
+# chmod 755 *.sh</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Architecture:</p>
 </div>
-<div class="paragraph">
-<p>+ There is a controller node to drive and aggregate results.
-+ There are driver nodes to run test driver processes. Each driver node can host multiple driver processes.</p>
+<div class="sect3">
+<h4 id="_architecture"><a class="anchor" href="#_architecture"></a>2.1.2. Architecture:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>There is a controller node to drive and aggregate results.</p>
+</li>
+<li>
+<p>There are driver nodes to run test driver processes. Each driver node can host multiple driver processes.</p>
+</li>
+</ul>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -356,89 +368,115 @@ the most popular benchmarking tools:</p>
 </div>
 </div>
 <div class="paragraph">
-<div class="title">/start_driver.sh – Run this on each driver node. Can do it on master node too if master node is itself the lone driver node.</div>
-<p>Can specify "[num_drivers][IP address of all drivers][base port]" as optional args.
+<p><code>./start_driver.sh</code> – Run this on each driver node. Can do it on master node too if master node is itself the lone driver node.
+Can specify "[num_drivers][IP address of all drivers][base port]" as optional args.
 Each driver then runs at port [base_port + index].
 Default driver base port is 18088.</p>
 </div>
 <div class="paragraph">
-<div class="title">/start_controller.sh – only on master node. Its <em>conf/controller.conf</em> should have entries for each worker node</div>
-<p>in [driver&lt;n&gt;] sections. Default controller port is 19088.</p>
+<p><code>./start_controller.sh</code> – only on master node. Its <code><em>conf/controller.conf</em></code> should have entries for each worker node
+in [driver&lt;n&gt;] sections. Default controller port is 19088.</p>
 </div>
-<div class="paragraph">
-<p>Configuration files:</p>
 </div>
-<div class="paragraph">
-<p>+ conf/controller.conf – specifies how many drivers, and URLs of all driver process endpoints.
-  If driver nodes run multiple driver processes, this should have endpoints for every process.</p>
-</div>
-<div class="paragraph">
-<p>+ conf/driver.conf – these are actually overwritten by start-driver.sh. So no point modifying these directly.
-  Instead modify conf/driver_template.conf.</p>
+<div class="sect3">
+<h4 id="_configuration_files"><a class="anchor" href="#_configuration_files"></a>2.1.3. Configuration files:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>conf/controller.conf – specifies how many drivers, and URLs of all driver process endpoints.
+If driver nodes run multiple driver processes, this should have endpoints for every process.</p>
+</li>
+<li>
+<p>conf/driver.conf – these are actually overwritten by start-driver.sh. So no point modifying these directly.
+Instead modify conf/driver_template.conf.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>Actual testing procedure is configured using a <strong>workload configuration file</strong> in conf/.</p>
 </div>
-<div class="paragraph">
-<p>+ Attached a working Ceph S3 workload configuration - cosbench-ceph-s3-workload.conf - based on the default S3 workload conf conf/s3-config-sample.xml</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Attached a working Ceph S3 workload configuration - cosbench-ceph-s3-workload.conf - based on the default S3 workload conf conf/s3-config-sample.xml</p>
+</li>
+<li>
+<p>Note the &lt;storage&gt; tag attributes.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code><em>endpoint</em></code> should be the RGW host:port. For actual AWS S3 testing, just remove the endpoint attribute and
+path_style_access can be removed too.</p>
+</li>
+<li>
+<p><code>path_style_access=true</code> is extremely important for Ceph S3; Otherwise, the Amazon S3 SDK library used by
+COSBench defaults to virtual host style access, tries to contact bucket URLs like
+<a href="http://s3testqwer1.cephmon1" class="bare">http://s3testqwer1.cephmon1</a> and if RGW host is not configured for virtual host addressing,
+S3 client fails with “Unknown name or service s3testqwer1.cephmon1”</p>
+</li>
+</ol>
 </div>
-<div class="paragraph">
-<p>+ Note the &lt;storage&gt; tag attributes.</p>
+</li>
+<li>
+<p>Another example S3 workload configuration: <a href="http://www.spinics.net/lists/ceph-users/msg28805.html" class="bare">http://www.spinics.net/lists/ceph-users/msg28805.html</a> . The multiple &lt;storage&gt; elements are not necessary – COSBench code seems to inherit global elements in each work stage or work element.</p>
+</li>
+<li>
+<p>For actual AWS S3 endpoints:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Bucket names should be globally unique across all S3 users. Since default name s3testqwer&lt;n&gt; is likely to be created by somebody else, COSBench fails with 403 access denied errors with default</p>
+</li>
+</ul>
 </div>
-<div class="literalblock">
+</li>
+<li>
+<p><strong>Start a test</strong>:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>+ _endpoint_ should be the RGW host:port. For actual AWS S3 testing, just remove the endpoint attribute and
-  path_style_access can be removed too.</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">./cli.sh submit conf/s3test.conf</code></pre>
 </div>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>+ path_style_access=true is extremely important for Ceph S3; Otherwise, the Amazon S3 SDK library used by
-  COSBench defaults to virtual host style access, tries to contact bucket URLs like
-  http://s3testqwer1.cephmon1 and if RGW host is not configured for virtual host addressing,
-  S3 client fails with “Unknown name or service s3testqwer1.cephmon1”</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>+ Another example S3 workload configuration: <a href="http://www.spinics.net/lists/ceph-users/msg28805.html" class="bare">http://www.spinics.net/lists/ceph-users/msg28805.html</a> . The multiple &lt;storage&gt; elements are not necessary – COSBench code seems to inherit global elements in each work stage or work element.</p>
-</div>
-<div class="paragraph">
-<p>+ For actual AWS S3 endpoints:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>+ Bucket names should be globally unique across all S3 users. Since default name s3testqwer&amp;lt;n&amp;gt; is likely to be created by somebody else,
-  COSBench fails with 403 access denied errors with default</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>Start a test</strong>: ./cli.sh submit conf/s3test.conf</p>
-</div>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p><strong>Monitor a test</strong>: From a browser, open <a href="http://&lt;cosbench-controller-node:19088/controller/" class="bare">http://&lt;cosbench-controller-node:19088/controller/</a>. Then open the item under active workload, and drill down into workload, work stage and missions by clicking on “view details”.</p>
+</li>
+</ul>
 </div>
-<div class="paragraph">
-<p>Troubleshooting:</p>
 </div>
+<div class="sect3">
+<h4 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>2.1.4. Troubleshooting:</h4>
 <div class="paragraph">
 <p>Log files and logging levels:</p>
 </div>
-<div class="paragraph">
-<p>+ log/system.log – the controller`s log.Logging level is set by log_level in [controller] section of conf/controller.conf. Set to DEBUG|INFO
+<div class="ulist">
+<ul>
+<li>
+<p>log/system.log – the controller`s log.Logging level is set by log_level in [controller] section of conf/controller.conf. Set to DEBUG|INFO
 log/mission/[mission-id].log – Actual worker logs. This is where any S3 client errors are recorded.
 Set “log_level” to DEBUG|INFO in [driver_n_ ] sections of conf/controller.conf
 Set “log_level” to DEBUG|INFO in [driver] section of conf/driver_template.conf.</p>
+</li>
+<li>
+<p><code>"Error 403 Access denied for actual AWS S3 endpoint"</code> - Check if the bucket has a globally unique name.
+The default s3testqwer&lt;n&gt; bucket names in workload configs are likely to be owned by somebody else already.</p>
+</li>
+<li>
+<p>Error</p>
+</li>
+</ul>
 </div>
-<div class="paragraph">
-<p>+ "Error 403 Access denied for actual AWS S3 endpoint" - Check if the bucket has a globally unique name.
-  The default s3testqwer&lt;n&gt; bucket names in workload configs are likely to be owned by somebody else already.</p>
-</div>
-<div class="paragraph">
-<p>+ Error
-  "[INFO] [NoneStorage] - performing PUT at /s3testqwer1
-   [WARN] [S3Storage] - below exception encountered when creating bucket s3testqwer1: Unable to execute HTTP request: s3testqwer1.cephmon1&#8230;&#8203;
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">  "[INFO] [NoneStorage] - performing PUT at /s3testqwer1
+   [WARN] [S3Storage] - below exception encountered when creating bucket s3testqwer1: Unable to execute HTTP request: s3testqwer1.cephmon1...
    [NoneStorage] - performing PUT at /s3testqwer2/myobjects10
-   [S3Storage] - below exception encountered when creating object myobjects10 at s3testqwer2: Unable to execute HTTP request: s3testqwer2.cephmon1: Name or service not known"</p>
+   [S3Storage] - below exception encountered when creating object myobjects10 at s3testqwer2: Unable to execute HTTP request: s3testqwer2.cephmon1: Name or service not known"</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The error here is that S3 client is attempting to use virtual host style URLs [<a href="http://bucket.host" class="bare">http://bucket.host</a>]() but Ceph RGW is not configured to handle it by default.
@@ -449,9 +487,9 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
 <img src="_images/cosbench1.png" alt="cos image1">
 </div>
 </div>
-<div class="paragraph">
-<p>Example template for cosbench</p>
 </div>
+<div class="sect3">
+<h4 id="_example_template_for_cosbench"><a class="anchor" href="#_example_template_for_cosbench"></a>2.1.5. Example template for cosbench</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
@@ -486,6 +524,355 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
   &lt;/workflow&gt;
 
 &lt;/workload&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_warp"><a class="anchor" href="#_warp"></a>2.2. Warp</h3>
+<div class="paragraph">
+<p>The warp benchmarking tool is a cloud ready S3 benchmarking tool that can be used to simulate a variety of object workloads.</p>
+</div>
+<div class="paragraph">
+<p>This doc is intended to provide a quick how-to when deploying warp for ODF or RGW deployments.</p>
+</div>
+<div class="sect3">
+<h4 id="_installing_warp"><a class="anchor" href="#_installing_warp"></a>2.2.1. Installing warp</h4>
+<div class="paragraph">
+<p>Warp has two main modes of execution, as a client and a server. The client is effectively the workload generator, and is told the attributes of the workload to execute by the server. The server component may also run in multiple modes;
+workload orchestration with the client
+results analysis
+Results comparisons
+You need to install warp on a server that has the ‘oc’ binary and access to the target k8s/OCP cluster.</p>
+</div>
+<div class="paragraph">
+<p>Download warp using git or wget/unzip.</p>
+</div>
+<div class="paragraph">
+<p>Using ‘git’ (your resulting directory will be called ‘warp’)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># git clone https://github.com/minio/warp.git</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using wget and unzip (your resulting directory will be called warp-master)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># wget https://github.com/minio/warp/archive/refs/heads/master.zip &amp;&amp; unzip master.zip</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_using_warp"><a class="anchor" href="#_using_warp"></a>2.2.2. Using Warp</h4>
+<div class="paragraph">
+<p>Unlike tools like the benchmark operator, the warp clients are designed to persist. By default, each worker removes the objects it used from the target S3 instance as the final stage of the benchmark job (this can be changed with a --keep-data flag). Therefore when testing different workloads, you only need to deploy the clients once, and then submit different jobs to exercise different workload profiles.</p>
+</div>
+<div class="paragraph">
+<p>Another default behavior is the generation of the analysis file. The server will attempt to create this on the root filesystem of the pod, which will typically fail with permissions. There are several ways to ensure the analysis data is persisted, shown here.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuring_warp_for_odfnoobaa"><a class="anchor" href="#_configuring_warp_for_odfnoobaa"></a>2.2.3. Configuring warp for ODF/Noobaa</h4>
+<div class="paragraph">
+<p>The project folder provides sample yaml files for the client and server in the projects k8s directory.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>To enable warp to run against an ODF noobaa environment</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Create an OBC and extract the ACCESS/SECRET keys</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>[OPTIONAL] Create a separate namespace for the warp clients and jobs</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Deploy the warp clients</p>
+</li>
+<li>
+<p>Modify the StatefulSet definition in warp.yaml file as follows
+[Optional] If the target environment is using self-signed certs, you will need to tell the clients to skip SSL verification. You do this by updating the spec.template.spec.containers.args to include ‘--insecure’ as an args option</p>
+</li>
+<li>
+<p>Create the clients</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc -n &lt;namespace&gt; create -f warp.yaml</code></pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Deploy the server (batch job)</p>
+</li>
+<li>
+<p>Modify warp-job.yaml</p>
+<div class="paragraph">
+<p>[Optional] give the job a specific name that reflects the type of run</p>
+</div>
+</li>
+<li>
+<p>Update the environment variables for WARP_ACCESS_KEY and WARP_SECRET_KEY with the credentials from step 1.</p>
+</li>
+<li>
+<p>Update the args passed to the container</p>
+</li>
+<li>
+<p>The first argument is the client action. Use ‘get’ for an initial smoke test</p>
+<div class="paragraph">
+<p>[Optional] ‘--objects’ defines the object count each client will act against (default is 2,500)</p>
+</div>
+</li>
+<li>
+<p>‘--bucket’ updated to reflect the bucket created by the OBC</p>
+</li>
+<li>
+<p>‘--warp-client’ to reflect the internal dns names of the clients</p>
+</li>
+<li>
+<p>‘--host’ should be used the internal S3 endpoint</p>
+</li>
+<li>
+<p>Add a ‘--tls’ parameter</p>
+</li>
+<li>
+<p>‘--concurrent’ is an int that governs the level of concurrency the client attempts with the server</p>
+</li>
+<li>
+<p>‘--obj.size’ should be set to the object size for the workload e.g. 16MiB</p>
+</li>
+<li>
+<p>Submit the job</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc -n &lt;namespace&gt; create -f warp-job.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>High level results are in the output of the job (output example)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc logs job.batch/warp-job</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuring_warp_for_odfrgw"><a class="anchor" href="#_configuring_warp_for_odfrgw"></a>2.2.4. Configuring warp for ODF/RGW</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create an object store user using the following yaml file.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat rgw_user.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephObjectStoreUser
+metadata:
+  name: ceph-rgw-user
+  namespace: openshift-storage
+spec:
+  store: ocs-storagecluster-cephobjectstore
+  displayName: ceph-rgw-user
+
+# oc create -f rgw_user.yaml</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Discover the secret name from the rgw user</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc get cephobjectstoreuser/&lt;user name&gt; -o jsonpath='{.status.info.secretName}'</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Retrieve the Access key, Secret Key and Endpoint from the newly created user’s secret.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.AccessKey | base64 -d
+# oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.SecretKey | base64 -d
+# oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.Endpoint | base64 -d</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Or as a one-liner</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># oc get secret &lt;secret-name&gt; -o go-template='AccessKey={{.data.AccessKey | base64decode}}{{"\n"}}SecretKey={{.data.SecretKey | base64decode}}{{"\n"}}Endpoint={{.data.Endpoint | base64decode }}{{"\n"}}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_analysis_file_handling"><a class="anchor" href="#_analysis_file_handling"></a>2.2.5. Analysis File Handling</h4>
+<div class="paragraph">
+<p>The most important component of any test run is the results file, and warp is no different. There are several ways to expose the detailed results.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Simple</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To save the status file (zst) you can create a PVC that binds to an external NFS server. Now when you run the job with the ‘--benchdata’ parameter defined, the output stats will be written to the mountpoint, which can later be used as input for the analyze feature.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Programmatic
+The data from a run can be exposed over http in JSON format (--serve), avoiding the requirement for PVC’s and NFS servers (as long as you’re happy with test results remaining local to your environment!). In fact the http endpoint supports the following endpoints (ref)</p>
+</li>
+<li>
+<p><code>v1/stop</code>
+Stops an active job, pod stays active due to the serve loop</p>
+</li>
+<li>
+<p><code>v1/status</code>
+JSON response, last_status and data_ready are two key fields</p>
+</li>
+<li>
+<p><code>v1/aggregated</code>
+Aggregated summary of the run in JSON format (This is probably the most useful - but it is very verbose!)</p>
+</li>
+<li>
+<p><code>v1/operations/json</code>
+Provides a JSON representation of the zst file</p>
+</li>
+<li>
+<p><code>v1/operations</code>
+Downloads the zst file
+e.g. curl localhost:7762/v1/operations -o my-testrun.zst</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_analysis"><a class="anchor" href="#_analysis"></a>2.2.6. Analysis</h4>
+<div class="paragraph">
+<p>The warp binary has an analyze mode, which takes as input the zst file from a test run and produces a summary of the run’s performance, and may optionally be used to generate a CSV file that covers each op request.</p>
+</div>
+<div class="paragraph">
+<p>You can run the analysis job as a pod in OCP, or execute it locally - all you really need is the zst file.</p>
+</div>
+<div class="paragraph">
+<p><strong>Example</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># podman run --rm -v /var/lib/nfs/data:/mnt minio/warp:latest analyze --analyze.v /mnt/warp-get-32mb.csv.zst
+
+
+Operation: PUT (15). Ran 15s. Concurrency: 3. Warp Instances: 3.
+
+
+Requests considered: 4:
+ * Avg: 2.815s, 50%: 2.997s, 90%: 3.439s, 99%: 3.439s, Fastest: 2.24s, Slowest: 3.439s
+Throughput:
+* Average: 34.56 MiB/s, 1.08 obj/s
+
+
+Throughput, split into 6 x 1s:
+ * Fastest: 40.0MiB/s, 1.25 obj/s (1s, starting 00:33:45 UTC)
+ * 50% Median: 34.3MiB/s, 1.07 obj/s (1s, starting 00:33:47 UTC)
+ * Slowest: 31.0MiB/s, 0.97 obj/s (1s, starting 00:33:49 UTC)
+
+Operation: GET (768). Ran 1m1s. Concurrency: 3. Warp Instances: 3.
+
+Requests considered: 751:
+
+ * Avg: 225ms, 50%: 35ms, 90%: 622ms, 99%: 1.953s, Fastest: 26ms, Slowest: 5.297s
+ * TTFB: Avg: 118ms, Best: 8ms, 25th: 9ms, Median: 11ms, 75th: 21ms, 90th: 185ms, 99th: 1.316s, Worst: 5.277s
+ * First Access: Avg: 1.947s, 50%: 1.946s, 90%: 5.297s, 99%: 5.297s, Fastest: 631ms, Slowest: 5.297s
+ * First Access TTFB: Avg: 1.395s, Best: 611ms, 25th: 905ms, Median: 1.275s, 75th: 1.371s, 90th: 5.277s, 99th: 5.277s, Worst: 5.277s
+ * Last Access: Avg: 744ms, 50%: 638ms, 90%: 1.891s, 99%: 1.891s, Fastest: 34ms, Slowest: 1.891s
+ * Last Access TTFB: Avg: 319ms, Best: 9ms, 25th: 26ms, Median: 32ms, 75th: 946ms, 90th: 1.288s, 99th: 1.288s, Worst: 1.288s
+
+Throughput:
+* Average: 424.93 MiB/s, 13.28 obj/s
+
+Throughput, split into 56 x 1s:
+ * Fastest: 1092.6MiB/s, 34.14 obj/s (1s, starting 00:34:38 UTC)
+ * 50% Median: 385.5MiB/s, 12.05 obj/s (1s, starting 00:34:30 UTC)
+ * Slowest: 39.7MiB/s, 1.24 obj/s (1s, starting 00:34:04 UTC)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_evaluation_of_warp"><a class="anchor" href="#_evaluation_of_warp"></a>2.2.7. Evaluation of Warp</h4>
+<div class="paragraph">
+<p>The warp project should not be considered feature complete, and has gaps relating to our current workflows and expectations.</p>
+</div>
+<div class="paragraph">
+<p><strong>The Good:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It’s simple to use and you can be running a benchmark in minutes within kubernetes</p>
+</li>
+<li>
+<p>It supports bare-metal and k8s based deployments</p>
+</li>
+<li>
+<p>It can provide extremely verbose output (per op), that could benefit problem determination</p>
+</li>
+<li>
+<p>It’s written in golang, so dependencies aren’t a problem!</p>
+</li>
+<li>
+<p>It supports GET/PUT/LIST/STAT/MIXED/MULTIPART</p>
+</li>
+<li>
+<p>It outputs high level and detailed stats</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>The Bad:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>By default the output format is txt or at best csv - you need the http handler to access summary analysis in JSON format</p>
+</li>
+<li>
+<p>Logs don’t have timestamps!</p>
+</li>
+<li>
+<p>There isn’t a UI, so organizing jobs and managing a suit of tests is an exercise for the user</p>
+</li>
+<li>
+<p>Documentation is incomplete - another read-the-code™ project?</p>
+</li>
+<li>
+<p>Owned by a competitor, with some feature specific to the minio platform (e.g. server profiling)</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

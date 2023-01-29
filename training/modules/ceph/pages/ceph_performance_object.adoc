@@ -30,6 +30,48 @@ the most popular benchmarking tools:
 * *Cosbench*
 * *Warp*
 
+Using an Object performance benchmarking tool like cosbench or warp to run
+different load tests that will help us get very valuable baseline data so we
+can get a rough estimate on the amount of nodes needed to reach a certain IO
+throughput target in the Ceph cluster.
+
+To generate a considerable amount of load on the Ceph cluster we will need a
+certain number of client nodes to concurrently execute and put load on the S3
+endpoint/Ceph cluster.
+
+== What is our Objective?
+
+Before starting the Benchmarking tests set your objectives. here is an example:
+
+* Baseline performance testing. Looking for our limits.
+
+** Set the Goal
+
+During this initial test our *goal is to understand the limits of our cluster*,
+Ideally we will have enough clients so that we can saturate and take to the
+limit the cluster, we then need to understand what is causing the performance
+bottleneck, if it’s something related to our Ceph configuration, that can be
+tuned to increase the performance or if we are seeing resource saturation
+spinning drives,network stack. *If our limitation/bottlenect is coming from the
+hardware resources we have achieved the objective of this testing* .
+
+** Configure the Benchmark workload(Ideally very similar to production)
+
+*** We want to work during the tests with 3 types of object sizes:
+
+. Small objects(1/15/30MB).  Throughput Testing.
+. Medium(32/64/128MB). Throughput Testing.
+. Mini & Tiny (4KB-1MB). Objects per second Testing. Understanding the performance hit when working with small objects.
+
+*** Workload types:
+
+. GET. 80%. PUT. 15%. DELETE. 5%
+. GET 75%.  PUT. 15%. DELETE. 5%. STATS 5%.
+
+** What do we extract from the results
+Once we finish this testing we need to have a clear understanding of the maximum throughput we are able to achieve on the full cluster, Individually with different object sizes and globally with a mix of object sizes, with the maximum total throughput of the cluster we will be able to calculate the maximum throughput per cluster node, this can be used in the future to calculate the number of nodes needed to achieve a certain target throughput.
+
+
 == Tools
 
 === Cosbench
@@ -94,8 +136,7 @@ Actual testing procedure is configured using a **workload configuration file** i
 
 * For actual AWS S3 endpoints:
   
-   + Bucket names should be globally unique across all S3 users. Since default name s3testqwer&lt;n&gt; is likely to be created by somebody else, 
-     COSBench fails with 403 access denied errors with default
+** Bucket names should be globally unique across all S3 users. Since default name s3testqwer&lt;n&gt; is likely to be created by somebody else, COSBench fails with 403 access denied errors with default
      
 * **Start a test**:
 ----
@@ -121,7 +162,7 @@ Set “log_level” to DEBUG|INFO in [driver] section of conf/driver_template.co
   
 * Error
 
------
+----
   "[INFO] [NoneStorage] - performing PUT at /s3testqwer1
    [WARN] [S3Storage] - below exception encountered when creating bucket s3testqwer1: Unable to execute HTTP request: s3testqwer1.cephmon1...
    [NoneStorage] - performing PUT at /s3testqwer2/myobjects10
@@ -205,15 +246,16 @@ Another default behavior is the generation of the analysis file. The server will
 ==== Configuring warp for ODF/Noobaa
 The project folder provides sample yaml files for the client and server in the projects k8s directory.
 
-To enable warp to run against an ODF noobaa environment
-Create an OBC and extract the ACCESS/SECRET keys
+* To enable warp to run against an ODF noobaa environment
+** Create an OBC and extract the ACCESS/SECRET keys
 
 [OPTIONAL] Create a separate namespace for the warp clients and jobs
 
-Deploy the warp clients
-Modify the StatefulSet definition in warp.yaml file as follows
+** Deploy the warp clients
+** Modify the StatefulSet definition in warp.yaml file as follows
 [Optional] If the target environment is using self-signed certs, you will need to tell the clients to skip SSL verification. You do this by updating the spec.template.spec.containers.args to include ‘--insecure’ as an args option
-Create the clients
+
+** Create the clients
 ----
 # oc -n <namespace> create -f warp.yaml
 ----
@@ -250,8 +292,8 @@ High level results are in the output of the job (output example)
 
 ==== Configuring warp for ODF/RGW
 
-Create an object store user using the following yaml file.
-
+. Create an object store user using the following yaml file.
++
 ----
 # cat rgw_user.yaml
 apiVersion: ceph.rook.io/v1
@@ -265,26 +307,26 @@ spec:
 
 # oc create -f rgw_user.yaml
 ----
-
-Discover the secret name from the rgw user
++
+. Discover the secret name from the rgw user
++
 ----
 # oc get cephobjectstoreuser/<user name> -o jsonpath='{.status.info.secretName}'
 ----
-
-Retrieve the Access key, Secret Key and Endpoint from the newly created user’s secret.
++
+. Retrieve the Access key, Secret Key and Endpoint from the newly created user’s secret.
++
 ----
 # oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.AccessKey | base64 -d
 # oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.SecretKey | base64 -d
 # oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.Endpoint | base64 -d
 ----
-
-Or as a one-liner
++
+. Or as a one-liner
 ----
 # oc get secret <secret-name> -o go-template='AccessKey={{.data.AccessKey | base64decode}}{{"\n"}}SecretKey={{.data.SecretKey | base64decode}}{{"\n"}}Endpoint={{.data.Endpoint | base64decode }}{{"\n"}}'
 ----
 
-Prepare the warp client file and start the pods. Sample file is present here.
-Prepare the warp-job file. Sample file is present here.
 
 ==== Analysis File Handling
 The most important component of any test run is the results file, and warp is no different. There are several ways to expose the detailed results.
@@ -362,7 +404,8 @@ Throughput, split into 56 x 1s:
 
 The warp project should not be considered feature complete, and has gaps relating to our current workflows and expectations.
 
-The Good:
+*The Good:*
+
 * It’s simple to use and you can be running a benchmark in minutes within kubernetes
 * It supports bare-metal and k8s based deployments
 * It can provide extremely verbose output (per op), that could benefit problem determination
@@ -370,7 +413,8 @@ The Good:
 * It supports GET/PUT/LIST/STAT/MIXED/MULTIPART
 * It outputs high level and detailed stats
 
-The Bad:
+*The Bad:*
+
 * By default the output format is txt or at best csv - you need the http handler to access summary analysis in JSON format
 * Logs don’t have timestamps!
 * There isn’t a UI, so organizing jobs and managing a suit of tests is an exercise for the user
