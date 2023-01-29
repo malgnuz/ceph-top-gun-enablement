@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Rados Gateway Introduction and Deployment :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_intro.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_intro.html">RGW Introduction &amp; Deployment</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_intro.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Rados Gateway Introduction and Deployment</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="ulist">
+<div class="title">Goals</div>
+<ul>
+<li>
+<p>Introduction to Object Storage</p>
+</li>
+<li>
+<p>Introduction to RadosGW</p>
+</li>
+<li>
+<p>Hands-On. Deploy RGW with Cephadm</p>
+</li>
+<li>
+<p>Hands-On. Verify S3/RGW Access with S3 client</p>
+</li>
+<li>
+<p>Hands-On. S3 Access: Path Style vs Hosted Style</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introducing_object_storage"><a class="anchor" href="#_introducing_object_storage"></a>1. Introducing Object Storage</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Object storage is a type of data storage that stores data as objects, with each object having a unique identifier and metadata associated with it. The objects are typically stored across a cluster of commodity servers, and are accessed through a RESTful API. Object storage is different from traditional file and block storage, which store data in a hierarchical file system or as blocks on a storage device.</p>
+</li>
+<li>
+<p>Object storage is highly scalable, meaning it can easily handle large amounts of data and accommodate growth as needed. It allows you to store, retrieve and delete large amounts of unstructured data. The data can be accessed from anywhere, at any time, by any device that supports the RESTful API.</p>
+</li>
+<li>
+<p>Object storage is also designed to be highly durable and fault-tolerant. It uses techniques such as data replication and erasure coding to ensure that data is stored redundantly and can be recovered in the event of a failure. This makes it suitable for use cases such as archiving, backup and disaster recovery.</p>
+</li>
+<li>
+<p>Object storage is also cost-effective, it uses commodity hardware, which is less expensive than specialized storage hardware used in other types of storage systems.</p>
+</li>
+<li>
+<p>Object storage systems usually have built-in features such as data versioning, data tiering, and data lifecycle management.</p>
+</li>
+<li>
+<p>Object storage can be used for a variety of use cases, including archiving, backup and disaster recovery, media and entertainment, and big data analytics.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introducing_radosgw"><a class="anchor" href="#_introducing_radosgw"></a>2. Introducing RadosGW</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The RADOS Gateway also called the Object Gateway (RGW), is a service that provides access to
+the Ceph cluster for clients using standard object storage APIs. The RADOS Gateway supports
+both the Amazon S3 and OpenStack Swift APIs.</p>
+</div>
+<div class="paragraph">
+<p>The core daemon, radosgw, is built on top of the librados library. The daemon provides a web
+service interface, based on the Beast HTTP, WebSocket, and networking protocol library, as a
+front-end to handle API requests.</p>
+</div>
+<div class="paragraph">
+<p>The radosgw is a client to Ceph Storage that provides object access to other client
+applications. Client applications use standard APIs to communicate with the RADOS Gateway, and
+the RADOS Gateway uses librados module calls to communicate with the Ceph cluster.</p>
+</div>
+<div class="paragraph">
+<p>The RGW is a separate service that externally connects to a Ceph cluster and provides object storage
+access to its clients. In a production environment, it&#8217;s recommended that you run more than
+one instance of the RGW masked by a Load Balancer,</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/rgw-lb.webp" alt="RGW LoadBalancer">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_radosgw_service_deployment_with_cephadm"><a class="anchor" href="#_radosgw_service_deployment_with_cephadm"></a>3. RadosGW service deployment with Cephadm</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ceph Object Gateway supports two interfaces:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>_S3-compatibility_provides object storage functionality with an interface compatible with a large subset of the Amazon S3 RESTful API.</p>
+</li>
+<li>
+<p><em>Swift-compatibility</em>, which provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><code>cephadm</code> deploys RGW as a collection of daemons that manage a single-cluster deployment or a particular realm and zone in a multisite deployment.
+Note that with <code>cephadm</code>, the RGW daemons are configured via the monitor configuration database instead of via a <code>ceph.conf</code> file or the command line. If that configuration is not already in place (usually in the client.rgw.&lt;something&gt; section), then the RGW daemons start up with default settings (for example, binding to port 80).</p>
+</div>
+<div class="paragraph">
+<p>There are many ways to deploy the RADOS object gateway one of which is through
+a single cephadm command that creates an object gateway across two random servers.</p>
+</div>
+<div class="paragraph">
+<p>In this lab we are going to follow a step-by-step approach to better understand the deployment process.</p>
+</div>
+<div class="paragraph">
+<p>First we will create a realm, a zone group, and a zone, and then specify a placement specification with the hostname when you deploy the RGW daemons.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/gateway-realm.png" alt="RGW Realm" width="740" height="580">
+</div>
+</div>
+<div class="paragraph">
+<p>Due to the limited number of OSDs in the lab environment, the <code>mon_max_pg_per_osd</code> configuration setting is lower than required. When you create more than seven pools each of PGs and PGPs, with the pool size being 32, you must increase the value of <code>mon_max_pg_per_osd</code> from <code>256</code> to <code>512</code> to create the additional pools.</p>
+</div>
+<div class="paragraph">
+<p>The Realm/Zonegroup/Zone Layout in our Lab:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/single-ms.png" alt="Lab RGW layout">
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update the value of the <code>mon_max_pg_per_osd</code> configuration variable to <code>512</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">#  ceph config set mon mon_max_pg_per_osd 512</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a realm:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin realm create --rgw-realm=multisite --default</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "name": "multisite",
+    "current_period": "0ad144e7-a880-43ab-8a64-c9deaf581280",
+    "epoch": 1
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a zone group:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zonegroup create --rgw-zonegroup=multizg  --master --default</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "id": "2e41dde9-80f4-4ec8-a099-ec0e8a60938d",
+    "name": "multizg",
+    "api_name": "multizg",
+    "is_master": "true",
+    "endpoints": [],
+    "hostnames": [],
+    "hostnames_s3website": [],
+    "master_zone": "",
+    "zones": [],
+    "placement_targets": [],
+    "default_placement": "",
+    "realm_id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "sync_policy": {
+        "groups": []
+    }
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a zone:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zone create --rgw-zonegroup=multizg --rgw-zone=zone1 --master --default</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "id": "9db08233-a099-4905-a77c-b8964995037b",
+    "name": "zone1",
+    "domain_root": "zone1.rgw.meta:root",
+    "control_pool": "zone1.rgw.control",
+    "gc_pool": "zone1.rgw.log:gc",
+    "lc_pool": "zone1.rgw.log:lc",
+    "log_pool": "zone1.rgw.log",
+    "intent_log_pool": "zone1.rgw.log:intent",
+    "usage_log_pool": "zone1.rgw.log:usage",
+    "roles_pool": "zone1.rgw.meta:roles",
+    "reshard_pool": "zone1.rgw.log:reshard",
+    "user_keys_pool": "zone1.rgw.meta:users.keys",
+    "user_email_pool": "zone1.rgw.meta:users.email",
+    "user_swift_pool": "zone1.rgw.meta:users.swift",
+    "user_uid_pool": "zone1.rgw.meta:users.uid",
+    "otp_pool": "zone1.rgw.otp",
+    "system_key": {
+        "access_key": "",
+        "secret_key": ""
+    },
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "zone1.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone1.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone1.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    "realm_id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "notif_pool": "zone1.rgw.log:notif"
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Commit the changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin period update --rgw-realm=multisite --commit</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "id": "5fb483c5-b3cd-4f4d-9788-556f89aa613e",
+    "epoch": 1,
+    "predecessor_uuid": "0ad144e7-a880-43ab-8a64-c9deaf581280",
+    "sync_status": [],
+    "period_map": {
+        "id": "5fb483c5-b3cd-4f4d-9788-556f89aa613e",
+        "zonegroups": [
+            {
+                "id": "2e41dde9-80f4-4ec8-a099-ec0e8a60938d",
+                "name": "default",
+                "api_name": "default",
+                "is_master": "true",
+                "endpoints": [],
+                "hostnames": [],
+                "hostnames_s3website": [],
+                "master_zone": "9db08233-a099-4905-a77c-b8964995037b",
+                "zones": [
+                    {
+                        "id": "9db08233-a099-4905-a77c-b8964995037b",
+                        "name": "zone1",
+                        "endpoints": [],
+                        "log_meta": "false",
+                        "log_data": "false",
+                        "bucket_index_max_shards": 11,
+                        "read_only": "false",
+                        "tier_type": "",
+                        "sync_from_all": "true",
+                        "sync_from": [],
+                        "redirect_zone": ""
+                    }
+                ],
+                "placement_targets": [
+                    {
+                        "name": "default-placement",
+                        "tags": [],
+                        "storage_classes": [
+                            "STANDARD"
+                        ]
+                    }
+                ],
+                "default_placement": "default-placement",
+                "realm_id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+                "sync_policy": {
+                    "groups": []
+                }
+            }
+        ],
+        "short_zone_ids": [
+            {
+                "key": "9db08233-a099-4905-a77c-b8964995037b",
+                "val": 299831308
+            }
+        ]
+    },
+    "master_zonegroup": "2e41dde9-80f4-4ec8-a099-ec0e8a60938d",
+    "master_zone": "9db08233-a099-4905-a77c-b8964995037b",
+    "period_config": {
+        "bucket_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        },
+        "user_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        }
+    },
+    "realm_id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "realm_name": "multisite",
+    "realm_epoch": 2
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Deploy the RGW daemons with the name <code>multi.zone1</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># ceph orch apply rgw multi.zone1 --realm=multisite --zone=zone1 --placement="1 proxy01" --port=8000</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">Scheduled multi.zone1 update...</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Use the client.rgw.* section in the centralised configuration database to define parameters and characteristics for new RADOS Gateway daemons.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify that the RGW service is available:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># ceph orch ls</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">NAME                       PORTS  RUNNING  REFRESHED  AGE  PLACEMENT
+alertmanager                          1/1  9m ago     4d   count:1
+crash                                 4/4  9m ago     4d   *
+grafana                               1/1  9m ago     4d   count:1
+mds.fs_name                           2/2  9m ago     3d   count:2
+mgr                                   2/2  9m ago     4d   count:2
+mon                                   4/5  9m ago     4d   count:5
+node-exporter                         4/4  9m ago     4d   *
+osd.all-available-devices             3/7  9m ago     4d   *
+prometheus                            1/1  9m ago     4d   count:1
+multi.zone1                   ?:8080       1/1  5s ago     12s  proxy01.example.com;count:1</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the RGW process is available:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># ceph orch ps | grep rgw</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">ceph orch ps | grep rgw
+rgw.multi.zone1.proxy01.mhawfj   proxy01      *:8000       running (4m)     3m ago   3m    54.9M        -  16.2.8-85.el8cp  b2c997ff1898  4de70934f04e</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Ceph orchestrator service names the daemons by using the format rgw.&lt;realm&gt;.&lt;zone&gt;.&lt;host&gt;.&lt;random-string&gt;
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Also, verify that the RGW daemons are running:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01 ~]# ceph -s</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">  cluster:
+    id:     7d4ee168-d9b9-11eb-bc7e-2cc260754989
+    health: HEALTH_OK
+  services:
+    mon: 3 daemons, quorum ceph-mon01.example.com,ceph-mon02,ceph-mon03 (age 36m)
+    mgr: ceph-mon02.pxyuuu(active, since 4h), standbys: ceph-mon01.example.com.cntwzr
+    mds: 1/1 daemons up, 1 standby
+    osd: 3 osds: 3 up (since 37m), 3 in (since 4d)
+    rgw: 1 daemons active (1 hosts, 1 zones)
+
+  data:
+    volumes: 1/1 healthy
+    pools:   10 pools, 273 pgs
+    objects: 384 objects, 14 MiB
+    usage:   169 MiB used, 30 GiB / 30 GiB avail
+    pgs:     273 active+clean</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_verify_connectivity_to_rados_gateway"><a class="anchor" href="#_verify_connectivity_to_rados_gateway"></a>4. Verify Connectivity to RADOS Gateway</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify that the RADOS Gateway container is bound to port 8080 on <code>proxy01</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@proxy01 ~]# netstat -tulpn</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+:
+tcp        0      0 0.0.0.0:8080              0.0.0.0:*               LISTEN      25250/radosgw
+:
+:
+tcp6       0      0 :::80                   :::*                    LISTEN      25250/radosgw</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Use cURL to connect to each RADOS Gateway and check for a response on <code>ceph-mon01</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01 ceph-ansible]# curl http://proxy01:8000</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"&gt;&lt;Owner&gt;&lt;ID&gt;anonymous&lt;/ID&gt;&lt;DisplayName&gt;&lt;/DisplayName&gt;&lt;/Owner&gt;&lt;Buckets&gt;&lt;/Buckets&gt;&lt;/ListAllMyBucketsResult&gt;</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_rados_gateway_user_accounts"><a class="anchor" href="#_create_rados_gateway_user_accounts"></a>5. Create RADOS Gateway User Accounts</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To access Red Hat Ceph Storage over object storage interfaces via Swift or S3, you must configure a Ceph RADOS Gateway component. In this section, you configure <code>proxy01</code> as a Ceph RADOS Gateway and then test S3 and Swift from <code>ceph-mon01</code>.</p>
+</div>
+<div class="paragraph">
+<p>You begin by logging into <code>ceph-mon01</code> to create RADOS Gateway user accounts to be used by S3 to access Ceph Storage via an object storage S3 cli client .</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Log in to <code>ceph-mon01</code>.</p>
+</li>
+<li>
+<p>Create an RGW user for S3 access:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01 ceph-ansible]# radosgw-admin user create --uid='user1' --display-name='First User' --access-key='S3user1' --secret-key='S3user1key'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample Output</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "user_id": "user1",
+    "display_name": "First User",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "auid": 0,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "user1",
+            "access_key": "S3user1",
+            "secret_key": "S3user1key"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "temp_url_keys": [],
+    "type": "rgw"
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>View the user information again:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01 ]# radosgw-admin user info --uid='user1'</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The output produced is the same as provided by the previous command.</p>
+</li>
+<li>
+<p>The Ceph RGW instances are already configured and running.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_accessing_s3_objects_using_rados_gateway"><a class="anchor" href="#_accessing_s3_objects_using_rados_gateway"></a>6. Accessing S3 Objects Using RADOS Gateway</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Amazon S3 API enables developers to manage object storage resources using an Amazon
+S3 compatible interface. Applications implemented with the S3 API can inter-operate with other
+S3-compatible object storage services, besides the RADOS Gateway, migrate storage from
+other locations to your Ceph storage cluster. In a hybrid cloud environment, you can configure
+your applications to use different authentication keys, regions, and vendor services to mix private
+enterprise and public cloud resources and storage locations seamlessly using the same API.
+The Amazon S3 interface defines the namespace in which objects are stored as a bucket. To
+access and manage objects and buckets using the S3 API, applications use RADOS Gateway
+users for authentication. Each user has an access key that identifies the user and a secret key that
+authenticates the user.
+There are object and metadata size limits to consider when using the Amazon S3 API:
+• An object size is between a minimum of OB and a maximum of 5 TB.
+• The maximum size is 5GB in a single upload operation.
+• Upload objects larger than 100MB by using the multipart upload capability.
+• The maximum metadata size is 16,000 bytes in a single HTTP request.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_using_amazon_s3_api_clients"><a class="anchor" href="#_using_amazon_s3_api_clients"></a>7. Using Amazon S3 API Clients</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="_images/S3.png" alt="AWS S3">
+</div>
+</div>
+<div class="paragraph">
+<p>There are many different S3 clients that you can use to interact with the S3
+API.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>s3cmd</p>
+</li>
+<li>
+<p><a href="https://github.com/bloomreach/s4cmd">s4cmd</a></p>
+</li>
+<li>
+<p><a href="https://github.com/peak/s5cmd">s5cmd</a></p>
+</li>
+<li>
+<p>AWS CLI</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We will be using the AWS CLI during the lab; the nodes have the AWS CLI binary
+available, you will just need to configure it; using the configure option, you
+can create a new RGW user or use the previously created user, you will need the
+Access and Secret key.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws configure
+AWS Access Key ID [****************07DO]:
+AWS Secret Access Key [****************QUH0]:
+Default region name [Default]:</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once configured, you need to use the --endpoint option and point it to your
+configure RGW HTTP endpoint, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[ceph: root@node /]# aws --endpoint http://ceph-node01:8080 s3 mb s3://demobucket</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_s3_bucket_access_types"><a class="anchor" href="#_s3_bucket_access_types"></a>8. S3 bucket access types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The S3 API currently supports two different bucket addressing models: path-style (old) and virtual-hosted style (new).</p>
+</div>
+<div class="sect2">
+<h3 id="_whats_the_difference"><a class="anchor" href="#_whats_the_difference"></a>8.1. What’s the difference?</h3>
+<div class="paragraph">
+<p><strong>In path-style URLs</strong>, the s3 bucket name will be in the URL path, examples:</p>
+</div>
+<div class="paragraph">
+<p>S3 endpoint URL: “https://s3.example.com/bucket-name/object_key"</p>
+</div>
+<div class="paragraph">
+<p>If you notice that the S3 bucket name and object keys are always in the same subdomain, which in this case is s3.example.com</p>
+</div>
+<div class="paragraph">
+<p><strong>In hosted-style URLs</strong>, the bucket name will be included on the subdomain so we can have distinct DNS subdomains for the buckets, examples:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://bucket-name.s3.example.com/object_key" class="bare">https://bucket-name.s3.example.com/object_key</a></p>
+</div>
+<div class="paragraph">
+<p>Hosted-style URL&#8217;s can help with DNS resolution, scaling, security, traffic management, and DDoS protection more challenging with this old centralised model than unique, virtual-hosted-style subdomains.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_to_enable_hosted_style_urls_in_radosgw"><a class="anchor" href="#_how_to_enable_hosted_style_urls_in_radosgw"></a>8.2. How to enable hosted-style URLs in RadosGW</h3>
+<div class="paragraph">
+<p>By default, RGW will work in the path-style URL format; if we want to access a bucket using the hosted-style URLs, some minimal configuration is needed.</p>
+</div>
+<div class="paragraph">
+<p>The first thing would be getting DNS resolution ready; we will need to get a
+wildcard DNS entry in place, so any DNS query that asks for *.bucket.example.com points to
+Our Load Balancer or RGW instance, in our lab, we are using dnsmasq for DNS resolution so we are
+going to add a new line to the dnsmasq config to get the DNS bucket resolution
+working.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Certain applications only work with hosted-style bucket access</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>RGW prefers the first method(Path Style), because the second
+method(hosted-style) requires added operations like domain certification and DNS wild cards.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In this example, IP 172.16.7.24 is for proxy01 where we have our RGW instance
+running, we add it at the end of the <code>/etc/dnsmasq.conf</code> of the <code>workstation</code>
+server and finally restart dnsmasq.</p>
+</div>
+<div class="paragraph">
+<p>On the <code>workstation.example.com</code> node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># echo "address=/.bucket.example.com/172.16.7.24" &gt;&gt; /etc/dnsmasq.conf
+# systemctl restart dnsmasq
+# ping bucket1.bucket.example.com
+PING bucket1.bucket.example.com (172.16.7.24) 56(84) bytes of data.
+64 bytes from proxy01 (172.16.7.24): icmp_seq=1 ttl=64 time=2.18 ms</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that DNS resolution is working, we need to configure our RGW instance; we can
+configure the hosted-style URL access in two ways:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add the cname.domain.com to the rgw_dns_name config parameter per RGW instance</p>
+</li>
+<li>
+<p>add cname.domain.com to the list of hostnames in your zonegroup configuration</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s get the name of our RGW instance</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph orch ps | grep rgw
+rgw.multi.zone1.proxy01.yrtaci  proxy01      *:8000       running (63m)      2m ago   63m    65.5M        -  16.2.8-85.el8cp  b2c997ff1898  323585d51d1e</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And use the name of the RGW instance adding the client.  configure our DNS bucket subdomain</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config ls | grep rgw_dns_name
+rgw_dns_name
+
+# ceph config set client.rgw.multi.zone1.proxy01.yrtaci rgw_dns_name bucket.example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Just so it&#8217;s evident that we are successfully using the hosted-style access, I&#8217;m
+going to do the following steps:</p>
+</div>
+<div class="paragraph">
+<p>Create a bucket called bucket2, for example</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint http://proxy01:8000 s3 mb s3://bucket2 --region multizg
+make_bucket: bucket2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Upload an object</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint http://proxy01:8000 s3 cp /etc/hosts  s3://bucket2 --region multizg
+upload: ../etc/hosts to s3://bucket2/hosts</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Modify the object ACL to give it public-read access so that it can be accessed by an
+anonymous user with curl</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint http://proxy01:8000  s3api put-object-acl --bucket bucket2 --key hosts --acl public-read</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now I can access the object using curl with the hosted-style access, the bucket
+name is in the URL as a subdomain, and the object is accessed directly without
+specifying the name of the bucket</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># curl http://bucket2.bucket.example.com:8000/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If I remove the rgw_dns_name configuration, we can see what happens</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config rm client.rgw.multi.zone1.proxy01.fybord rgw_dns_name
+# ceph orch  daemon restart rgw.multi.zone1.proxy01.fybord
+Scheduled to restart rgw.multi.zone1.proxy01.fybord on host 'proxy01'
+# curl http://bucket2.bucket.example.com:8000/hosts
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;Error&gt;&lt;Code&gt;NoSuchBucket&lt;/Code&gt;&lt;BucketName&gt;hosts&lt;/BucketName&gt;&lt;RequestId&gt;tx00000809c18c68dcf0c57-0063b30865-858d-zone1&lt;/RequestId&gt;&lt;HostId&gt;858d-zone1-multizg&lt;/HostId&gt;&lt;/Error&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will only work with path style:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># curl http://bucket2.bucket.example.com:8000/bucket2/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second way and recommended way of enabling hosted-style access is configuring our DNS host cname at the zone group configuration level:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin zonegroup get &gt; zonegroup.json
+# vi zonegroup.json
+...
+"hostnames": [ "bucket.example.com" ],
+...
+# radosgw-admin zonegroup set --infile zonegroup.json
+{
+    "id": "9ebd51aa-9e79-45c8-ab5d-d6b92f389c10",
+    "name": "multizg",
+    "api_name": "multizg",
+    "is_master": "true",
+    "endpoints": [],
+    "hostnames": [
+        "bucket.example.com"
+    ],
+    "hostnames_s3website": [],
+    "master_zone": "4bdeb630-734e-4b9f-9a7f-d1157de83b12",
+    "zones": [
+        {
+            "id": "4bdeb630-734e-4b9f-9a7f-d1157de83b12",
+            "name": "zone1",
+            "endpoints": [],
+            "log_meta": "false",
+            "log_data": "false",
+            "bucket_index_max_shards": 11,
+            "read_only": "false",
+            "tier_type": "",
+            "sync_from_all": "true",
+            "sync_from": [],
+            "redirect_zone": ""
+        }
+    ],
+    "placement_targets": [
+        {
+            "name": "default-placement",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        }
+    ],
+    "default_placement": "default-placement",
+    "realm_id": "4b6578f1-778b-4a51-95b1-4f81efb548b8",
+    "sync_policy": {
+        "groups": []
+    }
+}
+#  radosgw-admin period update --commit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We do the same test as before and check that we can access using the
+hosted-style access</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># curl http://bucket2.bucket.example.com:8000/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

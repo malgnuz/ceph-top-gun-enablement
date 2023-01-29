@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RadosGW Secure Token Service (STS) :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_sts_introduction.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_sts_introduction.html">RGW Secure Token Service</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_sts_introduction.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">RadosGW Secure Token Service (STS)</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. introduction.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AWS provides the Security Token Service (STS) to allow secure federation with existing OpenID
+Connect/ OAuth 2.0 compliant identity services such as Keycloak. STS is a standalone REST
+service that provides temporary tokens for an application or user to access an S3 endpoint after
+the user authenticates against an identity provider.</p>
+</div>
+<div class="paragraph">
+<p>Ceph supports a subset of Amazon Secure Token Service (STS) APIs. Users first authenticate against STS and, upon success, receive a short-lived s3 access and secret key that can be used in subsequent requests.</p>
+</div>
+<div class="paragraph">
+<p>In Ceph RGW STS can be configured to work with several authentication methods such as LDAP, keystone, or OpenID connect.</p>
+</div>
+<div class="paragraph">
+<p>Workflow of STS is shown in the next diagram.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/STS_overview.png" alt="STS Overview">
+</div>
+</div>
+<div class="paragraph">
+<p>We also need to introduce the concept of an Amazon Resource Name (ARN), Permission Policies, Bucket Policies and Roles.</p>
+</div>
+<div class="paragraph">
+<p>An ARN is used to identify a user, group or role amongst others. The ARN of a username has the general format of arn:aws:iam:::user1. ARNS are important as they are required in the permission policy language that S3 uses.</p>
+</div>
+<div class="paragraph">
+<p>A permission policy instructs what actions are allowed or denied on a set of resources by a set of principals. Principals are identified via an ARN.</p>
+</div>
+<div class="paragraph">
+<p>Permission policies are used in two instances: bucket policy and role policy.</p>
+</div>
+<div class="paragraph">
+<p>A bucket policy determines what actions can be performed inside an s3 bucket and is generally used to restrict who can read/write objects. The bucket policy is administered via the S3 API and can be self-managed by end users if they have appropriate permissions defined.</p>
+</div>
+<div class="paragraph">
+<p>A role is similar to a user and has its own ARN in the general format of arn:aws:iam:::role/rolename. In a bucket policy, instead of giving access to users based on their user ARN, a role ARN can be used instead. Users can then assume the role based on another permission policy which we refer to as the assume-role-policy-doc. The assume-role-policy-doc grants access to the roles if the user can meet its conditions.</p>
+</div>
+<div class="paragraph">
+<p>If you choose to use the STS protocol, be aware that several commercials off-the-shelf products will not be able to use the STS protocol due to a lack of engineering. For example, Quay currently has no option to use STS. Therefore, you will likely need to configure local users as a fallback option for such applications.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rgw_local_user_database_using_sts"><a class="anchor" href="#_rgw_local_user_database_using_sts"></a>2. RGW local user database using STS.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>RadosGW, by default, has a local user database to manage authentication and authorization. The user information and credentials are stored in a rados pool, so no extra work is needed to set up this authentication setup. It works with STS. An admin user can create roles and policies for the roles and then indicate the RGW local users authorised to assume the new role.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/STS_local.png" alt="STS local">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_oauthoidc_sts_authentication"><a class="anchor" href="#_oauthoidc_sts_authentication"></a>3. OAUTH(OIDC) + STS authentication.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With OAUTH authentication, we use an OIDC service to authenticate against. We need to have an OpenID Connect/ OAuth2 compatible service. Red Hat has tested the integration with RGW of the following OIDC products: Red Hat SSO and keycloak IDPs.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/STS_oidc.png" alt="STS OIDC">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sts_with_local_rgw_user_lab"><a class="anchor" href="#_sts_with_local_rgw_user_lab"></a>4. STS with Local RGW User Lab</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this module, we will complete a lab using RGW local users with STS.</p>
+</div>
+<div class="paragraph">
+<p>By default, the STS API is disabled in RGW, we need to enable the STS endpoint
+and restart the RGW daemons. The S3 and STS endpoints can be shared on the same
+RGW endpoint.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config set client.rgw.multi.zone1 rgw_s3_auth_use_sts true
+# ceph config set client.rgw.multi.zone1 rgw_sts_key = "abcdefghijklmnop"
+# ceph orch restart rgw.multi.zone1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create three users, Admin who will own the bucket, and users: user1 and user2, that
+will assume a role to gain access to the admin bucket.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin user create --uid admin --display-name admin --admin --secret-key=admin --access-key=admin
+radosgw-admin user create --uid user1 --display-name user1 --secret-key=user1 --access-key=user1
+radosgw-admin user create --uid user2 --display-name user2 --secret-key=user2 --access-key=user2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>configure s3cmd for the admin user, and create bucket + user:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># cat &lt;&lt; EOF &gt; ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin
+[default]
+access_key = admin
+secret_key = admin
+host_base = proxy01:8000
+host_bucket = proxy01:8000
+use_https = False
+signature_v2 = True
+#check_ssl_certificate = False
+EOF
+
+# s3cmd -c ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin mb s3://bucket-data
+Bucket 's3://bucket-data/' created
+# s3cmd -c ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin put /etc/hosts s3://bucket-data/hosts
+upload: '/etc/hosts' -&gt; 's3://bucket-data/hosts'  [1 of 1]
+ 492 of 492   100% in    0s    20.96 kB/s  done</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We create a role called S3A-user13 that will give user1 and user3 to assume this role</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin role create --role-name=S3A-user13 --path=/ --assume-role-policy-doc=\{\"Version\":\"2012-10-17\",\"Statement\":\[\{\"Effect\":\"Allow\",\"Principal\":\{\"AWS\":\[\"arn:aws:iam:::user/user1\",\"arn:aws:iam:::user/user2\"\]\},\"Action\":\[\"sts:AssumeRole\"\]\}\]\}
+
+# radosgw-admin role list
+[
+    {
+        "RoleId": "194ff4bb-9929-4bb7-8d7f-7181dca456aa",
+        "RoleName": "S3A-user13",
+        "Path": "/",
+        "Arn": "arn:aws:iam:::role/S3A-user13",
+        "CreateDate": "2022-12-23T09:41:08.222Z",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam:::user/user1\",\"arn:aws:iam:::user/user2\"]},\"Action\":[\"sts:AssumeRole\"]}]}"
+    }
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also manage roles from the AWS client. The user will need the required
+caps to work with roles. In this example, when we created the admin user, we used
+the <code>--admin</code> flag, but you could be more granular and use the specific <code>roles</code> cap</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --profile admin --endpoint http://proxy01:8000 iam list-roles
+{
+    "Roles": [
+        {
+            "Path": "/",
+            "RoleName": "S3A-user13",
+            "RoleId": "194ff4bb-9929-4bb7-8d7f-7181dca456aa",
+            "Arn": "arn:aws:iam:::role/S3A-user13",
+            "CreateDate": "2022-12-23T09:41:08.222000+00:00",
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "AWS": [
+                                "arn:aws:iam:::user/user1",
+                                "arn:aws:iam:::user/user2"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
+            },
+            "MaxSessionDuration": 3600
+        }
+    ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are now going to add a policy to the S3A-user13 role. The policy will allow to only list created buckets</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cat &lt;&lt; EOF &gt; policy.json
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListBucket"],"Resource":"arn:aws:s3:::*"}]}
+EOF
+
+#  radosgw-admin role-policy put --role-name=S3A-user13 --policy-name=access-list-bucket --policy-doc=$(&lt;policy.json)
+Permission policy attached successfully
+
+#  radosgw-admin role-policy list --role-name=S3A-user13
+[
+    "access-list-bucket"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using user1  credentials, we use the AWS cli to assume the S3A-user13 user role,
+this will create a temporary authentication token to be used</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --profile user1 --endpoint http://proxy01:8000 sts assume-role --role-arn arn:aws:iam:::role/S3A-user13 --role-session-name S3A-user13
+{
+    "Credentials": {
+        "AccessKeyId": "cXu2A3ZerKFrhBDQCL2",
+        "SecretAccessKey": "0N628VOMT5ZSLE9Q1WJRHV0NKZMZZWZ1WDIN3XU",
+        "SessionToken": "LONGOSETSIONTOKENpamGS6dXn3d3yiMKJUS6p2GhatKPzgXcGXB9nJi3rQ6hfq9CdhL+uZOakceomeXr1I8hIYv6GUsZVcwWiKv2NbRDdhDCaxbCKp4egfCcd9wnQ8q5HQxIr/hWR965f9Q3kSst0vy3HBPHzLqhusdPFWfpHvAcAfqL0kdEsWT1kmbDnHz0cjqWM2DgE9CQFXUYAyQVmiOBiRrnLzjqHI9bEl/pc97jQgreHuk+80s5CZfxSt3D/auW/yJVdDSxMwCITgqiWj9HzSOYbZJiFEdtUVkQvSMBtdxhclubBb",
+        "Expiration": "2022-12-23T11:08:13.562974+00:00"
+    },
+    "AssumedRoleUser": {
+        "Arn": "arn:aws:sts:::assumed-role/S3A-user13/S3A-user13"
+    },
+    "PackedPolicySize": 0
+}</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The session token is Opaque to the end user, it&#8217;s Encrypted using AES 128, it
+contains Authentication, Authorization information, Information about roles
+(permission policy) and Users.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We will create a new AWS cli profile with the credentials provided by the sts
+assume role command, these credentials will give user1 access to list
+bucket bucket-data per the policy we added to the S3A-user13 role</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cat .aws/credentials
+[sts]
+aws_access_key_id = cXu2A3ZerKFrhBDQCL2
+aws_secret_access_key = 0N628VOMT5ZSLE9Q1WJRHV0NKZMZZWZ1WDIN3XU
+aws_session_token = LONGOSETSIONTOKENpamGS6dXn3d3yiMKJUS6p2GhatKPzgXcGXB9nJi3rQ6hfq9CdhL+uZOakceomeXr1I8hIYv6GUsZVcwWiKv2NbRDdhDCaxbCKp4egfCcd9wnQ8q5HQxIr/hWR965f9Q3kSst0vy3HBPHzLqhusdPFWfpHvAcAfqL0kdEsWT1kmbDnHz0cjqWM2DgE9CQFXUYAyQVmiOBiRrnLzjqHI9bEl/pc97jQgreHuk+80s5CZfxSt3D/auW/yJVdDSxMwCITgqiWj9HzSOYbZJiFEdtUVkQvSMBtdxhclubBb
+
+# aws --profile sts --endpoint http://proxy01:8000 s3 ls s3://bucket-data
+2022-12-23 04:38:53       1330 hosts</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But with the same credentials, we can&#8217;t delete or upload objects to the bucket
+as the role policy only allowed "s3:ListBucket"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --profile sts --endpoint http://proxy01:8000 s3 rm s3://bucket-data/hosts
+delete failed: s3://bucket-data/hosts An error occurred (AccessDenied) when calling the DeleteObject operation: Unknown
+# aws --profile sts --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://bucket-data/file1
+upload failed: ../etc/hosts to s3://bucket-data/file1 An error occurred (AccessDenied) when calling the PutObject operation: Unknown</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can add a second policy to the role that will Allow uploading and downloading objects to bucket-data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># cat &lt;&lt; EOF &gt; policy2.json
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:PutObject","s3:GetObject","s3:DeleteObject"],"Resource":"arn:aws:s3:::bucket-data/*"}]}
+EOF</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We add this second policy to the S3A-user13 role:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin role-policy put --role-name=S3A-user13 --policy-name=access-put-bucket --policy-doc=$(&lt;policy2.json)
+Permission policy attached successfully
+
+# radosgw-admin role-policy get --role-name=S3A-user13 --policy-name=access-put-bucket
+{
+    "Permission policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:PutObject\",\"s3:GetObject\",\"s3:DeleteObject\"],\"Resource\":\"arn:aws:s3:::bucket-data/*\"}]}"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are now able to put and delete objects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --profile sts --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://bucket-data/file1
+upload: ../etc/hosts to s3://bucket-data/file1
+# aws --profile sts --endpoint http://proxy01:8000 s3 rm s3://bucket-data/hosts
+delete: s3://bucket-data/hosts</pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

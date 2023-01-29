@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>The Cephadm Orchestrator :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_cephadm_intro.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_cephadm_intro.html">Cephadm Orchestrator</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_cephadm_intro.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">The Cephadm Orchestrator</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the new tool for deploying Ceph starting with Ceph Octopus. Starting with Ceph Pacific
+<code>ceph-ansible</code> is being deprecated and all new clusters will be deployed using it.</p>
+</div>
+<div class="paragraph">
+<p>To deploy a cluster using <code>cephadm</code>, the following steps will be performed:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Bootstrap a minimal cluster (1 Monitor and 1 Manager by default)</p>
+</li>
+<li>
+<p>Configure the minimal cluster</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Add Monitors</p>
+</li>
+<li>
+<p>Add Managers</p>
+</li>
+<li>
+<p>Add OSDs</p>
+</li>
+<li>
+<p>Add MDSs</p>
+</li>
+<li>
+<p>Add RGWs</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cephadm_service_file"><a class="anchor" href="#_cephadm_service_file"></a>2. <code>cephadm</code> service file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The initial cluster can be deployed with all its component through the use of a <code>cephadm</code> service file.
+The service file uses the following syntax:</p>
+</div>
+<div class="listingblock">
+<div class="title">Service file syntax</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: {type_value}
+service_name: {name_value}
+addr: {address_value}
+hostname: {hostname}
+{options}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>service_type</code> accepts the following values:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>host</code> to declare cluster hosts</p>
+</li>
+<li>
+<p><code>crash</code> to place the Ceph crash collection module</p>
+</li>
+<li>
+<p><code>grafana</code> to place the Grafana dashboard components</p>
+</li>
+<li>
+<p><code>node-exporter</code> to place the node exporter components</p>
+</li>
+<li>
+<p><code>prometheus</code> to place the Prometheus components</p>
+</li>
+<li>
+<p><code>mgr</code> to place the Manager containers</p>
+</li>
+<li>
+<p><code>mon</code> to place the Monitor containers</p>
+</li>
+<li>
+<p><code>osd</code> to place the OSD containers</p>
+</li>
+<li>
+<p><code>rgw</code> to place the RADOS Gateway containers</p>
+</li>
+<li>
+<p><code>mds</code> to place the MDS containers</p>
+</li>
+<li>
+<p><code>ingress</code> to place the loadbalancer (haproxy)</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Available services also include <code>nfs</code> and <code>iscsi</code>. They are not covered
+in this documentation.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+For troubleshooting or tuning you can pass additional parameters to the
+container upong startup. See example below.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Add container parameters</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">extra_container_args:
+  -  "--cpus=2"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To assign labels to one or more hosts, use the following syntax:</p>
+</div>
+<div class="listingblock">
+<div class="title">Labelling nodes example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: host
+addr: {host_address}
+hostname: {host_name}
+labels:
+- xxx
+- yyy
+...</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can set the initial CRUSH location of the node using the <code>location</code>
+keyword.  See example below.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">CRUSH location setting</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">location:
+  rack: rack1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To assign a service to one or more nodes use the following syntax:</p>
+</div>
+<div class="listingblock">
+<div class="title">Assigning a service example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: {service_type}
+service_name: {service_name}
+placement:
+  host_pattern: ‘*’</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The OSD service file accepts additional parameters due to the complexity of
+OSD deployments based on drive types. The additional parameters are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>block_db_size</code> to specify the RocksDB size on separate devices</p>
+</li>
+<li>
+<p><code>block_wal_size</code> to specify the RocksDB size on separate devices</p>
+</li>
+<li>
+<p><code>data_devices</code> to specify which devices will receive the data</p>
+</li>
+<li>
+<p><code>db_devices</code> to specify which devices will receive RocksDB DB portion</p>
+</li>
+<li>
+<p><code>wal_devices</code> to specify which devices will receive the RocksDB WAL portion</p>
+</li>
+<li>
+<p><code>db_slots</code> to specify how many RocksDB DB partition to allocate per <code>db_device</code></p>
+</li>
+<li>
+<p><code>wal_slots</code> to specify how many RocksDB WAL partition to allocate per <code>wal_device</code></p>
+</li>
+<li>
+<p><code>data_directories</code> to specify a list of device paths to be used</p>
+</li>
+<li>
+<p><code>filter_logic</code> to specify <code>OR</code> or <code>AND</code> between filters. Default is <code>AND</code>.</p>
+</li>
+<li>
+<p><code>objectstore</code> to specify the OSD backend type (<code>bluestore</code> or <code>filestore</code>)</p>
+</li>
+<li>
+<p><code>crush_device_class</code> to specify the CRUSH device class</p>
+</li>
+<li>
+<p><code>data_allocate_fraction</code> to specify a portion of the drive for data devices (between <code>0</code> and <code>1.0</code>)</p>
+</li>
+<li>
+<p><code>osds_per_device</code> to specify how many OSDs should be deployed per device (default is 1)</p>
+</li>
+<li>
+<p><code>osd_id_claims</code> to specify the OSD ids should be repserved per node (<code>true</code> or <code>false</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>data_devices</code>, <code>db_devices</code> and <code>wal_devices</code> parameters accept the following parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>all</code> to specifcy all devices are to be consumed (<code>true</code> or <code>false</code>)</p>
+</li>
+<li>
+<p><code>limit</code> to specify how many OSD are to be deployed per node</p>
+</li>
+<li>
+<p><code>rotational</code> to specify the type of devices to select (<code>0</code> or <code>1</code>)</p>
+</li>
+<li>
+<p><code>size</code> to specify the size of the devices to select</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>xTB</code> to select a specific device size</p>
+</li>
+<li>
+<p><code>xTB:yTB</code> to select devices between the two capacities</p>
+</li>
+<li>
+<p><code>:xTB</code> to select any device up to this size</p>
+</li>
+<li>
+<p><code>xTB:</code> to select any device at least this size</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>path</code> to specify the device path to use</p>
+</li>
+<li>
+<p><code>model</code> to specify the disk model name</p>
+</li>
+<li>
+<p><code>vendor</code> to specify the vendor model name</p>
+</li>
+<li>
+<p><code>encrypted</code> to specify if the data is to be encrypted at rest (<code>data_devices</code> only)</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>cephadm</code> also support FileStore parameters for specific cases.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The RADOS Gateway service service file accepts additional paraneters due
+to the nature of the RADOS Gateway service. The additional parameters are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>networks</code> to specify which CIDR the gateway will bind to</p>
+</li>
+<li>
+<p><code>spec</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>rgw_frontend_port</code> to specify which the TCP port the gateway will bind</p>
+</li>
+<li>
+<p><code>rgw_realm</code> to specify the <code>realm</code> for this gateway</p>
+</li>
+<li>
+<p><code>rgw_zone</code> to specify the <code>zone</code> for this gateway</p>
+</li>
+<li>
+<p><code>ssl</code> to specify if this gateway uses SSL (<code>true</code> or <code>false</code>)</p>
+</li>
+<li>
+<p><code>rgw_frontend_ssl_certificate</code> to specify the certificate to use</p>
+</li>
+<li>
+<p><code>rgw_frontend_ssl_key</code> to specify the key to use</p>
+</li>
+<li>
+<p><code>rgw_frontend_type</code> to specify the frontend to use (default is <code>beast</code>)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>placement.count_per_host</code> to specify how many RADOS Gateways are to be deployed per node</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can upload the certificate and the key to be use by the gateway via the<br>
+<code>ceph config-key set rgw/cert/REALM_NAME/ZONE_NAME.crt -i {file}</code> and <br>
+ <code>ceph config-key set rgw/cert/REALM_NAME/ZONE_NAME.key -i {file}</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For more placement options see the next chapter.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cephadm_placement"><a class="anchor" href="#_cephadm_placement"></a>3. <code>cephadm</code> placement</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Placement can be a simple count to indicate the number of daemons to deploy. In such a
+configuration <code>cephadm</code> will choose where to deploy the daemons.</p>
+</div>
+<div class="paragraph">
+<p>Placement can use explicit naming: <code>--placement="host1 host2 &#8230;&#8203;"</code>. In such configuration
+the daemons will be deployed on the nodes listed.</p>
+</div>
+<div class="paragraph">
+<p>Placement can use labels: <code>--placement="label:mylabel"</code>. In such configuration the
+daemons will be deployed on the nodes that match the provided label.</p>
+</div>
+<div class="paragraph">
+<p>Placement can use expressions: <code>--placement="host[1-5]"</code>. In such configuration the
+daemons will be deployed on the nodes that match the provided expression.</p>
+</div>
+<div class="paragraph">
+<p>Using a service file, you would encode the following for count:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using the count syntax</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: rgw
+placement:
+  count: 3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using a service file, you would encode the following for label:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using the label syntax</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: rgw
+placement:
+  label: "mylabel"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using a service file, you would encode the following for host list:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using the list syntax</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: rgw
+placement:
+  hosts:
+    - host1
+    - host2
+    - host3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using a service file, you would encode the following for pattern:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using host pattern syntax</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: rgw
+placement:
+  host_pattern: "host[1-5]"</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The count argument can be added to <code>hosts</code>, <code>label</code> and <code>host_pattern</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can add <code>unmanaged: true</code> to your service file to instruct <code>cephadm</code>
+to not automatically manage the service described in the service file.
+Deployment and removal of the specified service will have to be managed
+manually by the storage administrator.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deploying_a_minimal_cluster"><a class="anchor" href="#_deploying_a_minimal_cluster"></a>4. Deploying a minimal cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The inital <code>cephadm</code> deployment always start with what is known as a cluster bootstrapping.
+To do so, install the <code>cephadm</code> binary on a node and run the following command:</p>
+</div>
+<div class="listingblock">
+<div class="title">Smaple bootstrap command</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>cephadm bootstrap --mon-ip {monitor_ip_address}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command performs the following actions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create an initial Monitor daemon</p>
+</li>
+<li>
+<p>Create an initial Managerdaemon</p>
+</li>
+<li>
+<p>Generate a <code>cephadm</code> SSH key</p>
+</li>
+<li>
+<p>Adds the <code>cephadm</code> SSH key to <code>~/.ssh/authorized_keys</code></p>
+</li>
+<li>
+<p>Writes a copy of the public key to <code>/etc/ceph</code></p>
+</li>
+<li>
+<p>Generate a minimal <code>/etc/ceph/ceph.conf</code> file</p>
+</li>
+<li>
+<p>Writes the <code>client.admin</code> keyring to <code>/etc/ceph</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Need be you can pass an initial Ceph configuration file to the <code>bootstrap</code> command through
+the <code>--config {path_to_config_file}</code> command line option.</p>
+</div>
+<div class="paragraph">
+<p>You can override the SSH user that will be used by <code>cephadm</code> through the <code>--ssh-user {user_name}</code>
+command line option.</p>
+</div>
+<div class="paragraph">
+<p>You can pass a specific set of registry parameters through a valid registry JSON file via
+the <code>--registry-json {path_to_registry_json}</code> command line option.</p>
+</div>
+<div class="paragraph">
+<p>You can choose the Ceph contaienr image you want to deploy via the <code>--image {registry}[:{port}]/ceph/ceph</code>
+command line option.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+To bootstrap a test cluster that will always be a single node cluster use the following syntax:
+<code>cephadm bootstrap --mon-ip {monitor_ip_address} --single-host-defaults</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_cli_to_your_new_cluster"><a class="anchor" href="#_cli_to_your_new_cluster"></a>4.1. CLI to your new cluster</h3>
+<div class="paragraph">
+<p>Once the cluster has been bootstrapped, use trhe <code>cephadm shell</code> command to issue
+Ceph commands. The <code>shell</code> command can be used with or without an actual command.
+Without a command you will be provided with an interactive shell. Providing a command
+will actually issue the command against the cluster and return.</p>
+</div>
+<div class="listingblock">
+<div class="title">Sample shell with a specific command</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>cephadm shell -- ceph status</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to be able to use the <code>ceph</code> command directly from the base host simply install
+the <code>ceph-common</code> package via <code>cephadm</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Sample <code>ceph-common</code> installation</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>cephadm add-repo --release pacific</strong>
+$ <strong>cephadm install ceph-common</strong>
+$ <strong>ceph -v</strong>
+$ <strong>ceph status</strong></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_node_management"><a class="anchor" href="#_node_management"></a>5. Node management</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_labelling_and_adding_a_node"><a class="anchor" href="#_labelling_and_adding_a_node"></a>5.1. Labelling and adding a node</h3>
+<div class="paragraph">
+<p>To label a node to your cluster, use the following command from your <code>cephadm shell</code> session.</p>
+</div>
+<div class="listingblock">
+<div class="title">Labelling a node</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host label add {hostname} {label}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To add a node to your cluster you must first distribuite the SSH keys that were generated
+by <code>cephadm</code> during the bootstrapping. Once the keys have been copied, execute the following
+command to add a the node the cluster.</p>
+</div>
+<div class="paragraph">
+<p><code>cephadm</code> offers a few special labels to help manage the cluster and the usage of each node:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>_no_schedule</code> prevents scheduling or deployment of daemons on this node</p>
+</li>
+<li>
+<p><code>_no_autotune_memory</code> disables memory tuning paraneters for the daemons deployed on this node</p>
+</li>
+<li>
+<p><code>_admin</code> deploys the admin keyring and the minimal config on the node</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Adding a node</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host add {hostname} [{hostip}] [{label1}]</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+It is recommended to provide both the hostname and the IP address for each node.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_a_node"><a class="anchor" href="#_removing_a_node"></a>5.2. Removing a node</h3>
+<div class="paragraph">
+<p>Before you remove a node from your cluster yopu will have to stop the components running
+on the node.</p>
+</div>
+<div class="listingblock">
+<div class="title">Draining a node</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host drain {hostname}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Draining a node will add the <code>_no_schedule</code> label to this node to prevent
+any daemon to be deployed on this node.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If the node was running OSD daemons, verify the OSDs have been stopped and removed</p>
+</div>
+<div class="listingblock">
+<div class="title">Check OSD removal status</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch osd rm status</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the OSD removal on the node is complete, verify no daemons remain running on this node.</p>
+</div>
+<div class="listingblock">
+<div class="title">Checking daemons on a node</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch ps {hostname}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When all daemons have been stopped and removed from the node, it is ready for removal.</p>
+</div>
+<div class="listingblock">
+<div class="title">Remove node</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host rm {hostname}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If a host has crashed and can no longer be booted up, you can force its removal.</p>
+</div>
+<div class="listingblock">
+<div class="title">Forcing host removal</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host rm {hostname} --offline --force</strong></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_host_maintenance"><a class="anchor" href="#_host_maintenance"></a>5.3. Host maintenance</h3>
+<div class="paragraph">
+<p><code>cephadm</code> allows you to easily stop all daemons on a node.</p>
+</div>
+<div class="listingblock">
+<div class="title">Node maintenance mode</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host maintenance enter {hostname}</strong>
+$ <strong>ceph orch host maintenance exit {hostname}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can use the <code>--force</code> flag to bypass warning messages that could prevent a node
+to be placed in maintenance mode. This flag does not allow you to bypass alerts.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_monitor_management"><a class="anchor" href="#_monitor_management"></a>6. Monitor management</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_adding_monitors"><a class="anchor" href="#_adding_monitors"></a>6.1. Adding Monitors</h3>
+<div class="paragraph">
+<p>Once your inital cluster has been depployed and the nodes added to it, you can then deploy
+the addotional Monitors that will create your "real" cluster. Before you do so you will have
+to configure the network parameters that will be used by your cluster.</p>
+</div>
+<div class="listingblock">
+<div class="title">Setting your public and cluster networks</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph config set mon public_network {public_network_cidr}</strong>
+$ <strong>ceph config set mon cluster_network {cluster_network_cidr}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you need to specify multiple public subnets, separate them with commas.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To deploy the Monitors use the following commad:</p>
+</div>
+<div class="listingblock">
+<div class="title">Adding a Monitor daemon</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch daemon add mon --placement="{host1},{host2}"</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+As an alternative you can use a service file and apply it to your cluster definition. <code>ceph orch apply -i {path_to_mon_service_file}</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In some cases you may want to add the Monitors using a specific network. To do so you will deploy
+the Monitors after requesting <code>cephadm</code> to not manage the Monitor deployment automatically
+and add each Monitor specifying the IP address or the subnet it needs to bind to.</p>
+</div>
+<div class="listingblock">
+<div class="title">Specify a specific Monitor network</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply mon --unmanaged</strong>
+$ <strong>ceph orch daemon add mon {hostname1}:{ip_address}</strong>
+$ <strong>ceph orch daemon add mon {hostname2}:{cidr}</strong>
+$ <strong>ceph orch apply mon --placement="{hostname1},{hostname2},{hostname3}"</strong></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_monitors"><a class="anchor" href="#_removing_monitors"></a>6.2. Removing Monitors</h3>
+<div class="paragraph">
+<p>To remove a Monitor, simply use the following commad: <code>ceph orch daemon rm mon.{hostname}</code></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_manager_management"><a class="anchor" href="#_manager_management"></a>7. Manager management</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_adding_managers"><a class="anchor" href="#_adding_managers"></a>7.1. Adding Managers</h3>
+<div class="paragraph">
+<p>Once your Monitors are up and running it is time to deploy a highly available Manager configuration.
+The initial boostrap operation only deployed a single Manager which is not sufficient for a production
+environment.</p>
+</div>
+<div class="paragraph">
+<p>The Manager service only supports one option to indicate the network the Manager daemon will bind to.</p>
+</div>
+<div class="listingblock">
+<div class="title">Sample Manager service file</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: mgr
+service_name: mgr
+networks:
+- {CIDR}
+placement:
+- {placement}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To deploy the manager, use the following command:<br>
+`ceph orch apply mgr "{hostname1},{hostname2}, &#8230;&#8203;"</p>
+</div>
+<div class="paragraph">
+<p>Optionally you can deploy the Managers using a valid service file using the following command:<br>
+<code>ceph orch apply -i {path_to_service_file}</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_managers"><a class="anchor" href="#_removing_managers"></a>7.2. Removing Managers</h3>
+<div class="paragraph">
+<p>To remove a Manager, simply use the following commad: <code>ceph orch daemon rm mgr.{hostname}</code></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_osd_management"><a class="anchor" href="#_osd_management"></a>8. OSD management</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once your Monitors and Managers are up and running it is time to deploy the OSDs in your cluster.
+The initial boostrap operation does not deploy any OSD which clearly makes your cluster
+unusable in a production environment.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+All <code>ceph orch apply</code> command is a persistent command. Therefor its effect will persist
+after its completes the first run. e.g. If you add a new device to a node and you have used the
+<code>ceph orch apply osd --all-available-devices</code> command, the new device will automatically be
+consumed and a new OSD will be deployed.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+To prevent the persistent nature of the command and instruct <code>cephadm</code> to not automatically
+deploy additional OSDs, add the <code>--unmanaged=true</code> option to your command.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_osd_batch_addition"><a class="anchor" href="#_osd_batch_addition"></a>8.1. OSD batch addition</h3>
+<div class="paragraph">
+<p>One easy way to add OSD, hence capacity, to your Ceph cluster is to tell <code>cephadm</code> to deploy
+OSDs so that they consume all the disk drives present on all the node. This is achieved with
+a single command.</p>
+</div>
+<div class="listingblock">
+<div class="title">Deploy OSDs consuming all devices presents on all nodes</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply osd --all-available-devices</strong></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_osd_addition_through_service_file"><a class="anchor" href="#_osd_addition_through_service_file"></a>8.2. OSD addition through service file</h3>
+<div class="paragraph">
+<p>Another option is to use a valid service file, following the guidelines detailed in the previous
+chapters of this document. Once you have craeted your service file for your OSDs, simply
+instruct <code>cephadm</code> to apply it.</p>
+</div>
+<div class="listingblock">
+<div class="title">Deploy OSDs using a service file</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply -i {path_to_osd_service_file}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+A single service file can contain multiple specificatiobs. See example below.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Multiple specifications in a single file</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: osd
+service_id: osd_spec_hdd
+placement:
+  host_pattern: '*'
+spec:
+  data_devices:
+    rotational: 1
+  db_devices:
+    model: MC-55-44-XZ # This model is identified as a flash device
+    limit: 2
+---
+service_type: osd
+service_id: osd_spec_ssd
+placement:
+  host_pattern: '*'
+spec:
+  data_devices:
+    model: MC-55-44-XZ # This model is identified as a flash device</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_osd_selective_addition"><a class="anchor" href="#_osd_selective_addition"></a>8.3. OSD selective addition</h3>
+<div class="paragraph">
+<p>Anotehr option to add OSDs is to indicate <code>cephadm</code> which devices from what specific node
+must be added to the cluster.</p>
+</div>
+<div class="listingblock">
+<div class="title">Selective OSd addition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch daemon add osd {hostname}:{device_path}</strong></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Multi-device selective addition</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch daemon add osd {hostname}:data_devices={dev1},{dev2},db_devices={db1}</strong></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_osd_memory_tuning"><a class="anchor" href="#_osd_memory_tuning"></a>8.4. OSD memory tuning</h3>
+<div class="paragraph">
+<p>Optionally you can opt for the following strategies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use OSD tuning defaults</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>osd_memory_target_autotune = true</code></p>
+</li>
+<li>
+<p><code>mgr/cephadm/autotune_memory_target_ratio = .7</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Modify the OSD tuning defaults</p>
+</li>
+<li>
+<p>Disable OSD tuning</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To modify the tuning default use the following command:</p>
+</div>
+<div class="listingblock">
+<div class="title">Modify OSD autotuning default</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph config set mgr mgr/cephadm/autotune_memory_target_ratio {new_value}</strong></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_removing_osds"><a class="anchor" href="#_removing_osds"></a>9. Removing OSDs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OSD can be removed from teh cluster. The removal of the OSD will lead to the following events:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>All <code>PGs</code> will be evacuated from the OSD</p>
+</li>
+<li>
+<p>Once the OSD manages no <code>PG</code> it is removed</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">Removing an OSD</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch osd rm {osd_id}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can monitor the status of the removal using <code>ceph orch osd rm status</code>.</p>
+</div>
+<div class="paragraph">
+<p>As long as an OSD has not been removed from teh cluster you can stop the OSD removal process.</p>
+</div>
+<div class="listingblock">
+<div class="title">Stopping OSD removal</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch osd rm stop {osd_id}</strong></code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_replacing_osds"><a class="anchor" href="#_replacing_osds"></a>9.1. Replacing OSDs</h3>
+<div class="paragraph">
+<p>An OSD can be replaced when a disk is bad an the OSD has crashed.</p>
+</div>
+<div class="listingblock">
+<div class="title">Removing an OSD</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch osd rm {osd_id} --replace</strong></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_initializing_devices"><a class="anchor" href="#_initializing_devices"></a>9.2. Initializing devices</h3>
+<div class="paragraph">
+<p>You can remotely initialize a device via <code>cephadm</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Zapping a device</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch device zap {hostname} {device_path}</strong></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rados_gateway_management"><a class="anchor" href="#_rados_gateway_management"></a>10. RADOS Gateway management</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>cephadm</code> being a generic tool teh syntax to add a RADOS Gateway will be using the similar
+format as the commands we have already seen in this document. However it will use specific
+parameters that are applciable only to RADOS Gateways.</p>
+</div>
+<div class="sect2">
+<h3 id="_adding_rados_gateway"><a class="anchor" href="#_adding_rados_gateway"></a>10.1. Adding RADOS Gateway</h3>
+<div class="paragraph">
+<p>The very minimal way to deploy a gateway, using the default <code>realm</code>, <code>zonegroup</code> and <code>zone</code>
+is to use the following command.</p>
+</div>
+<div class="listingblock">
+<div class="title">Easy RADOS Gateway deployment</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply rgw {service_name}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+By default and to fullfill high availability requriements the command above
+will deploy two (2) RADOS Gateways.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For a more complex deployment with non default <code>realm</code> values, use the following syntax.</p>
+</div>
+<div class="listingblock">
+<div class="title">Production RADOS Gateway deployment</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply rgw {service_name} --realm={realm} --zone={zone} \
+                                             --placement={placement_spec}</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is an example sequence to deploy on specific nodes, two (2) gateways per node and
+using a specific set of ports.</p>
+</div>
+<div class="listingblock">
+<div class="title">RADOS Gateway deployment sequence example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch host label add {host1} rgw</strong>
+$ <strong>ceph orch host label add {host2} rgw</strong>
+$ <strong>ceph orch apply rgw defaultrgw '--placement=label:rgw count-per-host:2' \
+                                                      --rgw_frontend_port=8000</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+When deploying multiple gateways on a single node the port numbers will be allocated in sequence.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_removing_rados_gateway"><a class="anchor" href="#_removing_rados_gateway"></a>10.1.1. Removing RADOS Gateway</h5>
+<div class="paragraph">
+<p>RADOS Gateways can be removed from teh cluster.</p>
+</div>
+<div class="listingblock">
+<div class="title">Removing a RADOS Gateway</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch rgw rm {rgw_service_name}</strong></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gateway_ingress_management"><a class="anchor" href="#_gateway_ingress_management"></a>11. Gateway ingress management</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When deploying a production cluster you will likely need a load balancer in front
+of the RADOS Gateways you deploy. This is accomplished by deploying an <code>ingress</code> service
+through <code>cephadm</code>.</p>
+</div>
+<div class="paragraph">
+<p>The service file for an <code>ingress</code> service will recognize the following parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>backend_service</code> specifies the RGW service name to frontend</p>
+</li>
+<li>
+<p><code>virtual_ip</code> specifies the CIDR the ingress service will bind to</p>
+</li>
+<li>
+<p><code>frontend_port</code> specifies the TCP port the ingress service will bind to</p>
+</li>
+<li>
+<p><code>monitor_port</code> specifies the port where the load balancer status is maintained</p>
+</li>
+<li>
+<p><code>virtual_interface_networks</code> specificies a list of CIDRs</p>
+</li>
+<li>
+<p><code>ssl_cert</code> specifies the SSL certtificate and key</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To deploy the <code>ingress</code> service simply use the following command.</p>
+</div>
+<div class="listingblock">
+<div class="title">Deploying an <code>ingress</code> service</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch apply -f {path_to_ingress_service_file}</strong></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Example of a complete ingress service file</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">service_type: ingress
+service_id: rgw.default
+placement:
+  hosts:
+    - host1
+    - host2
+    - host3
+spec:
+  backend_service: rgw.default
+  virtual_ip: 10.0.1.0/24
+  frontend_port: 8080
+  monitor_port: 1900
+  ssl_cert: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+    -----BEGIN PRIVATE KEY-----
+    ...
+    -----END PRIVATE KEY-----</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mds_management"><a class="anchor" href="#_mds_management"></a>12. MDS management</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_adding_mds"><a class="anchor" href="#_adding_mds"></a>12.1. Adding MDS</h3>
+<div class="paragraph">
+<p>Deploying an MDS is done in conunction with the creation of a Ceph FileSystem. The name of the filesystem
+will be the ID of the MDs service you deploy.</p>
+</div>
+<div class="paragraph">
+<p>You can deploy an MDS using two different methods:</p>
+</div>
+<div class="listingblock">
+<div class="title">By creating a volume</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph fs volume create {fsname} --placement="{placement}"</strong></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Via a service file</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>cat /var/lib/ceph/mds/mds.yaml</strong>
+<em>service_type: mds
+service_id: {fs_name}
+placement:
+  count: 2</em>
+$ <strong>ceph orch apply -i /var/lib/ceph/mds/mds.yaml</strong>
+$ <strong>ceph fs new {fs_name} {meta_pool} {data_pool}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The second method will require you to manually create the pools used by the Ceph FileSystem.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_removing_mds"><a class="anchor" href="#_removing_mds"></a>12.2. Removing MDS</h3>
+<div class="paragraph">
+<p>Just like for the creation of the Ceph FileSystem there are two (2) ways to remove a FileSystem</p>
+</div>
+<div class="listingblock">
+<div class="title">By deleteing a volume</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph fs volume rm {fs_name} --yes-i-really-mean-it</strong></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">By deleting the MDS service</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch rm mds.{fs_name}</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The second method will require that you manually delete the Ceph FileSystem and the associated pools.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generic_cephadm_commands"><a class="anchor" href="#_generic_cephadm_commands"></a>13. Generic <code>cephadm</code> commands</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_service_status_and_lists"><a class="anchor" href="#_service_status_and_lists"></a>13.1. Service status and lists</h3>
+<div class="paragraph">
+<p>To list the services managed by <code>cephadm</code> use:<br>
+<code>ceph orch ls</code></p>
+</div>
+<div class="paragraph">
+<p>To list the processes for each service managed by <code>cephadm</code> use:<br>
+<code>ceph orch ps [--daemon_type={daemon_type}]</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_service_removal"><a class="anchor" href="#_service_removal"></a>13.2. Service removal</h3>
+<div class="paragraph">
+<p>Most service removal will likely invoke the following command:<br>
+<code>ceph orch rm {service_name}</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exporting_cluster_configuration"><a class="anchor" href="#_exporting_cluster_configuration"></a>13.3. Exporting cluster configuration</h3>
+<div class="paragraph">
+<p>Once you have deployed your entire cluster you can generate a single file that can be reuse
+for other deployments.</p>
+</div>
+<div class="listingblock">
+<div class="title">Exporting cluster configuration</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph orch ls --export</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The default format of the export is <code>yaml</code>. To use json specify <code>--format json</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

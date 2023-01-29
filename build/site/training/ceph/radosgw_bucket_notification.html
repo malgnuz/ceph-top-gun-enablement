@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RGW Bucket Notifications :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_bucket_notification.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_bucket_notification.html">RGW bucket Notification</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_bucket_notification.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">RGW Bucket Notifications</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ceph is a suitable SDS solution for Big Data and Machine Learning/AI data scale. One of the new features, “Bucket Notifications”, provides Amazon SNS-SQS relationship between RGW and MQ targets and provides the ability of getting a notification each time an object is created/removed. In that way, we could define a topic in which RGW will send notifications to (AKA SNS topic), and a queue waiting for notifications to come (AKA SQS). The supported target endpoints are RabbitMQ (AMQP), Kafka, and HTTP.</p>
+</div>
+<div class="paragraph">
+<p>A user can create topics. A topic entity is defined by its name and is “per tenant”. A user can associate its topics (via notification configuration) only with buckets it owns.</p>
+</div>
+<div class="paragraph">
+<p>A notification entity must be created in order to send event notifications for a specific bucket. A notification entity can be created either for a subset of event types or for all event types (which is the default). The notification may also filter out events based on matches of the prefixes and suffixes of (1) the keys, (2) the metadata attributes attached to the object, or (3) the object tags.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To enable bucket notifications API, the rgw_enable_apis configuration parameter should contain: 'notifications'.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lab_configure_bucket_notifications_with_kafka"><a class="anchor" href="#_lab_configure_bucket_notifications_with_kafka"></a>2. Lab. Configure Bucket Notifications with Kafka</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Our <code>workstation</code> server is running a single node kafka instance that we can use
+for this lab. Let&#8217;s check that the kafka services are runing on the
+<code>workstation</code> node</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># systemctl status kafka.service
+# systemctl status zookeeper.service</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s listnening on that standard broker port '9092'</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"> netstat -natlop | grep 9092
+tcp6       0      0 :::9092                 :::*                    LISTEN      37321/java           off (0.00/0/0)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s create a topic called <code>storage</code> where RGW will send the notifications</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># /opt/kafka/bin/kafka-topics.sh --create --bootstrap-server workstation:9092 --topic storage
+# /opt/kafka/bin/kafka-topics.sh --describe --bootstrap-server workstation:9092  --topic storage
+Topic: storage	TopicId: k1FR5KvXQDm3AuF1sHKkIA	PartitionCount: 1	ReplicationFactor: 1	Configs: segment.bytes=1073741824
+	Topic: storage	Partition: 0	Leader: 1	Replicas: 1	Isr: 1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are going to create an RGW user and a bucket, we will use the user
+credentials to configure notifications on the bucket</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user create --uid='user1' --display-name='First User' --access-key='S3user1' --secret-key='S3user1key'
+# aws --endpoint http://ceph-node02:8080 s3 mb s3://demobucket --region default</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the RadosGW side of things we are going to use a python script written by
+Shon Paz, that makes the configuration of topics in RGW versy simple, from the
+<code>ceph-node01</code> can run</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># podman run shonpaz123/notify --help
+usage: notify.py [-h] -e ENDPOINT_URL -a ACCESS_KEY -s SECRET_KEY -b
+                 BUCKET_NAME [-ke KAFKA_ENDPOINT] [-ae AMQP_ENDPOINT]
+                 [-he HTTP_ENDPOINT] -t TOPIC [-f FILTER] [-o OPAQUE]
+                 [-x EXCHANGE] [-n NOTIFICATION]
+# podman run shonpaz123/notify -a S3user1 -s S3user1key -b demobucket -ke workstation.example.com:9092 -t storage -e http://ceph-mon02:8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check that the topic got created at the RGW/ceph level</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin topic list
+{
+    "topics": [
+        {
+            "topic": {
+                "user": "",
+                "name": "configuration_storage",
+                "dest": {
+                    "bucket_name": "",
+                    "oid_prefix": "",
+                    "push_endpoint": "kafka://workstation.example.com:9092",
+                    "push_endpoint_args": "Attributes.entry.1.key=push-endpoint&amp;Attributes.entry.1.value=kafka://workstation.example.com:9092&amp;Attributes.entry.2.key=kafka-ack-level&amp;Attributes.entry.2.value=broker&amp;Version=2010-03-31&amp;kafka-ack-level=broker&amp;push-endpoint=kafka://workstation.example.com:9092",
+                    "push_endpoint_topic": "storage",
+                    "stored_secret": "false",
+                    "persistent": "false"
+                },
+                "arn": "arn:aws:sns:default::storage",
+                "opaqueData": ""
+            },
+            "subs": []
+        },
+        {
+            "topic": {
+                "user": "",
+                "name": "storage",
+                "dest": {
+                    "bucket_name": "",
+                    "oid_prefix": "",
+                    "push_endpoint": "kafka://workstation.example.com:9092",
+                    "push_endpoint_args": "Attributes.entry.1.key=push-endpoint&amp;Attributes.entry.1.value=kafka://workstation.example.com:9092&amp;Attributes.entry.2.key=kafka-ack-level&amp;Attributes.entry.2.value=broker&amp;Version=2010-03-31&amp;kafka-ack-level=broker&amp;push-endpoint=kafka://workstation.example.com:9092",
+                    "push_endpoint_topic": "storage",
+                    "stored_secret": "false",
+                    "persistent": "false"
+                },
+                "arn": "arn:aws:sns:default::storage",
+                "opaqueData": ""
+            },
+            "subs": []
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that the bucket notification for topic <code>storage</code> is in place for bucket
+<code>demobucket</code>, let&#8217;s run a consumer on the topic and check if we can see the
+bucket notifications for the S3 actions that take place on the bucket, from the
+<code>workstation</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server workstation:9092 --topic storage --from-beginning</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lets create and delete and object in our <code>demobucket</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --endpoint http://ceph-node02:8080 s3 cp /etc/hosts s3://demobucket/host1 --region default
+upload: ../../../etc/hosts to s3://demobucket/host1
+# aws --endpoint http://ceph-node02:8080 s3 rm s3://demobucket/host1
+delete: s3://demobucket/host1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we check our consumer process we can see the notifications pop-up</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server workstation:9092 --topic storage --from-beginning
+
+{"Records":[{"eventVersion":"2.2","eventSource":"ceph:s3","awsRegion":"default","eventTime":"2023-01-13T12:59:25.628370Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"user1"},"requestParameters":{"sourceIPAddress":""},"responseElements":{"x-amz-request-id":"624eb1a9-ead9-40f2-a057-5c1ee984b480.34108.15857281513954931534","x-amz-id-2":"853c-default-default"},"s3":{"s3SchemaVersion":"1.0","configurationId":"configuration","bucket":{"name":"demobucket","ownerIdentity":{"principalId":"user1"},"arn":"arn:aws:s3:::demobucket","id":"624eb1a9-ead9-40f2-a057-5c1ee984b480.34117.1"},"object":{"key":"host1","size":1330,"eTag":"b7828f6b873e43d1bacec3670a9f4510","versionId":"","sequencer":"AD55C163D1943926","metadata":[{"key":"x-amz-content-sha256","val":"1ef29c6abb4b7bc3cc04fb804b1850aecf84dc87493330b66c31bef5209680f3"},{"key":"x-amz-date","val":"20230113T125925Z"}],"tags":[]}},"eventId":"1673614765.641307.b7828f6b873e43d1bacec3670a9f4510","opaqueData":""}]}
+{"Records":[{"eventVersion":"2.2","eventSource":"ceph:s3","awsRegion":"default","eventTime":"2023-01-13T13:00:22.848461Z","eventName":"ObjectRemoved:Delete","userIdentity":{"principalId":"user1"},"requestParameters":{"sourceIPAddress":""},"responseElements":{"x-amz-request-id":"624eb1a9-ead9-40f2-a057-5c1ee984b480.34108.15831645961373230453","x-amz-id-2":"853c-default-default"},"s3":{"s3SchemaVersion":"1.0","configurationId":"configuration","bucket":{"name":"demobucket","ownerIdentity":{"principalId":"user1"},"arn":"arn:aws:s3:::demobucket","id":"624eb1a9-ead9-40f2-a057-5c1ee984b480.34117.1"},"object":{"key":"host1","size":1330,"eTag":"b7828f6b873e43d1bacec3670a9f4510","versionId":"","sequencer":"E655C163DA949232","metadata":[{"key":"x-amz-content-sha256","val":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"key":"x-amz-date","val":"20230113T130022Z"}],"tags":[]}},"eventId":"1673614822.848467.b7828f6b873e43d1bacec3670a9f4510","opaqueData":""}]}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

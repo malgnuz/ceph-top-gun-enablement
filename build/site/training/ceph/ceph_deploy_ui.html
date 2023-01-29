@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Deploying Ceph from the Dashboard :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_deploy_ui.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_deploy_ui.html">Deploy Ceph from the UI</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_deploy_ui.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Deploying Ceph from the Dashboard</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Before performing this hands-on lab, you must go through the LAB env
+preparation steps described in the <a href="opentlc_lab_env.html" class="xref page">OpenTLC LAB</a> section</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_pre_flight_playbook"><a class="anchor" href="#_run_pre_flight_playbook"></a>1. Run Pre-Flight Playbook</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>This Ansible Playbook configures the Ceph repository and prepares the storage cluster for bootstrapping. It also installs some prerequisites, such as <code>podman</code>, <code>lvm2</code>, <code>chronyd</code>, and <code>cephadm</code>.</p>
+</li>
+<li>
+<p>The <code>cephadm-preflight</code> playbook uses the Ansible inventory file to identify the nodes in the storage cluster. Your Ansible inventory file must contain all the nodes that will be part of the cluster.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>As part of the OpenTLC LAB env preparations, you have the cephadm-ansible rpm
+installed an inventory available in <code>/usr/share/cephadm-ansible/inventory</code> on the admin node for cluster1 <code>ceph-mon01</code></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Prerequisites
+* Initial admin host is up and running
+* Ansible Automation Platform is installed on the host
+* Root-level access to all nodes in the storage cluster</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Run the <code>cephadm-preflight</code> playbook before you bootstrap the initial host.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If needed, edit the inventory file at <code>/usr/share/cephadm-ansible/inventory</code>
+leaving:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo"># cat /usr/share/cephadm-ansible/inventory
+ceph-mon01.example.com
+ceph-mon02.example.com
+ceph-mon03.example.com
+proxy01.example.com
+
+[admin]
+ceph-mon01.example.com</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+In this inventory file, we are using additional groups that are not needed
+by the preflight cephadm playbook like <code>[mgmt]</code> and <code>[client]</code> so you can
+remove them.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01]# ansible-playbook -i /usr/share/cephadm-ansible/inventory /usr/share/cephadm-ansible/cephadm-preflight.yml  --extra-vars "ceph_origin=rhcs"
+PLAY RECAP ***********************************************************************************************************************************************************************************
+ceph-mon01.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+ceph-mon02.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+ceph-mon03.example.com    : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0
+proxy01.example.com        : ok=5    changed=0    unreachable=0    failed=0    skipped=9    rescued=0    ignored=0</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We are using the <code>"ceph_origin=rhcs"</code> ansible variable to specify that we want
+to use the RHCS downstream repos.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prepare_the_registry_credentials_file"><a class="anchor" href="#_prepare_the_registry_credentials_file"></a>2. Prepare the registry credentials file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Because we are using the RHCS downstream container images, we need to
+authenticate against registry.redhat.io to get access to the ceph container
+images.</p>
+</div>
+<div class="paragraph">
+<p>Then OpenTLC LAB env preparations created a file called <code>registry.json</code> on the admin node for cluster1 <code>ceph-mon01</code> with
+the needed auth details, and if any modifications are needed, edit the file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /root/registry.json
+{
+ "url": "registry.redhat.io",
+ "username": "user@redhat.com",
+ "password": "PAssWord"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_storage_cluster"><a class="anchor" href="#_create_storage_cluster"></a>3. Create Storage Cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>cephadm</code> utility performs the following tasks during the bootstrap process:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Installs and starts Ceph Monitor and Ceph Manager daemons for a new Red Hat Ceph Storage cluster on the local node as containers.</p>
+</li>
+<li>
+<p>Generates a new SSH key, in the <code>/etc/ceph/ceph.pub</code> file by default, for the Ceph storage cluster and adds the SSH key to the root user’s <code>/root/.ssh/authorized_keys</code> file.</p>
+</li>
+<li>
+<p>Writes a minimal configuration file needed to communicate with the new cluster to <code>/etc/ceph/ceph.conf</code>.</p>
+</li>
+<li>
+<p>Writes a copy of the <code>client.admin</code> administrative secret key to <code>/etc/ceph/ceph.client.admin.keyring</code>.</p>
+</li>
+<li>
+<p>Deploys a basic monitoring stack with Prometheus, Grafana, and other tools such as <code>node-exporter</code> and <code>alertmanager</code>.</p>
+</li>
+<li>
+<p>Running the bootstrapping process establishes the default user name and password for the initial login to the dashboard. Be sure to change the password after you log in.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Prerequisites
+* An IP address for the first Ceph Monitor container, usually the IP address for the first node in the storage
+cluster
+* Root access to all nodes
+* Login access to <code>registry.redhat.io</code>
+* A minimum of 10 GB of free space for <code>/var/lib/containers/</code></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>In this lab environment, you do not have 10 GB of free space, but you can safely ignore warnings related to this.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bootstrap_new_storage_cluster"><a class="anchor" href="#_bootstrap_new_storage_cluster"></a>4. Bootstrap New Storage Cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bootstrap a storage cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01]# cephadm \
+	bootstrap \
+	--registry-json /root/registry.json \
+	--mon-ip 192.168.56.64
+
+Verifying podman|docker is present...
+Verifying lvm2 is present...
+Verifying time synchronization is in place...
+Unit chronyd.service is enabled and running
+firewalld ready
+Ceph Dashboard is now available at:
+         URL: https://ceph-mon01.example.com:8443/
+        User: admin
+    Password: PASSWORD
+
+You can access the Ceph CLI with:
+    sudo /usr/sbin/cephadm shell --fsid 99e4add2-d971-11eb-ad7e-2cc260754989 -c /etc/ceph/ceph.conf -k /etc/ceph/ceph.client.admin.keyring
+
+Please consider enabling telemetry to help improve Ceph:
+    ceph telemetry on
+:
+Bootstrap complete.</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can also deploy the full ceph cluster deployment with the help of a
+specification yaml file. If you want to use this option, you have an
+example in the file: <code>cat /root/cluster-spec.yaml</code> on node: <code>ceph-mon01</code>. To
+reference the spec file, you can use the <code>--apply-spec /root/cluster-spec.yaml</code></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If the storage cluster includes multiple networks and interfaces, be sure to choose a network that is
+accessible by any node that uses the storage cluster.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Ceph dashboard must be accessed using the Public IP of the <code>ceph-mon01</code> host by running <code>curl ifconfig.co</code> or by checking the email message you received for the URL to the lab console.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Currently, the OpenTLC ENV only has the 8443 port open to the external world for
+the ceph-mon0X clusters, if we want to access the dashboard for the ceph-mon0X
+the cluster, we have to use SSH tunnelling.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_expand_the_cluster_with_the_ui"><a class="anchor" href="#_expand_the_cluster_with_the_ui"></a>5. Expand the Cluster with the UI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Get the Public IP address of <code>ceph-mon01</code> to access the dashboard from your browser:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[root@ceph-mon01 cephadm-ansible]# curl ifconfig.co
+52.117.178.51</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Go to a browser and enter a URL matching the pattern <code><a href="https://$IP_ADDRESS:8443" class="bare">https://$IP_ADDRESS:8443</a></code>, using the IP address returned in the previous step and accepting the certificate and key in warnings:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use the admin username and password provided earlier.</p>
+</li>
+<li>
+<p>The web interface asks you to change the password upon first login as the</p>
+</li>
+<li>
+<p>admin user to the dashboard.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you see <code>ceph-mon02.example.com</code> as the browser link while trying to access the dashboard, change the IP address to the one provided by the <code>ceph-mon02</code> server on your browser.</p>
+</div>
+<div class="paragraph">
+<p>If the admin user does not work, create a new user called <code>admin1</code> with a password stored in a file called <code>password.txt</code> using the <code>ceph dashboard ac-user-create admin1 -i password.txt administrator</code> command.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The first time you log in to the dashboard, it will ask you to reset your admin
+password, you can avoid that by using the --dashboard-password-noupdate parameter
+during bootstrap</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once you log in you will see an initial dashboard screen asking us to expand the
+cluster</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash1.png" alt="dashboard bootstrap">
+</div>
+</div>
+<div class="paragraph">
+<p>because currently, we are running in bootstrap mode with a single node</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph -s
+  cluster:
+    id:     171d6182-9da1-11ed-8b39-2cc260754989
+    health: HEALTH_WARN
+            mon ceph-mon01 is low on available space
+            OSD count 0 &lt; osd_pool_default_size 3
+
+  services:
+    mon: 1 daemons, quorum ceph-mon01 (age 3h)
+    mgr: ceph-mon01.afpuwu(active, since 3h)
+    osd: 0 osds: 0 up, 0 in</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Before we add hosts via the UI, we need to install the storage cluster’s public
+SSH key in the root user’s <code>authorized_keys</code> file on the new hosts:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon01.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon02.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-mon03.example.com
+ssh-copy-id -f -i /etc/ceph/ceph.pub root@proxy02.example.com</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>For the ceph-mon0X cluster the OSDs nodes need their drives zapped, you can use
+the script available in <code>ceph-mon01</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># bash zap-disks.sh</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We select to expand the cluster, and on the following screen, we press <code>Add Host</code></p>
+</div>
+<div class="paragraph">
+<p>We fill in the information requested for each host, for example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>hostname:</strong> ceph-mon02</p>
+</li>
+<li>
+<p><strong>ip address:</strong> 192.168.56.65</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash2.png" alt="add host">
+</div>
+</div>
+<div class="paragraph">
+<p>We have to follow the same steps with the rest of the ceph cluster nodes <code>ceph-mon03</code> and <code>proxy02</code></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash3.png" alt="hosts added">
+</div>
+</div>
+<div class="paragraph">
+<p>We click Next and go into the next screen, <code>Create OSDs</code></p>
+</div>
+<div class="paragraph">
+<p>Depending on the type of disks in our nodes, the dashboard will make
+an educated gest of the configuration we want for our OSDs. If we disagree,
+we can go into advanced mode and do a custom configuration of the drives.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash4.png" alt="OSDs select">
+</div>
+</div>
+<div class="paragraph">
+<p>Because we have spinning drives, the option cost_capacity is select.</p>
+</div>
+<div class="paragraph">
+<p>When we click next, we move into the <code>Services</code> section, where we can add all the
+services we need for our cluster. Here is an example of adding the RGW
+service</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash5.png" alt="Add RGW service">
+</div>
+</div>
+<div class="paragraph">
+<p>We can see the current list of services deployed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash7.png" alt="Global services view">
+</div>
+</div>
+<div class="paragraph">
+<p>once we have added all the services we need, we can click next and get a final
+overview of our cluster resources and click on the  <code>expand cluster</code> button</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash8.png" alt="Final view">
+</div>
+</div>
+<div class="paragraph">
+<p>That takes us to the general dashboard cluster view.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash9.png" alt="global view">
+</div>
+</div>
+<div class="paragraph">
+<p>We now have a working Ceph cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_add_a_new_service_mds"><a class="anchor" href="#_add_a_new_service_mds"></a>6. Add a new service, MDS.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s do a couple of day-two operations; let&#8217;s add the MDS service so we can
+also serve cephfs client requests. On the left panel, we go into cluster &#8594;
+services.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash10.png" alt="cluster services">
+</div>
+</div>
+<div class="paragraph">
+<p>We select create and choose the MDS service.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash11.png" alt="cluster services">
+</div>
+</div>
+<div class="paragraph">
+<p>Once it&#8217;s created, we can see the status from the same page.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash12.png" alt="MDS services">
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+We still need to create the cephfs FS, for example <code># ceph fs volume create filesystem1</code>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_a_pool_for_rbd_workloads"><a class="anchor" href="#_create_a_pool_for_rbd_workloads"></a>7. Create a Pool for RBD workloads</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On the left panel, cluster &#8594; pool, create a pool</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash13.png" alt="pool create">
+</div>
+</div>
+<div class="paragraph">
+<p>We have to provide the details for the pool, name, application type:RBD,etc</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash14.png" alt="pool detais">
+</div>
+</div>
+<div class="paragraph">
+<p>We can now check on the pool overview page, our new rbdpool</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash15.png" alt="rbd pool">
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

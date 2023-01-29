@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Block/File Testing :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_performance_fio.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph Benchmarking</li>
+    <li><a href="ceph_performance_fio.html">Benchmarking Ceph block and File</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_performance_fio.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Block/File Testing</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section we will be providing very high level guidelines on how to conduct a block/file benchmark of Ceph</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tools"><a class="anchor" href="#_tools"></a>2. Tools</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the <a href="https://github.com/cloud-bulldozer/benchmark-operator">BenchMark-Operator</a></p>
+<div class="ulist">
+<ul>
+<li>
+<p>It has all the tools you will need to baseline and benchmark your Ceph Cluster: <code>Iperf3, FIO, Smallfile</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If you don&#8217;t have OCP at your disposal:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/ceph/cbt">CBT</a> is a great framework for benchmarking Ceph.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Nice Repo from Karan helping out setting up <a href="https://github.com/ksingh7/ceph-cbt">CBT</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Another tool that works fine and that can aggregate FIO data results is
+<a href="https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md">pbench-fio</a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_radosbench_only_for_smoketests"><a class="anchor" href="#_use_radosbench_only_for_smoketests"></a>3. Use RadosBench only for Smoketests.</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Rados bench operates on entire objects, which adds additional latency and skews results</p>
+</li>
+<li>
+<p>Rados bench results are unreliable on large writes/reads</p>
+</li>
+<li>
+<p>Rados bench operates on AIOs, meaning it gets bottlenecked by CPU fast and you can’t workaround it</p>
+</li>
+<li>
+<p>You can run only single rados bench per pool on single host</p>
+</li>
+<li>
+<p>But it’s great to verify whether your cluster is operating at more-or-less expected performance, or what
+performance expectations you should have</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_avoiding_ocp_range_limits_limits_and_quotas"></a>4. Avoiding OCP range limits, limits and quotas</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Before running any performance test, If using OCP as a client, make sure the namespace where your fio workloads are running does not have limits or quotas.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Delete or disable the following OpenShift features to ensure no resource limitation from the client&#8217;s perspective:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Limitranges.</p>
+</li>
+<li>
+<p>Namespace limits.</p>
+</li>
+<li>
+<p>Namespace quota.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>5. Client/Load Generators resources</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Having Enough client resources to saturate the Ceph cluster is pivotal to
+achieving a positive output of the benchmarking. If the clients don&#8217;t have
+enough firepower to saturate some part of the Ceph cluster, you will not be able
+to know the limits of your ceph cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>6. Always Drop Caches between tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Almost all of the benchmarking suites have a hook that you can execute before
+each test so all the caches can be dropped, achieving a deterministic result on
+every test.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>7. Run the tests with a considerable dataset size</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When running tests, consider creating a dataset that is bigger than the RAM
+size, ideally, the total RAM of all nodes would be less than 20% of the total
+size of the test dataset.</p>
+</div>
+<div class="paragraph">
+<p>With this, we are trying to avoid the Linux filesystem caching
+skewing our results and ending up with a false report of higher performance.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>8. Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s great to have the numbers IOPS for an empty cluster, but it&#8217;s
+also important to have a more realistic view of how your cluster will perform
+with storage used capacity of around 50/60% that will be closer to a real
+life scenario.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>9. Run the same test several times</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each test run needs to be run a minimum of three times, using
+the mathematical average across all test runs. This will help us get rid of
+outliers in testing.</p>
+</div>
+<div class="paragraph">
+<p>An example would be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Three test iterations executed for 20 minutes</p>
+</li>
+<li>
+<p>with a two-minute ramp-up time</p>
+<div class="ulist">
+<ul>
+<li>
+<p>for a total of 22-minute per test</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>an iteration or 66 minutes per pass.</p>
+</li>
+<li>
+<p>Before each iteration, the test script clears all Linux filesystem caches.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>10. Configure a ramp-up time</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before each run, it&#8217;s recommended to have a ramp-up time so every test finds
+the caches at the same point, providing fair results in all the test runs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>11. Use the same ceph configuration that you will have in production</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When running benchmarks, we are always on a quest to achieve more IOPS, and more Throughput in that ques we can be tempted to modify the ceph configuration in certain ways that will allow increasing the performance, IOPS count, total throughput, but if the configuration we are using during the benchmark is not production friendly we won’t have valuable data in our hands, and example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Removing cephx authentication</p>
+</li>
+<li>
+<p>Using replica x 2, when we will use replica x 3 in prod</p>
+</li>
+<li>
+<p>Disabling bluestore CRC checking</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>12. Looking for the best fio workload</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First, we must find the best fio workload and ensure all performance tests are executed with the same workload to compare apples with apples.</p>
+</div>
+<div class="paragraph">
+<p>Ideally, we need a fio workload that can saturate the ceph cluster while ensuring low latency and high cluster IOPS. For that reason, we will need to ensure the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Different fio servers are deployed to spread the workload properly.</p>
+</li>
+<li>
+<p>Fio numjobs are set to 8 to ensure concurrency per fio server and increase the load in the ceph cluster.</p>
+</li>
+<li>
+<p>Total number of fio jobs will be: fio servers * fio numjobs</p>
+</li>
+<li>
+<p>Maintain a reasonable number of I/O units to keep in flight against the file (iodepth=8). If we increase this value too much, we will see a huge increase in operation latency while not increasing the cluster IOPS.</p>
+</li>
+<li>
+<p>To increase the number of tests, we have decided to run only one sample per test.</p>
+</li>
+<li>
+<p>To avoid the impact of Ceph thin-provisioning, all tests will prefill the RBD volumes before the test execution.</p>
+</li>
+<li>
+<p>Fio randwrite jobs will be used as the most demanding workload for the ceph cluster.</p>
+</li>
+<li>
+<p>Use single image for single client (exclusive lock kills performance)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>After several tests, you should end up with a configuration that gives you the best results for your cluster</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>2 fio servers (one per OCP worker).</p>
+</li>
+<li>
+<p>8 numjobs.</p>
+</li>
+<li>
+<p>IOdepth=8.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is an example FIO file using the FIO RBD engine. No actual operating system mount happens when using this engine.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+With FIO RBD engine, we have to use a job count of 1 per RBD volume.
+NOTE: With FIO RBD engine, use single image for single client (exclusive lock kills performance)
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[global]
+ioengine=rbd
+clientname=admin
+pool=rbdpool
+#IO-Depth changes depending on the test
+iodepth=$IODEPTH
+runtime=600
+direct=1
+sync=0
+buffered=0
+#Blocksize changes depending on the test
+bs=$BLOCKSIZE
+#RR,RW, or a mixed workload, this changes depending on the test
+rw=$TYPEOFTEST
+norandommap
+randrepeat=0
+startdelay=15
+rwmixread=70
+invalidate=0	# mandatory
+time_based=1
+refill_buffers
+###compression/dedupe related
+#dedupe compress tests
+#dedupe_percentage=80
+#buffer_compress_percentage=10
+#buffer_pattern=0xdeadface
+ramp_time=180
+write_bw_log=fio
+write_iops_log=fio
+write_lat_log=fio
+log_avg_msec=6000
+write_hist_log=fio
+log_hist_msec=60000
+
+[rbd_vol00]
+rbdname=template-vol00
+numjobs = 1
+clientname=admin
+pool=rbdpool
+
+
+# One section per volume
+[rbd_vol0X]
+rbdname=template-vol0X
+numjobs = 1
+clientname=admin
+pool=rbdpool</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example RipSAW/Bench-mark operator FIO file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">apiVersion: ripsaw.cloudbulldozer.io/v1alpha1
+kind: Benchmark
+metadata:
+  name: fio-benchmark
+  namespace: my-ripsaw
+spec:
+  elasticsearch:
+    server: elastic-server.com
+    port: 80
+  clustername: test_2servers
+  test_user: fio_user
+  workload:
+    name: "fio_distributed"
+    args:
+      image: registry/fio:latest
+      prefill: true
+      samples: 1
+      servers: 2
+      pin_server: ''
+      jobs:
+        - randwrite
+      bs:
+        - 4KiB
+      numjobs:
+        - 8
+      iodepth: 8
+      read_runtime: 600
+      read_ramp_time: 5
+      filesize: 2GiB
+      log_sample_rate: 5000
+      storageclass: ocs-block
+      storagesize: 200Gi
+      rook_ceph_drop_caches: True
+      rook_ceph_drop_cache_pod_ip: IPPODCACHE
+#######################################
+
+#  EXPERT AREA - MODIFY WITH CAUTION  #
+
+#######################################
+#  global_overrides:
+#     - ioengine=sync
+#    - key=value
+  job_params:
+    - jobname_match: w
+      params:
+        - fsync_on_close=1
+        - create_on_open=1
+    - jobname_match: read
+      params:
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}
+    - jobname_match: rw
+      params:
+        - rwmixread=70
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}
+    - jobname_match: readwrite
+      params:
+        - rwmixread=70
+        - time_based=1
+        - runtime={{ fiod.read_runtime }}
+        - ramp_time={{ fiod.read_ramp_time }}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

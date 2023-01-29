@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cluster partitioning :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_cluster_partitioning.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_cluster_partitioning.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Cluster partitioning</h1>
+<div class="paragraph">
+<p>The Ceph OSDs will be in charge of the protection of the data as well as the
+constant checking of the integrity of the data stored in the entire cluster.
+The cluster will be separated into logical partitions, known as pools. Each
+pool has the following properties that can be adjusted:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An ID (immutable)</p>
+</li>
+<li>
+<p>A name</p>
+</li>
+<li>
+<p>A number of <code>PGs</code> to distribute the objects across the OSDs</p>
+</li>
+<li>
+<p>A <code>CRUSH</code> rule to determine the mapping of the <code>PGs</code> for this pool</p>
+</li>
+<li>
+<p>A type of protection (Replication or Erasure Coding)</p>
+</li>
+<li>
+<p>Parameters associated with the type of protection</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Number of copies for replicated pools</p>
+</li>
+<li>
+<p>K and M chunks for Erasure Coding</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Various flags to influence the behavior of the cluster</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Placement Groups</strong></p>
+</div>
+<div class="paragraph">
+<p>A Placement Group (<code>PG</code>) is a hash bucket that receives a series of objects. A
+<code>PG</code> belongs to one and only one Ceph pool and is protected by one (1) or more
+OSDs depending on the protection method assigned to the pool.</p>
+</div>
+<div class="paragraph">
+<p>An object belongs to one and only one <code>PG</code> while all objects that are store in the same
+<code>PG</code> return the same value as a hash result. The name of the object is used as
+the input to the hash calculation method together with the CRUSH Map.</p>
+</div>
+<div class="paragraph">
+<p>Before any IO issued on the client side the final placement of the object will
+be determined through a modulo calculation: <code>{poolid}.{object-name % pgp_num}</code>.
+Once the hash bucket ID is calculated, it is passed top the <code>CRUSH</code> function
+that will return the list of OSDs protecting this particular <code>PG</code>.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/ceph101-crushhashdetail.png" alt="CRUSH Hashing mechanism">
+</div>
+<div class="title">Figure 1. CRUSH hashing details</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The first OSD returned by the <code>CRUSH</code> function is the Primary OSD that
+the client will contact directly through the Ceph libraries.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The client gets the latest copy of the cluster map from the Monitors
+upon initial connection to the Ceph cluster. Further updates can be provided
+by Monitors or OSDs depending on actual cluster state and when an IO is issued.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The general way to look at a cluster in terms of <code>PG</code> allocation is to know how many <code>PGs</code>
+each OSD is protecting. The historic recommendation is to have between 100 and 200 <code>PGs</code>
+per OSD while never exceeding 300.</p>
+</div>
+<div class="paragraph">
+<p>The reason behind this recommendation is that too many <code>PGs</code> will cause an excessive
+memory pressure during OSD boot sequence but also during recovery and backfill operations
+as the OSD will build a list in memory of all the <code>PGs</code> that need to be taken care off.</p>
+</div>
+<div class="paragraph">
+<p>The general formula to use is, for a group of OSDs: <code>({number_of_osds} * {pgs_per_osd}) / {protection}</code></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>{number_of_osds}</code> is the actual number of OSDs that will host a group of pools</p>
+</li>
+<li>
+<p><code>{pgs_per_osd}</code> is the number of <code>PGs</code> you want to assign to each OSD</p>
+</li>
+<li>
+<p><code>{protection}</code> is the <code>size</code> parameter of your pools</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The result of this calculation will provide you with a number of <code>PGs</code>, let&#8217;s say <code>x</code>. <code>x</code>
+has to be spread  across all the pools that will share the set of OSDs you run the
+calculation for. This spread is determined by the percentage of data between the pools.
+<code>x</code> is known as the cluster total number of placement groups.</p>
+</div>
+<div class="paragraph">
+<p>e.g. A pool that will have 5% of the data will received 5% of the <code>PGs</code></p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Ideally you want all final value assigned to a pool to be a power of 2.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>Data protection</strong></p>
+</div>
+<div class="paragraph">
+<p>Ceph supports two types of data protection presented in the diagram below.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/ceph101-dataprotection.png" alt="Replicated Pools vs Erasure Coded Pools">
+</div>
+<div class="title">Figure 2. Ceph Data Protection</div>
+</div>
+<div class="paragraph">
+<p>Replicated pools provide better performance in almost all cases at the cost
+of a lower usable to raw storage ratio (1 usable byte is stored using 3 bytes
+of raw storage) while Erasure Coding provides a cost efficient way to store
+data with less performance.</p>
+</div>
+<div class="paragraph">
+<p>The following recommended Erasure Coding
+profiles with their corresponding usable to raw ratio:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>4+2 (1:2 ratio)</p>
+</li>
+<li>
+<p>8+3 (1:1.375 ratio)</p>
+</li>
+<li>
+<p>8+4 (1:2 ratio)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Another advantage of Erasure Coding (<code>EC</code>) is its ability to offer extreme
+resilience and durability as we can configure the number of parities being
+used. <code>EC</code> can be used for the RADOS Gateway access method, for the RBD
+access method (performance impact) and for CephFS although the two last use cases
+will exhibit poor performance compared to replicated pools during write IOs.</p>
+</div>
+<div class="paragraph">
+<p><strong>Pools and <code>PGs</code></strong></p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/ceph101-thefullpicture-new.png" alt="From Object to OSD">
+</div>
+<div class="title">Figure 3. Pools and <code>PGs</code></div>
+</div>
+<div class="paragraph">
+<p>The diagram above shows the relationship end to end between the object at the
+access method level down to the OSDs at the physical layer.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A Ceph pool has no size and is able to consume the space available on any
+OSD where it&#8217;s PGs are created. A Placement Group or <code>PG</code> belongs to only one
+pool and is protected by the number of OSDs configured through the <code>size</code> parameter
+of the pool.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+An object belongs to one and only one placement group.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>Pool parameters</strong></p>
+</div>
+<div class="paragraph">
+<p>Each pool will have a set of parameters that can mostly be changed dynamically
+via the command line interface. Those parameters are listed below.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>size</code>, the actual number of replicas or chunks (K+M) for the pool</p>
+</li>
+<li>
+<p><code>min_size</code>, the minimum number of replicas/chunks to be available for IOs</p>
+</li>
+<li>
+<p><code>pg_num</code>, the number of total <code>PGs</code> for this pool</p>
+</li>
+<li>
+<p><code>pgp_num</code>, the number of effective <code>PGs</code> for this pool and used by <code>CRUSH</code></p>
+</li>
+<li>
+<p><code>crush_rule</code>, the <code>CRUSH</code> rule to use for this pool</p>
+</li>
+<li>
+<p><code>nodelete</code>, to do permit pool deletion</p>
+</li>
+<li>
+<p><code>nopgchange</code>, do not permit <code>PG</code> allocation change</p>
+</li>
+<li>
+<p><code>nosizechange</code>, do not permit changing the <code>size</code> or <code>min_size</code> parameter</p>
+</li>
+<li>
+<p><code>autoscale-mode</code>, how the autoscale module should treat this pool (<code>on|off|warn</code>)</p>
+</li>
+<li>
+<p><code>compression_algorithm</code>, the compression algorithm to use</p>
+</li>
+<li>
+<p><code>compression_mode</code>, sets the compression policy (<code>none|passive|aggressive|force</code>)</p>
+</li>
+<li>
+<p><code>compression_min_blob_size</code>, sets the minimum chunk size that can be compressed</p>
+</li>
+<li>
+<p><code>compression_max_blob_size</code>, sets the maximum chunk size that can be compressed</p>
+</li>
+<li>
+<p><code>allow_ec_overwrites</code>, to allow RBD and CephFS to use <code>EC</code></p>
+</li>
+<li>
+<p><code>noscrub</code>, do not scrub this pool</p>
+</li>
+<li>
+<p><code>nodeep-scrub</code>, do not deep-scrub this pool</p>
+</li>
+<li>
+<p><code>fast_read</code>, to authorize IO return when enough data has been read from <code>EC</code></p>
+</li>
+<li>
+<p><code>scrub_min_interval</code>, minimum interval between scrubs</p>
+</li>
+<li>
+<p><code>scrub_max_interval</code>, maximum interval between scrubs</p>
+</li>
+<li>
+<p><code>deep_scrub_interval</code>, interval between deep scrubs</p>
+</li>
+<li>
+<p><code>recovery_priority</code>, recovery priority alteration for this pool (-10 through +10)</p>
+</li>
+<li>
+<p><code>recovery_op_priority</code>, recovery op priority for this pool</p>
+</li>
+<li>
+<p><code>recovery_op_priority</code>, recovery op priority for this pool</p>
+</li>
+<li>
+<p><code>target_size_ratio</code>, percentage of data this pool will hold to influence autoscaler</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Introduced with <code>Pacific</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>bulk</code>, increase <code>PG</code> allocation at creation time even if pool is empty</p>
+</li>
+<li>
+<p><code>pg_num_min</code>, minimum number of PGs on a pool via autoscaler</p>
+</li>
+<li>
+<p><code>pg_num_max</code>, maximum number of PGs on a pool via autoscaler</p>
+</li>
+<li>
+<p><code>pg_autoscale_bias</code>, Bias multiplication factor to be applied to the pool (default <code>1.0</code>),<br>
+the larger the bias the higher the number of <code>PGs</code> will be allocated to the pool.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The <code>size</code> parameter of an <code>EC</code> pool can not be changed after creation.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The ID of a pool can not be modified after creation.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The <code>EC</code> profile of a pool can not be changed after creation.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The autoscaler can be turned off for all pools at once starting with <code>Quincy</code>.
+<code>cepg osd pool set noautoscale</code> and unset via <code>ceph osd pool unset noautoscale</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<code>Quincy</code> introduces the following additional CLI glags when creating pools.
+<code>--pg-num-min</code>, <code>--pg-num-max</code> and <code>--bulk</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Check inforation provided by the autoscaler using <code>ceph osd pool autoscale-status</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>Data Distribution</strong></p>
+</div>
+<div class="paragraph">
+<p>To leverage the Ceph architecture at its best, all access methods but
+librados, will access the data in the cluster through a collection of
+objects. Hence a 1GB block device will be a collection of objects, each
+supporting a set of device sectors. Therefore, a 1GB file is stored in a
+CephFS directory will be split into multiple objects. Also a 5GB S3 object
+stored through the RADOS Gateway will be divided in multiple objects.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/ceph101-rbdlayout.png" alt="RADOS Block Device Layout">
+</div>
+<div class="title">Figure 4. Data Distribution</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+By default, each access method uses an object size of 4MB. The above
+diagram, using a 32MB RBD (Block Device) as an example, illustrates
+the logic and its impact on data distribution across the Ceph cluster.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>IO Request Flow</strong></p>
+</div>
+<div class="paragraph">
+<p>Whatever the type of data protection you choose for a pool, the flow of
+and IO request will always be following the same rules:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Client calculates the placement of the object</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Open a storage context for a given pool</p>
+</li>
+<li>
+<p>Hash the name of the object modulo the effective number of <code>PGs</code> (<code>pgp_num</code>)</p>
+</li>
+<li>
+<p>CRUSH returns the mapping for the <code>PG</code></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Client connects to the Primary OSD</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Client issues IO request</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Primary OSD protects the data</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Data is physically written to disk</p>
+</li>
+<li>
+<p>Data is shared with Secondary OSDs</p>
+</li>
+<li>
+<p>Secondary OSDs acknowledge when data is physically written to disk</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Primary OSD acknowledges IO reuquest to client</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When using replicated pools the same data is written on all OSDs. When
+using Erasure Coding the Primary OSD splits the data in <code>K</code> chunks, calculates
+<code>M</code> coding chunks and each <code>K</code> or <code>M</code> chunk is dispatched by the Primary
+OSD according to the map returned by CRUSH.
+</td>
+</tr>
+</table>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

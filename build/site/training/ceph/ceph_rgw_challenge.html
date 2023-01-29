@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ceph RadosGW Challenge :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_rgw_challenge.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="ceph_rgw_challenge.html">Challenge RGW</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_rgw_challenge.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Ceph RadosGW Challenge</h1>
+<div class="sect1">
+<h2 id="_goals"><a class="anchor" href="#_goals"></a>1. Goals</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Deploy RGW in HA mode</p>
+</li>
+<li>
+<p>Work with Placement Targets and Storage Classes</p>
+</li>
+<li>
+<p>Use Life Cycle policies to transition object to other tiers</p>
+</li>
+<li>
+<p>Work with bucket policies</p>
+</li>
+<li>
+<p>Configure basic STS authentication</p>
+</li>
+<li>
+<p>Secure the RGW endpoint with SSL</p>
+</li>
+<li>
+<p>Audit all S3 operations in RGW</p>
+</li>
+<li>
+<p>Configure a Multisite Replicated</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deploy_rgw_services"><a class="anchor" href="#_deploy_rgw_services"></a>2. Deploy RGW services</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Create a realm called <code>single</code>, add a zonegroup called <code>singlezg</code>, and a master zone called <code>singlezone</code></p>
+</li>
+<li>
+<p>Deploy two RGW services, using the above-mentioned realm and zone, on port 8080</p>
+</li>
+<li>
+<p>Create a test user called <code>user1</code>, and test rgw setup by creating a bucket * called <code>bucket1</code> and object with S3 client</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deploy_a_securedssl_ingress_service_to_provide_ha"><a class="anchor" href="#_deploy_a_securedssl_ingress_service_to_provide_ha"></a>3. Deploy a secured(SSL) Ingress service to provide HA</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Deploy an ingress service using ip <code>192.168.56.100</code> that will load-balance client requests between both of the deployed RGW services</p>
+</li>
+<li>
+<p>Configure SSL, the SSL termination must be done at the Ingress/HAproxy level</p>
+<div class="ulist">
+<ul>
+<li>
+<p>You can use certificates available on /root/certificates of the admin nodes,
+or create your own custom certificates, the SAN of the provided certs covers <code>s3.example.com</code> and <code>s3zone1.example.com</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_add_a_new_placement_target_to_zonegroup_singlezg"><a class="anchor" href="#_add_a_new_placement_target_to_zonegroup_singlezg"></a>4. Add a new placement target to zonegroup <code>singlezg</code></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Create dedicated EC pools for the placement target</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new EC pool called <code>singlezone.rgw.ssd.buckets.data</code> pg count 32, with 2+1 EC and host failure domain
+WARNING: EC 2+1 Setting is not supported in production, just for lab testing, check-out valid configurations <a href="https://access.redhat.com/articles/1548993">here</a></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Enable Bluestore compression: aggressive, snappy</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Create a new replicated pool <code>singlezone.rgw.ssd.buckets.index</code> pg count: 8, replica 3 and host failure domain</p>
+</li>
+<li>
+<p>Create a new replicated pool <code>singlezone.rgw.ssd.buckets.non-ec</code> pg count: 8, replica 3 and host failure domain</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Create a Placement target called rgwec</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Users should be able to store data on the new placement target using a reference tag when they create their buckets</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"><a class="anchor" href="#_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"></a>5. Configure a LifeCycle policy to transition objects to a COLD Storage Class</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new RGW data pool used for storing Cold Data</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new EC pool called <code>singlezone.rgw.cold.buckets.data</code> pg count 16, with 2+1 EC and host failure domain</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Create a new Storage Class called <code>COLD</code> in the DEFAULT Placement Group</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new bucket called <code>data1</code></p>
+</li>
+<li>
+<p>Configure a Life Cycle policy that will transition objects to the <code>COLD</code> Storage class after 10 days</p>
+</li>
+<li>
+<p>Apply the LCP to the <code>data1</code> bucket</p>
+</li>
+<li>
+<p>Upload some objects and test the LCP is working(Remember rgw_lc_debug_interval to speed things up)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_a_bucket_life_cycle_policy"><a class="anchor" href="#_create_a_bucket_life_cycle_policy"></a>6. Create a Bucket Life Cycle policy</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new user called <code>user2</code>, and create a bucket called <code>policy</code> with the following layout:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Policy</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Policy/reads</p>
+</li>
+<li>
+<p>Policy/write</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Create a Bucket policy that will give <code>user1</code> the following access to bucket <code>policy</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Policy/ &#8592;  list objects(not read/GET)</p>
+</li>
+<li>
+<p>Policy/reads &#8592; read(GET)</p>
+</li>
+<li>
+<p>Policy/write &#8592;  write(PUT/DELETE)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_local_database_stsusing_assumerole"><a class="anchor" href="#_configure_local_database_stsusing_assumerole"></a>7. Configure Local Database STS(using AssumeRole)</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>We need to allow <code>user1</code> and <code>user2</code> to assume an IAM role called <code>role1</code> that will give them full access to a bucket called <code>admin</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a new RGW <code>admin</code> user</p>
+<div class="ulist">
+<ul>
+<li>
+<p>With the <code>admin</code> user create an <code>admin</code> bucket and add 1 object</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Enable the STS endpoint in the RGW services</p>
+</li>
+<li>
+<p>Create a new IAM role called <code>admin</code></p>
+</li>
+<li>
+<p>Create a Role Policy Document that will allow <code>user1</code> and <code>user2</code> to assume <code>role1</code></p>
+</li>
+<li>
+<p>Create a new role policy that allows <code>user1</code> and <code>user2</code> full access to bucket <code>admin</code></p>
+</li>
+<li>
+<p>Using an AWS client assume the IAM <code>admin</code> role using STS</p>
+</li>
+<li>
+<p>Use the temporal token created to access the <code>admin</code> bucket</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_audit_all_s3_operations"><a class="anchor" href="#_audit_all_s3_operations"></a>8. Audit all S3 operations</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Configure the opslog, so all S3 operations get stored in * /var/log/ceph/<code>FSID</code>/opslog.log</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_a_new_realm_that_has_multisite_replication"><a class="anchor" href="#_configure_a_new_realm_that_has_multisite_replication"></a>9. Configure a new realm that has multisite replication</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>New Realm/Zonegroup/Zone</p>
+<div class="ulist">
+<ul>
+<li>
+<p>On site1 the one we already have configured, we need to create:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A realm called: <code>multi</code></p>
+</li>
+<li>
+<p>A zonegroup called: <code>singlezg1</code></p>
+</li>
+<li>
+<p>A zone called: <code>singlezone1</code></p>
+</li>
+<li>
+<p>New RGW instances and pools for this Realm</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>We need a second Ceph Cluster configured</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The second site ceph deployment needs:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A realm called: <code>multi</code></p>
+</li>
+<li>
+<p>A zonegroup called: <code>singlezg2</code></p>
+</li>
+<li>
+<p>A zone called: <code>singlezone2</code></p>
+</li>
+<li>
+<p>RGW instances and pools for this Realm</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Test that the Multisite replication is working between sites.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_enable_per_bucket_replication"><a class="anchor" href="#_enable_per_bucket_replication"></a>10. Enable per-bucket replication</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Disable Full zonegroup replication</p>
+</li>
+<li>
+<p>Create a new bucket called <code>sync1</code></p>
+</li>
+<li>
+<p>Configure symmetrical replication for bucket <code>sync1</code></p>
+</li>
+<li>
+<p>Create a new bucket called <code>sync2</code></p>
+</li>
+<li>
+<p>Configure uni-directional replication from zone <code>singlezone1</code> to <code>singlezone2</code></p>
+</li>
+<li>
+<p>Test bucket granular replication</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

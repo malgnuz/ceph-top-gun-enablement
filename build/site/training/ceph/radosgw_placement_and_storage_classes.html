@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ceph RadosGW placement targets :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_placement_and_storage_classes.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_placement_and_storage_classes.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Ceph RadosGW placement targets</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="ulist">
+<div class="title">Goals</div>
+<ul>
+<li>
+<p>Introduction to RGW placement targets</p>
+</li>
+<li>
+<p>Hands-on Lab. Configure and Experiment with RGW placement targets</p>
+</li>
+<li>
+<p>Introduction to RGW Storage Classes</p>
+</li>
+<li>
+<p>Hands-on Lab. Configure and Experiment with RGW Storage Classes</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Placement targets control which pools are associated with a particular
+bucket. A bucket’s placement target is selected on creation, and cannot
+be modified.</p>
+</div>
+<div class="paragraph">
+<p>The zonegroup configuration contains a list of placement targets with an
+initial target named <code>default-placement</code>. The zone configuration then
+maps each zonegroup placement target name onto its local storage. This
+zone placement information includes the <code>index_pool</code> name for the bucket
+index, the <code>data_extra_pool</code> name for metadata about incomplete
+multipart uploads, and a <code>data_pool</code> name for each storage class.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>More info about this topic in the
+<a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html/object_gateway_configuration_and_administration_guide/rgw-administration-rgw#creating-storage-policies-rgw">Red
+Hat official documentation</a> or in the
+<a href="https://docs.ceph.com/en/latest/radosgw/placement/">Ceph upstream
+documentation</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_getting_current_placement_targets_configuration"><a class="anchor" href="#_getting_current_placement_targets_configuration"></a>2. Getting current placement targets configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The zonegroup placement configuration can be queried with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup get
+{
+    "id": "0f8491ad-001a-494e-acd3-80463b0d1757",
+    "name": "multisite_zonegroup",
+    "api_name": "multisite_zonegroup",
+    ...
+    "placement_targets": [
+        {
+            "name": "default-placement",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        }
+    ],
+    "default_placement": "default-placement",
+    ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The zone placement configuration can be queried with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone get
+{
+    "id": "e2409d45-9e3d-4545-ac63-f6038f0bf8b1",
+    "name": "zone1",
+    "domain_root": "zone1.rgw.meta:root",
+    ...
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "zone1.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone1.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone1.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    ...</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adding_a_placement_target"><a class="anchor" href="#_adding_a_placement_target"></a>3. Adding a placement target</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_creating_new_pools"><a class="anchor" href="#_creating_new_pools"></a>3.1. Creating new pools</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Before creating the pools, we have to add the new hosts/OSDs and
+create a different CRUSH rule.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First thing we need to do is create new pools where the objects will be stored. We can use the following commands:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>zone1:</strong></p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  ceph osd pool create zone1.rgw.ssd.buckets.data 32 32 replicated
+$  ceph osd pool create zone1.rgw.ssd.buckets.index 8 8 replicated
+$  ceph osd pool create zone1.rgw.ssd.buckets.non-ec 8 8 replicated
+$  ceph osd pool application enable zone1.rgw.ssd.buckets.data rgw
+$  ceph osd pool application enable zone1.rgw.ssd.buckets.non-ec rgw
+$  ceph osd pool application enable zone1.rgw.ssd.buckets.index rgw</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Because this is just for testing, we don&#8217;t have a crush rule that would
+point to different disks. We are using the per-default replicated crush rule
+that uses our standard HDD class osds
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_a_new_placement_target"><a class="anchor" href="#_create_a_new_placement_target"></a>3.2. Create a new placement target</h3>
+<div class="paragraph">
+<p>To create a new placement target named <code>ssd</code>, start by adding it to the
+zonegroup in the master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup placement add --rgw-zonegroup multisite_zonegroup --placement-id ssd</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then provide the zone placement info for that target in the master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone placement add --rgw-zone zone1 --placement-id ssd --data-pool zone1.rgw.ssd.buckets.data --index-pool zone1.rgw.ssd.buckets.index --data-extra-pool zone1.rgw.ssd.buckets.non-ec</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the changes we have performed in the master zone to aware all
+Ceph RadosGW:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin period update --commit</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verify_the_new_placement_target"><a class="anchor" href="#_verify_the_new_placement_target"></a>3.2.1. Verify the new placement target</h4>
+<div class="paragraph">
+<p>The zonegroup placement configuration can be queried with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup get
+{
+    "id": "0f8491ad-001a-494e-acd3-80463b0d1757",
+    "name": "multisite_zonegroup",
+    "api_name": "multisite_zonegroup",
+    ...
+    "placement_targets": [
+        {
+            "name": "default-placement",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        },
+        {
+            "name": "ssd",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        }
+    ],
+    "default_placement": "default-placement",
+    ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The zone placement configuration can be queried in the master zone with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone get
+{
+    "id": "e2409d45-9e3d-4545-ac63-f6038f0bf8b1",
+    "name": "zone1",
+    "domain_root": "zone1.rgw.meta:root",
+    ...
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "zone1.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone1.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone1.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        },
+        {
+            "key": "ssd",
+            "val": {
+                "index_pool": "zone1.rgw.ssd.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone1.rgw.ssd.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone1.rgw.ssd.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    ...</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_the_new_placement_target"><a class="anchor" href="#_testing_the_new_placement_target"></a>3.3. Testing the new placement target</h3>
+<div class="paragraph">
+<p>As we have created a new placement target, we are going to verify that
+the objects are stored in the <code>ssd</code> placement target.</p>
+</div>
+<div class="paragraph">
+<p>The first thing we have to do is to create a new user:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin user create --uid test-ssd-placement-target --display-name test-ssd-placement-target
+{
+    "user_id": "test-ssd-placement-target",
+    "display_name": "test-ssd-placement-target",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "test-ssd-placement-target",
+            "access_key": "PIC2A85DZPEJVNKK8MZT",
+            "secret_key": "SECRETKEY"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "default_storage_class": "",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "temp_url_keys": [],
+    "type": "rgw",
+    "mfa_ids": []
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we need to modify our recently created user to set the placement
+target we have created before:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin user modify --uid test-ssd-placement-target --placement-id ssd --storage-class STANDARD
+{
+    "user_id": "test-ssd-placement-target",
+    "display_name": "test-ssd-placement-target",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "test-ssd-placement-target",
+            "access_key": "PIC2A85DZPEJVNKK8MZT",
+            "secret_key": "SECRETKEY"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "ssd",
+    "default_storage_class": "STANDARD",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "temp_url_keys": [],
+    "type": "rgw",
+    "mfa_ids": []
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we are going to create a new bucket using <code>s3cmd</code> and upload an object:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mkdir ~/s3cmd-credentials
+$ cat &lt;&lt; EOF &gt; ~/s3cmd-credentials/test-ssd-placement-target.conf
+[default]
+access_key = PIC2A85DZPEJVNKK8MZT
+secret_key = SECRETKEY
+host_base = s3zone1.example.com:80
+host_bucket = s3zone1.example.com:80
+use_https = False
+signature_v2 = True
+#check_ssl_certificate = False
+#check_ssl_hostname = False
+EOF
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf mb s3://test-bucket-ssd-placement-target
+Bucket 's3://test-bucket-ssd-placement-target/' created
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf put /etc/hosts s3://test-bucket-ssd-placement-target/test-file
+upload: '/etc/hosts' -&gt; 's3://test-bucket-ssd-placement-target/test-file'  [1 of 1]
+ 1330 of 1330   100% in    0s    54.41 kB/s  done</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the Ceph cluster, review the bucket&#8217;s placement target:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin bucket stats --bucket test-bucket-ssd-placement-target | jq [.placement_rule]
+[
+  "ssd"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also, we can verify how the object has been created in the pools for
+the <code>ssd</code> placement target:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Bucket index OMAP files:</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  rados -p zone1.rgw.ssd.buckets.index ls
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.7
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.0
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.3
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.9
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.5
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.1
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.4
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.2
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.10
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.6
+.dir.e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1.8</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The object itself in the bucket data pool:</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  rados -p zone1.rgw.ssd.buckets.data ls
+e2409d45-9e3d-4545-ac63-f6038f0bf8b1.2826690.1_test-file</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_tags_to_specify_the_desired_placement_target_upon_bucket_creation"><a class="anchor" href="#_using_tags_to_specify_the_desired_placement_target_upon_bucket_creation"></a>3.4. Using tags to specify the desired placement target upon bucket creation</h3>
+<div class="paragraph">
+<p>With the example we have documented above, we will store all the user
+data in the <code>ssd</code> placement target for all the buckets of the
+<code>test-ssd-placement-target</code> user. On some occasions, we can allow the
+user to use the placement target they prefer per bucket.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+A bucket’s placement target is selected on creation and
+cannot be modified.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In our case, we are going to use the tag <code>allowed-ssd</code> to allow users to
+use other placement targets besides the default placement target.</p>
+</div>
+<div class="paragraph">
+<p>In the first place, we need to modify the zonegroup. We need to export
+the JSON file, modify the <code>tags</code> section and then import back the JSON
+file to properly configure our zonegroup:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup get &gt; /etc/ceph/zonegroup.json
+$ vim /etc/ceph/zonegroup.json
+...
+    "placement_targets": [
+        {
+            "name": "default-placement",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        },
+        {
+            "name": "ssd",
+            "tags": ["allowed-ssd"],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        }
+    ],
+...
+$ radosgw-admin zonegroup set &lt; /etc/ceph/zonegroup.json
+$ radosgw-admin period update --commit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once we have modified the zonegroup, we have to modify our user adding
+the <code>allowed-ssd</code> tag:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin user modify --uid test-ssd-placement-target --placement-id default-placement --storage-class STANDARD --tags allowed-ssd
+{
+    "user_id": "test-ssd-placement-target",
+    "display_name": "test-ssd-placement-target",
+...
+    "default_placement": "default-placement",
+    "default_storage_class": "STANDARD",
+    "placement_tags": [
+        "allowed-ssd"
+    ],
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that we have added the <code>allowed-ssd</code> tag, we can create a bucket in
+the default placement target with <code>s3cmd</code>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>fallocate -l 8M /tmp/test-file
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf mb s3://test-tags-default-placement-target
+Bucket 's3://test-tags-default-placement-target/' created
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf put /tmp/test-file s3://test-tags-default-placement-target/test-file
+upload: '/tmp/test-file' -&gt; 's3://test-tags-default-placement-target/test-file'  [1 of 1]
+ 86459 of 86459   100% in    0s     5.27 MB/s  done
+$  radosgw-admin bucket stats --bucket test-tags-default-placement-target | jq [.placement_rule]
+[
+  "default-placement"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or we can create a bucket in the <code>ssd</code> placement target using <code>s3cmd</code>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd-credentials]# s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf mb --region=:ssd s3://test-tags-ssd-placement-target
+Bucket 's3://test-tags-ssd-placement-target/' created
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf put /tmp/test-file s3://test-tags-ssd-placement-target/test-file
+upload: '/tmp/test-file' -&gt; 's3://test-tags-ssd-placement-target/test-file'  [1 of 1]
+ 86459 of 86459   100% in    0s     3.57 MB/s  done
+$  radosgw-admin bucket stats --bucket test-tags-ssd-placement-target | jq [.placement_rule]
+[
+  "ssd"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are going to create another user without the <code>allowed-ssd</code> tag to
+verify that users with no tags cannot specify the <code>ssd</code> placement target
+upon bucket creation:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin user create --uid test-placement-target-no-tag --display-name test-placement-target-no-tag
+{
+    "user_id": "test-placement-target-no-tag",
+    "display_name": "test-placement-target-no-tag",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "subusers": [],
+    "keys": [
+        {
+            "user": "test-placement-target-no-tag",
+            "access_key": "DZR9KE6TYN92KIVGJZX4",
+            "secret_key": "SECRETKEY2FAR"
+        }
+    ],
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "default_storage_class": "",
+    "placement_tags": [],
+    ...
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Configure <code>s3cmd</code> with the <code>test-placement-target-no-tag</code> user
+credentials and try to create a bucket specifying the <code>ssd</code> placement
+target:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ cat &lt;&lt; EOF &gt; ~/s3cmd-credentials/test-placement-target-no-tag.conf
+[default]
+access_key =DZR9KE6TYN92KIVGJZX4
+secret_key = SECRETKEY2FAR
+host_base = s3zone1.example.com:80
+host_bucket = s3zone1.example.com:80
+use_https = False
+signature_v2 = True
+#check_ssl_certificate = False
+#check_ssl_hostname = False
+EOF
+$ s3cmd -c ~/s3cmd-credentials/test-placement-target-no-tag.conf mb --region=:ssd s3://test-bucket-test-placement-target-no-tag
+ERROR: Access to bucket 'test-bucket-test-placement-target-no-tag' was denied
+ERROR: S3 error: 403 (AccessDenied)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we do not specify the <code>ssd</code> placement target, this user can create
+the bucket successfully:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-placement-target-no-tag.conf mb s3://test-bucket-test-placement-target-no-tag
+Bucket 's3://test-bucket-test-placement-target-no-tag/' created</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also, we can specify the region or placement target using Python
+<code>boto3</code> AWS SDK as we can see in the following example:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ cat &lt;&lt; EOF &gt; ~/create-s3-bucket-ssd-placement-target.py import boto3 from botocore.exceptions import ClientError
+
+s3_endpoint="http://proxy01:8000"
+s3_access_key="PIC2A85DZPEJVNKK8MZT"
+s3_secret_key="SECRETKEY"
+s3client = boto3.client('s3', use_ssl=False, verify=False, endpoint_url=s3_endpoint, aws_access_key_id=s3_access_key, aws_secret_access_key=s3_secret_key)
+location = {'LocationConstraint': ":ssd"}
+s3client.create_bucket(Bucket="boto3-ssd-placement-target",CreateBucketConfiguration=location)
+EOF
+$ python ~/create-s3-bucket-ssd-placement-target.py</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can verify using <code>s3cmd</code> how the bucket has been created:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf ls
+2021-08-30 15:24  s3://boto3-ssd-placement-target</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using the <code>radosgw-admin bucket stats</code> command in the Ceph cluster we
+can verify the placement target for the bucket
+<code>boto3-ssd-placement-target</code> is <code>ssd</code>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin bucket stats --bucket boto3-ssd-placement-target | jq [.placement_rule]
+[
+  "ssd"
+]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_default_placement_target"><a class="anchor" href="#_change_default_placement_target"></a>3.5. Change default placement target</h3>
+<div class="paragraph">
+<p>If we want to change the default placement target for our buckets, we
+can use the following command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup placement default --rgw-zonegroup multisite_zonegroup --placement-id ssd
+$  radosgw-admin zonegroup get | jq [.default_placement]
+[
+  "ssd"
+]</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ceph_radosgw_storage_classes"><a class="anchor" href="#_ceph_radosgw_storage_classes"></a>4. Ceph RadosGW storage classes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Storage classes are used to customize the placement of object data. S3
+Bucket Lifecycle rules can automate the transition of objects between
+storage classes.</p>
+</div>
+<div class="paragraph">
+<p>Storage classes are defined in terms of placement targets. Each
+zonegroup placement target lists its available storage classes with an
+initial class named <code>STANDARD</code>. The zone configuration is responsible
+for providing a <code>data_pool</code> pool name for each of the zonegroup’s
+storage classes.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>More info about this topic on the
+<a href="https://docs.ceph.com/en/latest/radosgw/placement/">Ceph upstream
+documentation</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_adding_a_storage_class"><a class="anchor" href="#_adding_a_storage_class"></a>5. Adding a storage class</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_creating_new_pools_2"><a class="anchor" href="#_creating_new_pools_2"></a>5.1. Creating new pools</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Before creating the pools, we have to add the new hosts/OSDs and
+create a different CRUSH rule.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First thing we need to do is create new pools where the objects are
+going to be stored. We can use the following commands:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Master zone:</strong></p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  ceph osd pool create zone1.rgw.ssd.storage.class.buckets.data 32 32 replicated
+$  ceph osd pool application enable zone1.rgw.ssd.storage.class.buckets.data rgw</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_create_a_new_storage_class"><a class="anchor" href="#_create_a_new_storage_class"></a>5.1.1. Create a new storage class</h4>
+<div class="paragraph">
+<p>To create a new storage class named <code>SSD</code> in the <code>default-placement</code>
+target, start by adding it to the zonegroup in the master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup placement add --rgw-zonegroup multisite_zonegroup --placement-id default-placement --storage-class SSD</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then provide the zone placement info for that storage class in the
+master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone placement add --rgw-zone zone1 --placement-id default-placement --storage-class SSD --data-pool zone1.rgw.ssd.storage.class.buckets.data [--compression lz4]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the changes we have performed in the master zone to aware all
+Ceph RadosGW:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin period update --commit</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_the_new_storage_class"><a class="anchor" href="#_verify_the_new_storage_class"></a>5.2. Verify the new storage class</h3>
+<div class="paragraph">
+<p>The zonegroup placement configuration can be queried with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup get | jq [.placement_targets]
+[
+  [
+    {
+      "name": "default-placement",
+      "tags": [],
+      "storage_classes": [
+        "SSD",
+        "STANDARD"
+      ]
+    },
+    {
+      "name": "ssd",
+      "tags": [
+        "allowed-ssd"
+      ],
+      "storage_classes": [
+        "STANDARD"
+      ]
+    }
+  ]
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The zone placement configuration can be queried in the master zone with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone get | jq [.placement_pools]
+[
+  [
+    {
+      "key": "default-placement",
+      "val": {
+        "index_pool": "zone1.rgw.buckets.index",
+        "storage_classes": {
+          "SSD": {
+            "data_pool": "zone1.rgw.ssd.storage.class.buckets.data"
+          },
+          "STANDARD": {
+            "data_pool": "zone1.rgw.buckets.data"
+          }
+        },
+        "data_extra_pool": "zone1.rgw.buckets.non-ec",
+        "index_type": 0
+      }
+    },
+    {
+      "key": "ssd",
+      "val": {
+        "index_pool": "zone1.rgw.ssd.buckets.index",
+        "storage_classes": {
+          "STANDARD": {
+            "data_pool": "zone1.rgw.ssd.buckets.data"
+          }
+        },
+        "data_extra_pool": "zone1.rgw.ssd.buckets.non-ec",
+        "index_type": 0
+      }
+    }
+  ]
+]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_the_new_storage_class"><a class="anchor" href="#_testing_the_new_storage_class"></a>5.3. Testing the new storage class</h3>
+<div class="paragraph">
+<p>As we have created a new storage class, we are going to verify that the
+objects are stored in the <code>SSD</code> storage class. We are going to use the
+credentials of the <code>test-ssd-placement-target</code> user created before.</p>
+</div>
+<div class="paragraph">
+<p>Using <code>s3cmd</code> create a new bucket and verify we are using the
+<code>default-placement</code> placement target:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf mb s3://test-bucket-storage-class
+Bucket 's3://test-bucket-storage-class/' created
+$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf put /tmp/test-file s3://test-bucket-storage-class/test-file
+upload: '/tmp/test-file' -&gt; 's3://test-bucket-storage-class/test-file'  [1 of 1]
+ 86459 of 86459   100% in    0s     5.78 MB/s  done</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can verify with <code>s3cmd</code> how the object has been uploaded to the
+<code>STANDARD</code> storage class:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf info s3://test-bucket-storage-class/test-file
+s3://test-bucket-storage-class/test-file (object):
+   File size: 86459
+   Last mod:  Mon, 30 Aug 2021 16:08:44 GMT
+   MIME type: text/plain
+   Storage:   STANDARD
+   MD5 sum:   5a71d80251cfb7f28fe88438b561c32f
+   SSE:       none
+   Policy:    none
+   CORS:      none
+   ACL:       test-ssd-placement-target: FULL_CONTROL
+   x-amz-meta-s3cmd-attrs: atime:1630323196/ctime:1629128095/gid:0/gname:root/md5:5a71d80251cfb7f28fe88438b561c32f/mode:33188/mtime:1627502240/uid:0/uname:root</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the Ceph cluster, review the bucket&#8217;s placement target:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin bucket stats --bucket test-bucket-storage-class | jq [.placement_rule]
+[
+  "default-placement"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, using <code>s3cmd</code> we are going to upload an object directly to the
+<code>SSD</code> storage class:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf put /tmp/test-file s3://test-bucket-storage-class/test-file-SSD --storage-class=SSD
+upload: '/tmp/test-file' -&gt; 's3://test-bucket-storage-class/test-file-SSD'  [1 of 1]
+ 86459 of 86459   100% in    0s     5.26 MB/s  done</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can verify with <code>s3cmd</code> how the object has been uploaded to the <code>SSD</code>
+storage class:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ s3cmd -c ~/s3cmd-credentials/test-ssd-placement-target.conf info s3://test-bucket-storage-class/test-file-SSD
+s3://test-bucket-storage-class/test-file-SSD (object):
+   File size: 86459
+   Last mod:  Mon, 30 Aug 2021 16:14:24 GMT
+   MIME type: text/plain
+   Storage:   SSD
+   MD5 sum:   5a71d80251cfb7f28fe88438b561c32f
+   SSE:       none
+   Policy:    none
+   CORS:      none
+   ACL:       test-ssd-placement-target: FULL_CONTROL
+   x-amz-meta-s3cmd-attrs: atime:1630323196/ctime:1629128095/gid:0/gname:root/md5:5a71d80251cfb7f28fe88438b561c32f/mode:33188/mtime:1627502240/uid:0/uname:root</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_additional_considerations_regarding_placement_targets_and_storage_classes"><a class="anchor" href="#_additional_considerations_regarding_placement_targets_and_storage_classes"></a>Additional considerations regarding placement targets and storage classes</h2>
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When using AWS S3 SDKs such as <code>boto3</code>, it is important that
+non-default storage class names match those provided by AWS S3, or else
+the SDK will drop the request and raise an exception.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Red Hat has tested the performance of the Lifecycle Configuration
+Policies with the deletion of nearly 84 million objects per day. There
+are two different RadosGW parameters that helps regarding process
+concurrency when dealing with Lifecycle Configuration Policies (but
+beware, these parameters must not be changed without exhaustive
+performance testing):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>rgw_lc_max_worker</code>: Impacts the number of buckets processed in
+parallel.</p>
+</li>
+<li>
+<p><code>rgw_lc_max_wp_worker</code>: Impacts the number of operations that each
+<code>lc-worker</code> can process in parallel.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Ceph cluster performance totally depends on the hardware
+configuration. In this specific case, having a good amount of all-flash
+devices to store Bluestore WAL/RocksDB really helps to improve the
+overall cluster performance.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

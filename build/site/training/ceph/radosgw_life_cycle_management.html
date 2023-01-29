@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Object Lifecycle Management :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_life_cycle_management.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_life_cycle_management.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Object Lifecycle Management</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="ulist">
+<div class="title">Goals</div>
+<ul>
+<li>
+<p>Introduction to RGW Lifecycle Management</p>
+</li>
+<li>
+<p>Hands-on Lab. Configure and Experiment with RGW Lifecycle Management</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Object expiration is in substance implemented in the following way: ceph lifecycle mechanism (lc) scans the objects' metadata, where the expiration date is being held, comparing the expiration date with the current date. Once the condition becomes true lc marks the object as deleted, and it is transferred to Ceph’s garbage collector (GC) which in its turn deletes the expired object. lc process runs periodically with a pre-defined and configurable schedule. This mechanism makes it possible to use a declarative policy to expire the objects we have in our cluster, in the same way, it can be done in Amazon S3.</p>
+</div>
+<div class="paragraph">
+<p>Tier transition in its turn provides us with the ability to create Storage
+Classes for hot (fast media, such as SSD/NVMe used for I/O sensitive workloads) and slow (slow, magnetic media such as SAS/SATA used for archiving) areas relying on bucket lifecycle process for moving out data. Thus it&#8217;s now possible to create a scheduled data movement between storage classes where data is written to the hot class, then it&#8217;s moved to the slow (after a configured amount of time) and then expires and deleted for good. This feature is the de-facto standard in AWS nowadays, and now it’s available in Ceph as well.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_a_new_storage_class"><a class="anchor" href="#_create_a_new_storage_class"></a>2. Create a new storage class</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a new storage class named <code>SLOW</code> in the <code>default-placement</code>
+target, start by adding it to the zonegroup in the master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup placement add --rgw-zonegroup multisite_zonegroup --placement-id default-placement --storage-class SLOW</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then provide the zone placement info for that storage class in the
+master zone:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zone placement add --rgw-zone zone1 --placement-id default-placement --storage-class SLOW --data-pool zone1.rgw.slow.storage.class.buckets.data [--compression lz4]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the changes we have performed in the master zone to aware all
+Ceph RadosGW:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin period update --commit</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verify_the_new_storage_class"><a class="anchor" href="#_verify_the_new_storage_class"></a>2.1. Verify the new storage class</h3>
+<div class="paragraph">
+<p>The zonegroup placement configuration can be queried with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  radosgw-admin zonegroup get | jq [.placement_targets]
+[
+  [
+    {
+      "name": "default-placement",
+      "tags": [],
+      "storage_classes": [
+        "SLOW",
+        "STANDARD"
+      ]
+    },
+    {
+      "name": "ssd",
+      "tags": [
+        "allowed-ssd"
+      ],
+      "storage_classes": [
+        "STANDARD"
+      ]
+    }
+  ]
+]</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create S3 Lifecycle configuration file named for example lc_slow.xml:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ cat &lt;&lt; EOF &gt; lc_slow.xml
+&lt;LifecycleConfiguration&gt;
+  &lt;Rule&gt;
+    &lt;ID&gt;Archive all objects older than 1 days&lt;/ID&gt;
+    &lt;Filter&gt;
+      &lt;Prefix&gt;&lt;/Prefix&gt;
+    &lt;/Filter&gt;
+    &lt;Status&gt;Enabled&lt;/Status&gt;
+    &lt;Transition&gt;
+      &lt;Days&gt;1&lt;/Days&gt;
+      &lt;StorageClass&gt;SLOW&lt;/StorageClass&gt;
+    &lt;/Transition&gt;
+  &lt;/Rule&gt;
+&lt;/LifecycleConfiguration&gt;
+EOF</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a bucket and apply a lifecycle policy to its future contents:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ s3cmd mb s3://transitionbucket
+Bucket 's3://transitionbucket/' created
+$ s3cmd setlifecycle lc_slow.xml s3://transitionbucket
+s3://transitionbucket/: Lifecycle Policy updated</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify the lifecycle policy has been applied to the bucket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ s3cmd getlifecycle s3://transitionbucket
+&lt;?xml version="1.0" ?&gt;
+&lt;LifecycleConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"&gt;
+    &lt;Rule&gt;
+        &lt;ID&gt;Archive all object older than 1 days&lt;/ID&gt;
+        &lt;Prefix/&gt;
+        &lt;Status&gt;Enabled&lt;/Status&gt;
+        &lt;Transition&gt;
+            &lt;Days&gt;1&lt;/Days&gt;
+            &lt;StorageClass&gt;SLOW&lt;/StorageClass&gt;
+        &lt;/Transition&gt;
+    &lt;/Rule&gt;
+&lt;/LifecycleConfiguration&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Upload a test file into our bucket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ dd if=/dev/zero of=50mb bs=10M count=5
+5+0 records in
+5+0 records out
+52428800 bytes (52 MB, 50 MiB) copied, 0,0594021 s, 883 MB/s
+
+$ s3cmd put 50mb s3://transitionbucket/50mb
+upload: '50mb' -&gt; 's3://transitionbucket/50mb'  [part 1 of 4, 15MB] [1 of 1]
+ 15728640 of 15728640   100% in   35s   436.04 KB/s  done
+upload: '50mb' -&gt; 's3://transitionbucket/50mb'  [part 2 of 4, 15MB] [1 of 1]
+15728640 of 15728640   100% in   23s   655.30 KB/s  done
+upload: '50mb' -&gt; 's3://transitionbucket/50mb'  [part 3 of 4, 15MB] [1 of 1]
+15728640 of 15728640   100% in   22s   675.70 KB/s  done
+upload: '50mb' -&gt; 's3://transitionbucket/50mb'  [part 4 of 4, 5MB] [1 of 1]
+5242880 of 5242880   100% in   13s   384.96 KB/s  done</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have 4 chunks 15 MB each of the test 50 MB file stored now in zone1.rgw.buckets.data pool (replicated three times, so total 150 MB):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ rados ls -p zone1.rgw.buckets.data
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.3_1
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.2_2
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__multipart_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.1
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.2_3
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.1_3
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1_50mb
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__multipart_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.3
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__multipart_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.2
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.3_3
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.3_2
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.1_2
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.4_1
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__multipart_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.4
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.1_1
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_50mb.2~x6GnoM_tN5elP9Gp5kLOE9POVoHF6TH.2_1
+
+$ rados df -p zone1.rgw.buckets.data
+POOL_NAME                   USED OBJECTS CLONES COPIES MISSING_ON_PRIMARY UNFOUND DEGRADED RD_OPS     RD WR_OPS     WR USED COMPR UNDER COMPR
+zone1.rgw.buckets.data 150 MiB      15      0     45                  0       0        0     92 34 MiB    175 84 MiB        0 B         0 B</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We confirm that zone1.rgw.slow.data is empty so far:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ rados ls -p zone1.rgw.slow.data
+$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>According to the policy, the objects in the transition bucket will transition from pool zone1.rgw.buckets.data to default.rgw.slow.data after one day.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+For testing purposes, you might want to modify rgw lc debug interval to 60
+in the Ceph RGW config database, followed by ceph-radosgw unit restart.
+This will enable debug interval for the lifecycle process (each day in the bucket lifecycle configuration equals 60 sec, so one day&#8217;s expiration is 1 minute).
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ ceph config set client.rgw.multi.zone1 rgw_lc_debug_interval 60</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we wait for 1 minute (rgw lc debug interval = 60), and verify if an object has been moved to SLOW storage class after this period:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ s3cmd info s3://transitionbucket/50mb
+s3://transitionbucket/50mb (object):
+   File size: 52428800
+   Last mod:  Tue, 20 Apr 2021 12:42:48 GMT
+   MIME type: application/octet-stream
+   Storage:   SLOW
+   MD5 sum:   25e317773f308e446cc84c503a6d1f85
+   SSE:       none
+   Policy:    none
+   CORS:      none
+   ACL:       Test User: FULL_CONTROL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So it confirms the objects are now on SLOW storage.  Let&#8217;s verify the contents of zone1.rgw.slow.data pool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ rados ls -p zone1.rgw.slow.data
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_1
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_0
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_7
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_4
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_5
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_9
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_8
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_3
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_10
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_12
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_6
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_11
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1__shadow_.OI9wNbjZ5SE5AGEoZjDa4eJpUnuWu5H_2</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ rados df -p zone1.rgw.slow.data
+POOL_NAME                USED OBJECTS CLONES COPIES MISSING_ON_PRIMARY UNFOUND DEGRADED RD_OPS  RD WR_OPS     WR USED COMPR UNDER COMPR
+zone1.rgw.slow.data 150 MiB      13      0     39                  0       0        0     11 0 B     35 84 MiB        0 B         0 B
+[...]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is now populated with 150 MB of our test file.</p>
+</div>
+<div class="paragraph">
+<p>The chunks are no more in zone1.rgw.buckets.data pool, and we see 0B USED field in the rados df output:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ rados ls -p zone1.rgw.buckets.data
+e6836dbc-e1c5-4cd5-bf3f-a998a6e3886d.34106.1_50mb
+
+$ rados df -p zone1.rgw.buckets.data
+POOL_NAME                USED OBJECTS CLONES COPIES MISSING_ON_PRIMARY UNFOUND DEGRADED RD_OPS     RD WR_OPS     WR USED COMPR UNDER COMPR
+zone1.rgw.buckets.data  0 B       1      0      3                  0       0        0    128 84 MiB    205 84 MiB        0 B         0 B</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If the objects weren’t deleted, it is probably because the garbage collector isn’t synchronized with the lifecycle process. We can execute radosgw-admin GC process --include-all to run the garbage collection manually so we don&#8217;t have to wait for its scheduled run.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

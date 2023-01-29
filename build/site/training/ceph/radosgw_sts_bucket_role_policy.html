@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>STS assume role Bucket &amp; Role Policy Examples. :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_sts_bucket_role_policy.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_sts_bucket_role_policy.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">STS assume role Bucket &amp; Role Policy Examples.</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this module we explain the differences between bucket policies and
+role policies when using the STS assume role call implementation, we
+also share policy examples and how they are applied differently using
+bucket or role policies.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bucket_policy_vs_role_policy"><a class="anchor" href="#_bucket_policy_vs_role_policy"></a>2. Bucket Policy vs Role Policy:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We can apply the rules/policy that give access to the s3 resources in 2
+places, at the bucket level and at the role level.</p>
+</div>
+<div class="paragraph">
+<p>One of the advantages I see of applying the rules at the role level is
+that with one command using radosgw-admin role-policy list/get you can
+see all the rules/policies for that role. If you use bucket policies,
+you have to list the policies on all the buckets to get the
+rules/policies that give access to certain roles.</p>
+</div>
+<div class="paragraph">
+<p>Just as a simplified example. With role policies, you would be able to
+get this info with a single command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>rgw policy-role list role1
+
+role1:
+
+    - bucket1/folder1 ro
+    - bucket2/folder2 rw
+    - bucket3/folder3/db  rw</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To achieve the same with the policy in buckets you would need to run 3
+commands and aggregate the info for role1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>get-policy bucket1
+
+role1: /folder1 ro
+role2: /folder1 rw
+role3: /folder1 ro
+
+get-policy bucket2
+
+role1: /folder2 rw
+role2: /folder2 ro
+
+get-policy bucket3
+
+role1: /folder3/db rw
+role3: /folder3/db2 rw</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In any case we are going to share a couple of examples of each, role
+and bucket policy.</p>
+</div>
+<div class="sect2">
+<h3 id="_bucket_policy_1st_example"><a class="anchor" href="#_bucket_policy_1st_example"></a>2.1. Bucket Policy. 1st Example.</h3>
+<div class="paragraph">
+<p>The steps I have followed to setup this example with an rgw local user
+called admin, I created the following resources:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A bucket called bucket-new</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called write-folder</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called read-folder</p>
+</li>
+<li>
+<p>A role called testrole</p>
+</li>
+<li>
+<p>A local RGW user called testuser</p>
+</li>
+<li>
+<p>A role document policy to give testuser access to the testrole.</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># aws --profile admin --endpoint http://10.10.0.10:8080 s3 mb s3://bucket-new
+# aws --profile admin --endpoint http://10.10.0.10:8080 s3api put-object --bucket bucket-new --key write-folder/
+# radosgw-admin role  get --role-name testrole
+warning: line 8: 'log_file' in section 'client.rgw.cepha.rgw0' redefined
+{
+    "RoleId": "8d427258-ca7c-4620-87dd-d4c935e20ddb",
+    "RoleName": "testrole",
+    "Path": "/",
+    "Arn": "arn:aws:iam:::role/testrole",
+    "CreateDate": "2021-05-13T16:37:14.247Z",
+    "MaxSessionDuration": 3600,
+    "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam:::user/testuser\"]},\"Action\":[\"sts:AssumeRole\"]}}"
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With all that in place, I&#8217;m going to set the following bucket policy,
+with this policy we are setting the testrole as the principal of the policy.
+and we are giving access to the role to allow the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>can list objects(not read/GET) at the bucket-new level</p>
+</li>
+<li>
+<p>only write(PUT/DELETE) inside the write-folder/ folder and its
+subfolders,</p>
+</li>
+<li>
+<p>and read(GET) the read-folder/ and it&#8217;s subfolders.</p>
+</li>
+<li>
+<p>With this config it will also be possible to list objects in other
+folders at the root level of the bucket, but the user won&#8217;t be able to
+read(GET) them.</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/testrole"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-new"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/testrole"
+        ]
+      },
+      "Action": [
+      "s3:Get*",
+      "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-new/read-folder/*",
+        "arn:aws:s3:::bucket-new/read-folder",
+        "arn:aws:s3:::bucket-new/read-folder/"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/testrole"
+        ]
+      },
+      "Action": [
+      "s3:Get*",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-new/write-folder/*",
+        "arn:aws:s3:::bucket-new/write-folder",
+        "arn:aws:s3:::bucket-new/write-folder/"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We now apply the policy to the bucket:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># aws --profile admin --endpoint http://10.10.0.10:8080 s3api put-bucket-policy --bucket bucket-new --policy file://bucket-policy.json.all.with_role
+#</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are going to test our policies with Hadoop hdfs cli command, we are
+using the assumerole credential provider(local RGW users) that is
+provided by Hadoop.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="literalblock">
+<div class="content">
+<pre> We could check the applied policies with any S3 client or
+library that supports S3 STS features, like for example the AWS cli.</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These are the options I used in the hadoop core-site.xml:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ cat core-site.xml
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;
+
+&lt;!-- Put site-specific property overrides in this file. --&gt;
+
+&lt;configuration&gt;
+&lt;property&gt;
+  &lt;name&gt;fs.defaultFS&lt;/name&gt;
+  &lt;value&gt;hdfs://hadoop:9000&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+  &lt;value&gt;/home/hadoop/hadooptmpdata&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!--
+&lt;property&gt;
+  &lt;name&gt;hadoop.security.credential.provider.path&lt;/name&gt;
+  &lt;value&gt;localjceks://file/home/hadoop/token/aws.jceks&lt;/value&gt;
+  &lt;description&gt;Path to interrogate for protected credentials.&lt;/description&gt;
+&lt;/property&gt;
+--&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.path.style.access&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;fs.s3a.impl&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.fs.s3a.S3AFileSystem&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;fs.AbstractFileSystem.s3a.impl&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.fs.s3a.S3A&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.endpoint&lt;/name&gt;
+  &lt;value&gt;http://10.10.0.10:8080&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.session.name&lt;/name&gt;
+  &lt;value&gt;sesiongo&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.session.duration&lt;/name&gt;
+  &lt;value&gt;30m&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.sts.endpoint&lt;/name&gt;
+  &lt;value&gt;http://10.10.0.10:8080&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.sts.endpoint.region&lt;/name&gt;
+  &lt;value&gt;&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.credentials.provider&lt;/name&gt;
+  &lt;value&gt;org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.aws.credentials.provider&lt;/name&gt;
+  &lt;value&gt;org.apache.hadoop.fs.s3a.auth.AssumedRoleCredentialProvider&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.arn&lt;/name&gt;
+  &lt;value&gt;arn:aws:iam:::role/testrole&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.access.key&lt;/name&gt;
+  &lt;value&gt;testuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.secret.key&lt;/name&gt;
+  &lt;value&gt;testuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.encryption.enabled&lt;/name&gt;
+  &lt;value&gt;false&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.connection.ssl.enabled&lt;/name&gt;
+  &lt;value&gt;false&lt;/value&gt;
+&lt;/property&gt;
+&lt;/configuration&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>NOTE:</strong> I have removed the debug/info output around the hdfs dfs command
+to reduce the output of each command and make it easier to read.</p>
+</div>
+<div class="paragraph">
+<p>We can check with the hdfs client, that we can access the bucket
+bucket-new, and also list files inside the read-folder folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/
+Found 4 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-18 04:53 s3a://bucket-new/read-folder
+drwxrwxrwx   - hadoop hadoop          0 2021-06-18 04:53 s3a://bucket-new/write-folder
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/read-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-18 05:09 s3a://bucket-new/read-folder/host-file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can also test and check that we can GET/read the objects inside the
+read folder</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -cat  s3a://bucket-new/read-folder/host-file
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.5 bastion.cephocs.com bastion
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -get s3a://bucket-new/read-folder/host-file
+
+[hadoop@hadoop hadoop]$ cat host-file
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.5 bastion.cephocs.com bastion</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can also read and get objects inside a subfolder tree inside
+bucket-new/read-folder/</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/read-folder/
+Found 2 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:41 s3a://bucket-new/read-folder/folder1
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-18 05:09 s3a://bucket-new/read-folder/host-file
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/read-folder/folder1/
+Found 1 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:41 s3a://bucket-new/read-folder/folder1/folder2
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/read-folder/folder1/folder2
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-19 02:48 s3a://bucket-new/read-folder/folder1/folder2/host-file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But we can&#8217;t delete or PUT/write new objects into the folder
+read-folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -rm s3a://bucket-new/read-folder/host-file
+2021-06-18 05:10:56,280 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+rm: s3a://bucket-new/read-folder/host-file: delete on s3a://bucket-new/read-folder/host-file: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx0000000000000002deb7c-0060cc6320-fa06c-lab1; S3 Extended Request ID: fa06c-lab1-lab), S3 Extended Request ID: fa06c-lab1-lab:AccessDenied
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -put /etc/hosts s3a://bucket-new/read-folder/host-file2
+put: read-folder/host-file2._COPYING_: put on read-folder/host-file2._COPYING_: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx0000000000000002debaf-0060cc632d-fa06c-lab1; S3 Extended Request ID: fa06c-lab1-lab), S3 Extended Request ID: fa06c-lab1-lab:AccessDenied</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we now move into the write folder, we can check that we can list and
+get/read objects like with the read-folder, but we can also put/write
+new objects and delete them:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/write-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-18 05:09 s3a://bucket-new/write-folder/host-file-write
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -rm  s3a://bucket-new/write-folder/host-file-write
+Deleted s3a://bucket-new/write-folder/host-file-write
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -put /etc/hosts  s3a://bucket-new/write-folder/host-new-file
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/write-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        177 2021-06-19 02:34 s3a://bucket-new/write-folder/host-new-file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally, with other folders at the root level, we are able to list(not
+read) the objects inside this folder2, only one level down:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/
+Found 4 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:52 s3a://bucket-new/folder-new2
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:52 s3a://bucket-new/folder2
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:52 s3a://bucket-new/read-folder
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:52 s3a://bucket-new/write-folder
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/folder2/
+
+Found 3 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-19 02:52 s3a://bucket-new/folder2/folder3
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-18 10:35 s3a://bucket-new/folder2/host1
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-18 10:35 s3a://bucket-new/folder2/host2
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-new/folder2/folder3/
+ls: folder2/folder3/: getFileStatus on folder2/folder3/: com.amazonaws.services.s3.model.AmazonS3Exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: tx0000000000000003427c9-0060cd9435-fa06c-lab1; S3 Extended Request ID: null), S3 Extended Request ID: null:403 Forbidden
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -cat  s3a://bucket-new/folder2/host1
+cat: s3a://bucket-new/folder2/host1: getFileStatus on s3a://bucket-new/folder2/host1: com.amazonaws.services.s3.model.AmazonS3Exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: tx00000000000000034283d-0060cd944d-fa06c-lab1; S3 Extended Request ID: null), S3 Extended Request ID: null:403 Forbidden</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bucket_policy_2nd_example_use_of_notresource"><a class="anchor" href="#_bucket_policy_2nd_example_use_of_notresource"></a>3. Bucket Policy. 2nd Example. Use of NotResource</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The steps I have followed with an rgw local user called admin, I create:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A bucket called bucket-data</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called write-folder</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called read-folder</p>
+</li>
+<li>
+<p>A role called readrole</p>
+</li>
+<li>
+<p>A role called writerole</p>
+</li>
+<li>
+<p>A local RGW user called readuser</p>
+</li>
+<li>
+<p>A local RGW user called writeuser</p>
+</li>
+<li>
+<p>A role document policy to give readuser access to the readrole.</p>
+</li>
+<li>
+<p>A role document policy to give writeuser access to the writerole.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The policy we are using for the bucket is the following:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole",
+          "arn:aws:iam:::role/writerole"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole"
+        ]
+      },
+      "Action": [
+        "s3:Get*",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/read-folder",
+        "arn:aws:s3:::bucket-data/read-folder/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole"
+        ]
+      },
+      "Action": "s3:*",
+      "NotResource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/read-folder",
+        "arn:aws:s3:::bucket-data/read-folder/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/writerole"
+        ]
+      },
+      "Action": [
+      "s3:Get*",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/write-folder",
+        "arn:aws:s3:::bucket-data/write-folder/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/writerole"
+        ]
+      },
+      "Action": "s3:*",
+      "NotResource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/write-folder",
+        "arn:aws:s3:::bucket-data/write-folder/*"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We are using the NotResource and Effect Deny workaround
+because we found a bug when using the more straight forward approach to
+limit the access of the user to certain folders/prefixes that would be
+to use a condition with the StringLike to match the folder we want to
+use, for example:</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::user/testuser"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::svcbucket"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "readfolder4",
+            "readfolder4/"
+          ]
+        }
+      }
+    },</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There is an open BZ to fix this issue:
+<a href="https://bugzilla.redhat.com/show_bug.cgi?id=1974678" class="bare">https://bugzilla.redhat.com/show_bug.cgi?id=1974678</a> , important to take
+in account that this BZ only affects role policies, bucket policies work
+fine.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s briefly explain the different sections of the policy. In the first
+statement we are allowing access to the bucket-data bucket:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>"Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole",
+          "arn:aws:iam:::role/writerole"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data"
+      ]
+    },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the next statement we are allowing access to read/GET objects and
+subfolders under the read-folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole"
+        ]
+      },
+      "Action": [
+        "s3:Get*",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/read-folder",
+        "arn:aws:s3:::bucket-data/read-folder/*"
+      ]
+    },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, we use the Effect Deny with the NotResource, this denies all
+actions on objects inside the bucket except for bucket-data/read-folder
+and bucket-data/read-folder/* , that is why we have the previous
+statement which explicitly allows the actions on the resources
+bucket-data/read-folder bucket-new/data-folder/*</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>    {
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole"
+        ]
+      },
+      "Action": "s3:*",
+      "NotResource": [
+        "arn:aws:s3:::bucket-data",
+        "arn:aws:s3:::bucket-data/read-folder",
+        "arn:aws:s3:::bucket-data/read-folder/*"
+      ]
+    },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We first use the readrole in hadoop to check that we can only access and
+read/GET inside the read-folder in bucket-data, the core-site.xml is the
+same as the previous example except for the following:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ cat core-site.xml | grep -C 3 -E '(user|role.arn)'
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.arn&lt;/name&gt;
+  &lt;value&gt;arn:aws:iam:::role/readrole&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.access.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.secret.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some examples with the hdfs client, we are able to list all the folders
+at the root level of the bucket:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/
+Found 2 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-20 03:19 s3a://bucket-data/read-folder
+drwxrwxrwx   - hadoop hadoop          0 2021-06-20 03:19 s3a://bucket-data/write-folder</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But we can only list files inside the read-folder, access to the
+write-folder is denied:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/write-folder/
+ls: write-folder/: getFileStatus on write-folder/: com.amazonaws.services.s3.model.AmazonS3Exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: tx0000000000000003b5fae-0060ceec15-fa06c-lab1; S3 Extended Request ID: null), S3 Extended Request ID: null:403 Forbidden</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As expected we can access/list files and subfolders in the read-folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/read-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-19 11:58 s3a://bucket-data/read-folder/read-object</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can also read/GET from the objects inside the read-folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -cat  s3a://bucket-data/read-folder/read-object
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.5 bastion.cephocs.com bastion</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But we can&#8217;t delete or write inside the read-folder:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -rm  s3a://bucket-data/read-folder/read-object
+rm: s3a://bucket-data/read-folder/read-object: delete on s3a://bucket-data/read-folder/read-object: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx0000000000000003b69d6-0060ceede8-fa06c-lab1; S3 Extended Request ID: fa06c-lab1-lab), S3 Extended Request ID: fa06c-lab1-lab:AccessDenied
+[hadoop@hadoop hadoop]$ hdfs dfs  -put /etc/hosts  s3a://bucket-data/read-folder/hosts-file
+put: read-folder/hosts-file._COPYING_: put on read-folder/hosts-file._COPYING_: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx0000000000000003b6a2c-0060ceedf9-fa06c-lab1; S3 Extended Request ID: fa06c-lab1-lab), S3 Extended Request ID: fa06c-lab1-lab:AccessDenied</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we now try to assume the writerole with the readuser, it will fail:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ cat core-site.xml | grep -C 3 -E '(user|role.arn)'
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.arn&lt;/name&gt;
+  &lt;value&gt;arn:aws:iam:::role/writerole&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.access.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.secret.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/read-folder/
+2021-06-20 03:34:20,069 ERROR auth.AssumedRoleCredentialProvider: Failed to get credentials for role arn:aws:iam:::role/writerole</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So we are now going to assume the writerole with the writeuser:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ cat core-site.xml | grep -C 3 -E '(user|role.arn)'
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.arn&lt;/name&gt;
+  &lt;value&gt;arn:aws:iam:::role/writerole&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.access.key&lt;/name&gt;
+  &lt;value&gt;writeuser&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.secret.key&lt;/name&gt;
+  &lt;value&gt;writeuser&lt;/value&gt;
+&lt;/property&gt;
+--</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can list all the folders at the root level of the bucket:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/
+
+Found 2 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-20 03:38 s3a://bucket-data/read-folder
+drwxrwxrwx   - hadoop hadoop          0 2021-06-20 03:38 s3a://bucket-data/write-folder</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But we can only access the write-folder if we try and list what is
+inside the read-folder it will fail:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/read-folder/
+ls: read-folder/: getFileStatus on read-folder/: com.amazonaws.services.s3.model.AmazonS3Exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: tx0000000000000003b77a9-0060cef05f-fa06c-lab1; S3 Extended Request ID: null), S3 Extended Request ID: null:403 Forbidden</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As expected we can list subfolders and objects inside the write-folder,
+and also read/GET objects:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/write-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-19 11:59 s3a://bucket-data/write-folder/write-object
+[hadoop@hadoop hadoop]$ hdfs dfs  -cat  s3a://bucket-data/write-folder/write-object
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.5 bastion.cephocs.com bastion</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because the policy gives access to the writerole to write inside the
+write-folder we can check this is the case:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -rm  s3a://bucket-data/write-folder/write-object
+Deleted s3a://bucket-data/write-folder/write-object
+[hadoop@hadoop hadoop]$ hdfs dfs  -put /etc/hosts  s3a://bucket-data/write-folder/write-object-new
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-data/write-folder/
+Found 1 items
+-rw-rw-rw-   1 hadoop hadoop        177 2021-06-20 03:39 s3a://bucket-data/write-folder/write-object-new</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_role_policy_examples"><a class="anchor" href="#_role_policy_examples"></a>3.1. Role Policy examples.</h3>
+<div class="paragraph">
+<p>Role policies are written in the same way as the bucket policies, the
+only difference is that the principal of the policy in a role policy is
+always the role, which is why in role policies the principal statement
+is absent. A small example to understand this better:</p>
+</div>
+<div class="paragraph">
+<p>Bucket policy, has a principal with the role:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::role/readrole",
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-data"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The same rule in a Role Policy, the principal is absent because
+implicitly the principal is always going to be the role to which we
+apply the role policy:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+      ],
+      "Resource": [
+        "arn:aws:s3:::svcbucket"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_role_policy_example_local_rgw_user"><a class="anchor" href="#_role_policy_example_local_rgw_user"></a>3.2. Role Policy. Example. Local RGW user.</h3>
+<div class="paragraph">
+<p>In this example we are going to try and achieve the same thing we did
+with example number 2 of bucket policies, where we have a read and a
+writing role, the readuser assuming the readrole will only be able to
+access the readfolder, and the writeuser assuming the writerole will
+only be able to access the writefolder.</p>
+</div>
+<div class="paragraph">
+<p>The steps I have followed with a rgw local user called admin, I created:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A bucket called bucket-pol</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called write-folder</p>
+</li>
+<li>
+<p>Inside the bucket create a folder called read-folder</p>
+</li>
+<li>
+<p>A role called readrole</p>
+</li>
+<li>
+<p>A role called writerole</p>
+</li>
+<li>
+<p>A local RGW user called readuser</p>
+</li>
+<li>
+<p>A local RGW user called writeuser</p>
+</li>
+<li>
+<p>A role document policy to give readuser access to the readrole.</p>
+</li>
+<li>
+<p>A role document policy to give writeuser access to the writerole.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Once we have all this configuration in place, we can just double check
+the roles are in place:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@cepha /]# radosgw-admin role list | grep -C 3 -E '(readrole|writerole)'
+warning: line 8: 'log_file' in section 'client.rgw.cepha.rgw0' redefined
+    },
+    {
+        "RoleId": "2b0926d2-5fed-47f2-8001-0385cc0f22e9",
+        "RoleName": "readrole",
+        "Path": "/",
+        "Arn": "arn:aws:iam:::role/readrole",
+        "CreateDate": "2021-06-19T16:02:35.296Z",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam:::user/readuser\",\"arn:aws:iam:::user/readuser2\"]},\"Action\":[\"sts:AssumeRole\"]}]}"
+--
+    },
+    {
+        "RoleId": "0b1abf82-abd8-4741-95e7-7070f08c3850",
+        "RoleName": "writerole",
+        "Path": "/",
+        "Arn": "arn:aws:iam:::role/writerole",
+        "CreateDate": "2021-06-19T16:03:15.20Z",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam:::user/writeuser\",\"arn:aws:iam:::user/writeuser2\"]},\"Action\":[\"sts:AssumeRole\"]}]}"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are now going to double check there is no bucket policy configured in
+bucket bucket-pol that might interfere with our role policies.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@bastion ~]# aws --profile admin --endpoint http://10.10.0.10:8080 s3api delete-bucket-policy --bucket bucket-pol
+[root@bastion ~]# aws --profile admin --endpoint http://10.10.0.10:8080 s3api get-bucket-policy --bucket bucket-pol
+An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The role policy we are going to apply is the same as the bucket policy
+but removing the principal statement:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@bastion policy]# cat read-role-rolepolicy.json | jq .
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-pol"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:Get*",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-pol",
+        "arn:aws:s3:::bucket-pol/read-folder",
+        "arn:aws:s3:::bucket-pol/read-folder/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": "s3:*",
+      "NotResource": [
+        "arn:aws:s3:::bucket-pol",
+        "arn:aws:s3:::bucket-pol/read-folder",
+        "arn:aws:s3:::bucket-pol/read-folder/*"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One thing to take in account is that the radosgw-admin command we use to
+apply the role policy doesn’t like spaces in the .json, so we need to
+remove them from the previous policy before applying:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@bastion policy]# cat read-role-rolepolicy.json | tr -d " \t\n\r"
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListBucket","s3:ListBucketMultipartUploads","s3:Get*"],"Resource":["arn:aws:s3:::bucket-pol"]},{"Effect":"Allow","Action":["s3:Get*","s3:ListMultipartUploadParts"],"Resource":["arn:aws:s3:::bucket-pol","arn:aws:s3:::bucket-pol/read-folder","arn:aws:s3:::bucket-pol/read-folder/*"]},{"Effect":"Deny","Action":"s3:*","NotResource":["arn:aws:s3:::bucket-pol","arn:aws:s3:::bucket-pol/read-folder","arn:aws:s3:::bucket-pol/read-folder/*"]}]}
+[root@bastion policy]# cat read-role-rolepolicy.json | tr -d " \t\n\r" &gt; read-role-rolepolicy-rgw.json</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We now apply the policy to the readrole using the radosgw-admin command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@cepha tmp]# radosgw-admin role-policy put --role-name=readrole --policy-name=access-list-bucket --policy-doc=$(&lt;read-role-rolepolicy-rgw.json)
+warning: line 8: 'log_file' in section 'client.rgw.cepha.rgw0' redefined
+Permission policy attached successfully</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once applied we configure our core-site.xml to use the readuser local
+RGW user, and assume the readrole:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;property&gt;
+  &lt;name&gt;fs.s3a.assumed.role.arn&lt;/name&gt;
+  &lt;value&gt;arn:aws:iam:::role/readrole&lt;/value&gt;
+&lt;/property&gt;
+
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.access.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;
+
+
+&lt;property&gt;
+  &lt;name&gt;fs.s3a.secret.key&lt;/name&gt;
+  &lt;value&gt;readuser&lt;/value&gt;
+&lt;/property&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With this in place, let’s test the access with the hdfs command. We can
+access the bucket and we will be able to list all folders at the root
+level like expected:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-pol/
+Found 2 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-26 03:50 s3a://bucket-pol/read-folder
+drwxrwxrwx   - hadoop hadoop          0 2021-06-26 03:50 s3a://bucket-pol/write-folder</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we try to access/list the write-folder we should get a 403:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -ls  s3a://bucket-pol/write-folder/
+ls: write-folder/: getFileStatus on write-folder/: com.amazonaws.services.s3.model.AmazonS3Exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: tx000000000000000096aa6-0060d6dc99-197571-lab1; S3 Extended Request ID: null), S3 Extended Request ID: null:403 Forbidden</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we try to access/list the read-folder we should get access:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -cat  s3a://bucket-pol/read-folder/hosts1
+deprecated. Instead, use fs.s3a.server-side-encryption.key
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.5 bastion.cephocs.com bastion</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because this is a read-role if we try to put/write it should fail:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -mkdir  s3a://bucket-pol/read-folder/folder1
+mkdir: read-folder/folder1/: PUT 0-byte object  on read-folder/folder1/: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx000000000000000097ccf-0060d6dfd7-197571-lab1; S3 Extended Request ID: 197571-lab1-lab), S3 Extended Request ID: 197571-lab1-lab:AccessDenied
+
+[hadoop@hadoop hadoop]$ hdfs dfs  -put /etc/hosts  s3a://bucket-pol/read-folder/hosts3
+2021-06-26 04:06:45,701 WARN s3a.S3AInstrumentation: Closing output stream statistics while data is still marked as pending upload in OutputStreamStatistics{blocksSubmitted=1, blocksInQueue=1, blocksActive=0, blockUploadsCompleted=0, blockUploadsFailed=0, bytesPendingUpload=177, bytesUploaded=0, blocksAllocated=1, blocksReleased=1, blocksActivelyAllocated=0, exceptionsInMultipartFinalize=0, transferDuration=0 ms, queueDuration=0 ms, averageQueueTime=0 ms, totalUploadDuration=0 ms, effectiveBandwidth=0.0 bytes/s}
+put: read-folder/hosts3._COPYING_: put on read-folder/hosts3._COPYING_: com.amazonaws.services.s3.model.AmazonS3Exception: null (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: tx000000000000000097e28-0060d6e015-197571-lab1; S3 Extended Request ID: 197571-lab1-lab), S3 Extended Request ID: 197571-lab1-lab:AccessDenied</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let’s move to the write role example, we follow the same steps, we first
+write the policy:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@bastion policy]# cat write-role-rolepolicy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-pol"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+       "s3:Get*",
+       "s3:PutObject",
+       "s3:DeleteObject",
+       "s3:AbortMultipartUpload",
+       "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::bucket-pol",
+        "arn:aws:s3:::bucket-pol/write-folder",
+        "arn:aws:s3:::bucket-pol/write-folder/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": "s3:*",
+      "NotResource": [
+        "arn:aws:s3:::bucket-pol",
+        "arn:aws:s3:::bucket-pol/write-folder",
+        "arn:aws:s3:::bucket-pol/write-folder/*"
+      ]
+    }
+  ]
+}</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[root@bastion policy]# cat write-role-rolepolicy.json | tr -d " \t\n\r"
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListBucket","s3:ListBucketMultipartUploads","s3:Get*"],"Resource":["arn:aws:s3:::bucket-pol"]},{"Effect":"Allow","Action":["s3:Get*","s3:PutObject","s3:DeleteObject","s3:AbortMultipartUpload","s3:ListMultipartUploadParts"],"Resource":["arn:aws:s3:::bucket-pol","arn:aws:s3:::bucket-pol/write-folder","arn:aws:s3:::bucket-pol/write-folder/*"]},{"Effect":"Deny","Action":"s3:*","NotResource":["arn:aws:s3:::bucket-pol","arn:aws:s3:::bucket-pol/write-folder","arn:aws:s3:::bucket-pol/write-folder/*"]}]}[root@bastion policy]#
+
+[root@bastion policy]# cat write-role-rolepolicy.json | tr -d " \t\n\r" &gt; write-role-rolepolicy-rgw.json
+[root@cepha tmp]# radosgw-admin role-policy put --role-name=writerole --policy-name=access-list-bucket --policy-doc=$(&lt;write-role-rolepolicy-rgw.json)
+warning: line 8: 'log_file' in section 'client.rgw.cepha.rgw0' redefined
+Permission policy attached successfully</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we try to create a dir or delete a file inside the write-folder it
+works as expected:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[hadoop@hadoop hadoop]$ hdfs dfs  -mkdir   s3a://bucket-pol/write-folder/folder4
+[hadoop@hadoop hadoop]$ hdfs dfs  -ls   s3a://bucket-pol/write-folder/
+Found 3 items
+drwxrwxrwx   - hadoop hadoop          0 2021-06-26 04:24 s3a://bucket-pol/write-folder/folder4
+-rw-rw-rw-   1 hadoop hadoop        585 2021-06-26 03:16 s3a://bucket-pol/write-folder/hosts2
+[hadoop@hadoop ~]$ hdfs dfs  -rm  s3a://bucket-pol/write-folder/hosts2
+Deleted s3a://bucket-pol/write-folder/hosts2</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

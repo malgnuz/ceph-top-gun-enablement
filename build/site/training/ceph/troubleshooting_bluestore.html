@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Internal bluestore tools in Ceph containers :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/troubleshooting_bluestore.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph Troubleshooting</li>
+    <li><a href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/troubleshooting_bluestore.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Internal bluestore tools in Ceph containers</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>When troubleshooting Ceph, sometimes we need to use some tools such as
+<code>ceph-objectstore-tool</code> or <code>ceph-bluestore-tool</code>. When working in
+containerized environments this is more complicated as there are a set
+of internal scripts inside the container that automatically start the
+OSD service and the OSD is automatically included in the cluster upon
+start.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_accessing_bluestore_lab"><a class="anchor" href="#_accessing_bluestore_lab"></a>1. Accessing Bluestore LAB.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>1. Set <code>noout</code> flag on Ceph cluster</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  ceph osd set noout
+noout is set</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>2. Login to the node hosting the OSD container</strong></p>
+</div>
+<div class="paragraph">
+<p>In our case we are going to act in the node <code>ceph-node01</code> and the <code>osd.0</code>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ceph osd tree
+ID  CLASS  WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+-1         0.04887  root default
+-3         0.04887      datacenter DC1
+-2         0.02928          host ceph-node01
+ 0    hdd  0.00980              osd.0             up   1.00000  1.00000
+-4         0.00980          host ceph-node02
+ 1    hdd  0.00980              osd.1             up   1.00000  1.00000
+-5         0.00980          host ceph-node03
+ 2    hdd  0.00980              osd.2             up   1.00000  1.00000</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*3. Delete the symbolic link for OSD 3, and copy the OSD service template with
+the name of the previous OSD3 file, so we can edit it.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>systemctl disable --now ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@osd.0.service</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*4. Make a backup/copy of the unit.run file for OSD 0</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cp -p /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/unit.run /root/unit.run.backup</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>5. Edit <code>/var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/unit.run</code> unit file</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add <code>-it --entrypoint /usr/bin/bash</code> option to the second podman command.</p>
+</li>
+<li>
+<p>Remove everything after the container image definition.</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/unit.run
+set -e
+/bin/install -d -m0770 -o 167 -g 167 /var/run/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef
+# LVM OSDs use ceph-volume lvm activate
+! /bin/podman rm -f ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd.0-activate 2&gt; /dev/null
+! /bin/podman rm -f ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0-activate 2&gt; /dev/null
+! /bin/podman rm -f --storage ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0-activate 2&gt; /dev/null
+! /bin/podman rm -f --storage ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd.0-activate 2&gt; /dev/null
+/bin/podman run --rm --ipc=host --stop-signal=SIGTERM --authfile=/etc/ceph/podman-auth.json --net=host --entrypoint /usr/sbin/ceph-volume --privileged --group-add=disk --init --name ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0-activate -e CONTAINER_IMAGE=registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81 -e NODE_NAME=ceph-node01 -e CEPH_USE_RANDOM_NONCE=1 -e CEPH_VOLUME_SKIP_RESTORECON=yes -e CEPH_VOLUME_DEBUG=1 -v /var/run/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef:/var/run/ceph:z -v /var/log/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef:/var/log/ceph:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/crash:/var/lib/ceph/crash:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0:/var/lib/ceph/osd/ceph-0:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/config:/etc/ceph/ceph.conf:z -v /dev:/dev -v /run/udev:/run/udev -v /sys:/sys -v /run/lvm:/run/lvm -v /run/lock/lvm:/run/lock/lvm -v /:/rootfs registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81 activate --osd-id 0 --osd-uuid 2bef24fb-bb2e-43aa-9cf3-fceeabee206c --no-systemd --no-tmpfs
+# osd.0
+! /bin/podman rm -f ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd.0 2&gt; /dev/null
+! /bin/podman rm -f ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0 2&gt; /dev/null
+! /bin/podman rm -f --storage ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0 2&gt; /dev/null
+! /bin/podman rm -f --storage ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd.0 2&gt; /dev/null
+/bin/podman run --rm --ipc=host --stop-signal=SIGTERM --authfile=/etc/ceph/podman-auth.json --net=host -it --entrypoint /usr/bin/bash --privileged --group-add=disk --init --name ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0 -d --log-driver journald --conmon-pidfile /run/ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@osd.0.service-pid --cidfile /run/ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@osd.0.service-cid --cgroups=split -e CONTAINER_IMAGE=registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81 -e NODE_NAME=ceph-node01 -e CEPH_USE_RANDOM_NONCE=1 -e TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES=134217728 -v /var/run/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef:/var/run/ceph:z -v /var/log/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef:/var/log/ceph:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/crash:/var/lib/ceph/crash:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0:/var/lib/ceph/osd/ceph-0:z -v /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/config:/etc/ceph/ceph.conf:z -v /dev:/dev -v /run/udev:/run/udev -v /sys:/sys -v /run/lvm:/run/lvm -v /run/lock/lvm:/run/lock/lvm -v /:/rootfs registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>6. Login to container associated with our OSD</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec -it ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-0 bash</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>7. Run <code>ceph-objectstore-tool</code> or <code>ceph-bluestore-tool</code> commands</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ceph-objectstore-tool --data-path /var/lib/ceph/osd/ceph-0 --op list
+$ ceph-bluestore-tool show-label --dev /dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59
+{
+    "/dev/ceph-a54942f0-a335-4a5f-9028-27825e779605/osd-data-a4a8734e-0222-4c7c-933e-73da01938c59": {
+        "osd_uuid": "8a398b35-aa13-4363-9652-e2aa6dd1fb8d",
+        "size": 32208060416,
+        "btime": "2021-01-25 07:02:17.277679",
+        "description": "main",
+        "bluefs": "1",
+        "ceph_fsid": "d8a34408-3b5a-4ee3-bd12-b32f6f466c60",
+        "kv_backend": "rocksdb",
+        "magic": "ceph osd volume v026",
+        "mkfs_done": "yes",
+        "osd_key": "AQBHsw5glhbhNhAAXGDN2BdMkXan71OFduMrRA==",
+        "ready": "ready",
+        "require_osd_release": "14",
+        "whoami": "0"
+    }
+}
+$ exit</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_restore_steps"><a class="anchor" href="#_restore_steps"></a>2. Restore steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>*1. Copy <code>/root/unit.run.backup</code> unit file from <code>/root</code> directory to
+<code>/var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/unit.run</code></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># cp -p /root/unit.run.backup /var/lib/ceph/910c8bb8-95bc-11ed-b7d6-2cc26078e4ef/osd.0/unit.run</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>*2. Enable and start the OSD 0 process with Systemd</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># systemctl enable --now ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@osd.0.service
+Created symlink /etc/systemd/system/ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef.target.wants/ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@osd.0.service → /etc/systemd/system/ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef@.service.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>3. Unset <code>noout</code> flag on Ceph cluster</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  ceph osd unset noout
+noout is unset</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>4. Ensure Ceph status is in <code>HEALTH_OK</code></strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$  ceph -s
+  cluster:
+    id:     d8a34408-3b5a-4ee3-bd12-b32f6f466c60
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph-node01,ceph2,ceph3 (age 27h)
+    mgr: ceph2(active, since 27h), standbys: ceph-node01, ceph3
+    osd: 6 osds: 6 up (since 80s), 6 in (since 80s)
+    rgw: 3 daemons active (ceph-node01.rgw0, ceph2.rgw0, ceph3.rgw0)
+
+  task status:
+
+  data:
+    pools:   18 pools, 264 pgs
+    objects: 1.24k objects, 56 KiB
+    usage:   6.4 GiB used, 174 GiB / 180 GiB avail
+    pgs:     264 active+clean
+
+  io:
+    client:   341 B/s rd, 0 op/s rd, 0 op/s wr</pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

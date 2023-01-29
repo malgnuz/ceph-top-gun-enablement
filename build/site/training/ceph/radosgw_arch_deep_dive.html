@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Deep dive into RGW Architecture. :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_arch_deep_dive.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_arch_deep_dive.html">RGW Deep Dive</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_arch_deep_dive.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Deep dive into RGW Architecture.</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="ulist">
+<div class="title">Goals</div>
+<ul>
+<li>
+<p>Review the RGW frontends</p>
+</li>
+<li>
+<p>Understanding RGW Rados Pools</p>
+</li>
+<li>
+<p>Detailed overview of Bucket Index &amp; Bucket Sharding</p>
+</li>
+<li>
+<p>Deep Dive RGW Data Layout</p>
+</li>
+<li>
+<p>S3 MultiPart Upload</p>
+</li>
+<li>
+<p>Garbage Collector</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_radosgw_frontends"><a class="anchor" href="#_radosgw_frontends"></a>1. RadosGW Frontends</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Ceph Object Gateway exposes its RESTful interfaces over HTTP. RGW currently
+supports two embedded HTTP frontend libraries that can be configured with
+<code>rgw_frontends</code> :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>CivetWeb web server. CivetWeb is a C/C++ embeddable web server.</p>
+</li>
+<li>
+<p>Beast. The beast front end uses the Boost Beast library for HTTP parsing and the Boost.Asio library for asynchronous network i/o.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the current versions of Ceph, Beast is the default frontend used, It provides
+increased performance than it&#8217;s predecessor, Civetweb.</p>
+</div>
+<div class="paragraph">
+<p>Reference the
+<a href="https://www.redhat.com/en/blog/comparing-red-hat-ceph-storage-33-bluestorebeast-performance-red-hat-ceph-storage-20-filestorecivetweb">Civetweb
+versus Beast Blog</a> for more information.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config get mon rgw_frontends
+beast port=7480</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Frontend and Frontend options can be configured with Cephadm, example spec:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>service_type: rgw
+service_id: myrealm.myzone
+spec:
+    rgw_realm: myrealm
+    rgw_zone: myzone
+    ssl: true
+    rgw_frontend_port: 1234
+    rgw_frontend_type: beast
+    rgw_frontend_ssl_certificate: ...</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_radosgw_pools"><a class="anchor" href="#_radosgw_pools"></a>2. RadosGW pools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Ceph Object Gateway uses several pools for its various storage needs, listed in the Zone object. A single zone named default is created automatically with pool names starting with default.rgw.</p>
+</div>
+<div class="paragraph">
+<p>When radosgw first tries to operate on a zone pool that does not exist, it will create that pool with the default values from osd pool default pg num and osd pool default pgp num. These defaults are sufficient for some pools, but others (especially those listed in placement_pools for the bucket index and data) will require additional tuning.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph osd lspools | grep rgw
+2 .rgw.root
+3 default.rgw.log
+4 default.rgw.control
+5 default.rgw.meta
+6 default.rgw.buckets.index
+7 default.rgw.buckets.data</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Pool names particular to a zone follow the naming convention <code>zone-name.pool-name</code>. For example, a zone named us-east will have the following pools:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.rgw.root
+us-east.rgw.control
+us-east.rgw.meta
+us-east.rgw.log
+us-east.rgw.buckets.index
+us-east.rgw.buckets.data</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>[TODO] Create  table
+ Pool
+Description
+.rgw.root
+Domain Root Pool
+.rgw.control
+Control Pool
+.rgw.gc
+The garbage Collection pool, contains hash buckets containing the IDs of the objects to be deleted
+.log
+Will log bucket and object actions by the RGW
+.intent-log
+Store a copy of the object update request so that it can be used for undo/redo in case the object request fails
+.usage
+Contains a log of usage per user
+.users
+Contains access and secret keys, mapped to user id
+.users.email
+Contains emails associated with a user
+.users.swift
+Contains swift sub-user information
+.users.uid
+Contains a mapping of a user&#8217;s unique uid
+.rgw.buckets.index
+Contains the bucket index
+.rgw.buckets
+Contains object data
+.rgw.root
+Stores the region and zone definition for the RGW</p>
+</div>
+<div class="paragraph">
+<p>The zone definitions list several more pools than that, but many of those are consolidated through the use of rados namespaces.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin zone get --rgw-zone default
+{
+    "id": "d9c4f708-5598-4c44-9d36-849552a08c4d",
+    "name": "default",
+    "domain_root": "default.rgw.meta:root",
+    "control_pool": "default.rgw.control",
+    "gc_pool": "default.rgw.log:gc",
+    "lc_pool": "default.rgw.log:lc",
+    "log_pool": "default.rgw.log",
+    "intent_log_pool": "default.rgw.log:intent",
+    "usage_log_pool": "default.rgw.log:usage",
+    "roles_pool": "default.rgw.meta:roles",
+    "reshard_pool": "default.rgw.log:reshard",
+    "user_keys_pool": "default.rgw.meta:users.keys",
+    "user_email_pool": "default.rgw.meta:users.email",
+    "user_swift_pool": "default.rgw.meta:users.swift",
+    "user_uid_pool": "default.rgw.meta:users.uid",
+    "otp_pool": "default.rgw.otp",
+    "system_key": {
+        "access_key": "",
+        "secret_key": ""
+    },
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "default.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "default.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "default.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    "realm_id": "",
+    "notif_pool": "default.rgw.log:notif"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can list rados namespaces with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados ls -p default.rgw.meta --all | awk '{ print $1 }' | sort -u
+root
+users.keys
+users.uid</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bucket_index"><a class="anchor" href="#_bucket_index"></a>3. Bucket Index</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Rados Gateway maintains an index per bucket that holds the list and the
+metadata of all the objects it contains, the Index holds a key-value map in
+rados objects, The value holds basic metadata for each object like header, number of objects, total size,</p>
+</div>
+<div class="paragraph">
+<p>The bucket index is also used for multiple tasks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Listing the bucket content</p>
+</li>
+<li>
+<p>Maintaining a journal for versioned operations</p>
+</li>
+<li>
+<p>Bucket quota metadata</p>
+</li>
+<li>
+<p>Log for multi-zone synchronization</p>
+</li>
+<li>
+<p>Bucket Versioning</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Each Bucket Index is an Omap entry in RocksDB, Omap is a key-value store associated with an object in a way similar to how Extended Attributes associate with a POSIX file. An object’s omap is not physically located in the object’s storage, Omaps are stored in RocksDB.</p>
+</div>
+<div class="paragraph">
+<p>We can also create Indexless buckets:
+Provides a mechanism in which RadosGW does not track objects in specific buckets. This removes resource contention and reduces the number of round trips RadosGW needs to make to the RADOS backend. Not supported on multi-site configurations</p>
+</div>
+<div class="paragraph">
+<p>Bucket Index pool for the default zone:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph osd lspools | grep default.rgw.buckets.index
+6 default.rgw.buckets.index</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can list the Bucket Index for a specific bucket using the <code>radosgw-admin bi
+list command</code>, where we can see the metadata it stores.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin bi list --bucket bucket1
+[
+    {
+        "type": "plain",
+        "idx": "hosts5",
+        "entry": {
+            "name": "hosts5",
+            "instance": "",
+            "ver": {
+                "pool": 16,
+                "epoch": 3
+            },
+            "locator": "",
+            "exists": "true",
+            "meta": {
+                "category": 1,
+                "size": 4066,
+                "mtime": "2022-12-14T16:27:02.562603Z",
+                "etag": "71ad37de1d442f5ee2597a28fe07461e",
+                "storage_class": "",
+                "owner": "test",
+                "owner_display_name": "test",
+                "content_type": "",
+                "accounted_size": 4066,
+                "user_data": "",
+                "appendable": "false"
+            },
+            "tag": "_iDrB7rnO7jqyyQ2po8bwqE0vL_Al6ZH",
+            "flags": 0,
+            "pending_map": [],
+            "versioned_epoch": 0
+        }
+    },</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we take a look at the objects in pool <code>default.rgw.buckets.index</code> , we have
+several .dir objects,  By default, it is a single RADOS .dir object per bucket, but
+it is possible since Hammer to shard that map over multiple RADOS objects. We
+will cover Bucket sharding in the next section.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.index  ls
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.9
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.0
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.10
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.1
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.7
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.8
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.6
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.5
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.4
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each .dir object is a bucket index; we have 11 because it&#8217;s the default number of
+shards per bucket. the .dir is formatted in the following way
+.dir.&lt;maker&gt;.&lt;Shard Number&gt;</p>
+</div>
+<div class="paragraph">
+<p>We can get the marker for a bucket using the stats command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin bucket stats --bucket bucket1 | grep marker
+    "marker": "7fb0a3df-9553-4a76-938d-d23711e67677.34162.1",</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that we know that the marker for bucket1 is
+<code>7fb0a3df-9553-4a76-938d-d23711e67677.34162.1</code>. Let&#8217;s upload an object to
+bucket1 called file1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ aws --endpoint=http://ceph-node02:8080 s3 cp /etc/hosts s3://bucket1/file1 --region default
+upload: ../etc/hosts to s3://bucket1/file1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>let&#8217;s investigate the bucket index for this bucket at the rados level, by
+listing the omapkeys on the bucket index object, we can see we have a key
+called file1, the same as the uploaded object name in S3.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.index listomapkeys .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+file1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we check the values, we can see that the key/value entry in the bucket index
+omap for bucket1 is 217 bytes in size. In the hex translation, we see some info
+like the object name</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.index listomapvals .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+file1
+value (217 bytes) :
+00000000  08 03 d3 00 00 00 05 00  00 00 66 69 6c 65 31 01  |..........file1.|
+00000010  00 00 00 00 00 00 00 01  07 03 5a 00 00 00 01 32  |..........Z....2|
+00000020  05 00 00 00 00 00 00 4b  ab a1 63 95 74 ba 04 20  |.......K..c.t.. |</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we add more objects to our bucket we will see new key/value entries for
+each object:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.index listomapkeys .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+file1
+file2
+file4
+file10</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can check the usage of the <code>default.rgw.buckets.index</code>, and it&#8217;s 0 bytes,
+although we have 11 Objects(11 index shards of our only bucket, bucket1), Why is
+that?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>rados df -p default.rgw.buckets.index
+POOL_NAME                  USED  OBJECTS  CLONES  COPIES  MISSING_ON_PRIMARY  UNFOUND  DEGRADED  RD_OPS       RD  WR_OPS      WR  USED COMPR  UNDER COMPR
+default.rgw.buckets.index   0 B       11       0      33                   0        0         0     208  207 KiB      41  20 KiB         0 B          0 B
+
+# rados -p default.rgw.buckets.index stat .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+default.rgw.buckets.index/.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2 mtime 2022-12-20T07:32:11.000000-0500, size 0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As we mentioned before, bucket index objects are Omaps that are stored in the rocksdb database of each OSD, not on the actual pool default.rgw.buckets.index
+That is why it&#8217;s essential to use a fast/flash device for our DB partition, as
+the DB partition holds the RocksDB database and the Omaps for our bucket index,
+having fast media in the DB partition means faster access to our bucket index,
+and quicker listing/access to the objects in our buckets.</p>
+</div>
+<div class="paragraph">
+<p>One final note, if we want to know on which OSDs our bucket index Omaps are
+stored, we can use the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph osd map default.rgw.buckets.index default.rgw.buckets.index .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+osdmap e90 pool 'default.rgw.buckets.index' (9) object '.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2/default.rgw.buckets.index' -&gt; pg 9.6fa75bc9 (9.9) -&gt; up ([5,0,10], p5) acting ([5,0,10], p5)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Our Bucket Index log for shard 2 of bucket1 is on OSD 5,0 and 10(replica 3, the
+primary is OSD.5), If needed for troubleshooting, we could then further
+investigate in rocksdb with the ceph-objectstore-tool, more information on how
+to use this tool on a containerised setup[link]</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bucket_sharding"><a class="anchor" href="#_bucket_sharding"></a>4. Bucket Sharding</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sharding is the process of breaking down data into multiple locations to increase parallelism, as well as distribute the load. This is a common feature used in databases.</p>
+</div>
+<div class="paragraph">
+<p>The concept of sharding is used in Ceph object storage for splitting the bucket
+index in RADOSGW</p>
+</div>
+<div class="paragraph">
+<p>RADOS Gateway keeps an index for all the objects in its buckets for faster and easier lookup.</p>
+</div>
+<div class="paragraph">
+<p>When the number of objects increases, the RADOS object&#8217;s size also increases. Two problems arise due to the increased index size.</p>
+</div>
+<div class="paragraph">
+<p>RADOS does not work well with large objects since it’s not designed as such. Operations such as recovery, scrubbing etc.. work on a single object. If the object size increases, OSDs may start hitting timeouts because reading a large object may take a long time. This is one reason that all RADOS client interfaces, such as RBD, RGW, CephFS use a standard 4MB object size.
+Since the index is stored in a single RADOS object, only a single operation can be done at any given time. When the number of objects increases, the index stored in the RADOS object grows. Since a single index is handling a large number of objects, and there is a chance the number of operations also increases, parallelism is not possible, which can become a bottleneck. Multiple operations must wait in a queue since a single operation is possible.
+The bucket index is divided into multiple parts to work around these problems. Each shard is kept on a separate RADOS object within the index pool.</p>
+</div>
+<div class="paragraph">
+<p>Sharding is configured with the tunable bucket_index_max_shards. By default,
+this tunable is set to 11.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin bucket stats --bucket bucket1 | grep shards
+    "num_shards": 11,</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can see a shard per object from 0 to 10 at the rados level for bucket1</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.index ls | grep .dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.9
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.0
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.10
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.1
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.7
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.8
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.2
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.6
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.5
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.4
+.dir.7fb0a3df-9553-4a76-938d-d23711e67677.34162.1.3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At bucket creation time, the number of shards is defined by the parameter bucket_index_max_shards set at zonegroup level, and it is used for all buckets.</p>
+</div>
+<div class="paragraph">
+<p>If a different number of shards is required for a specific bucket, it is possible to change it.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Red Hat recommends a maximum of 102,400 objects per bucket index shard</p>
+</li>
+<li>
+<p>The current maximum supported number of bucket index shards is 65521</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dynamic_bucket_re_sharding"><a class="anchor" href="#_dynamic_bucket_re_sharding"></a>5. Dynamic Bucket Re-Sharding</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Since Luminous we have a new RGW capability to manage the sharding of RGW bucket index objects automatically. This completely automates the management of RGW&#8217;s internal index objects</p>
+</div>
+<div class="paragraph">
+<p>One property of RADOS (Ceph&#8217;s underlying object store) is that it doesn&#8217;t keep an index for all of the objects in the system. Instead, it leverages the CRUSH algorithm to calculate the location of any object based on its name, cluster configuration, and cluster state. This is a scalability enabler: the overall IO capacity can scale with the number of OSDs in the system since there aren&#8217;t any metadata servers or lookups that need to be used for these IO operations. The RADOS gateway (RGW), which provides an S3-compatible object storage service on top of RADOS, leverages this property. Indeed, when accessing RGW objects, there is no need to touch any index.</p>
+</div>
+<div class="paragraph">
+<p>However, RGW still maintains an index per bucket, which holds a list and metadata of all the objects it contains. This is needed since RGW needs to be able to provide this data when requested (for example, when listing RGW bucket contents), and RADOS itself does not provide an efficient listing capability. This bucket index is also used for other tasks, like maintaining a journal for versioned operations, bucket quota metadata, and a log for multi-zone synchronization. The bucket index does not affect read operations on objects but adds extra operations when writing and modifying RGW objects.</p>
+</div>
+<div class="paragraph">
+<p>Luminous finally introduces a dynamic bucket resharding capability. Bucket indexes will now reshard automatically as the number of objects in the bucket grows. Furthermore, there is no need to stop IO operations that go to the bucket (although some concurrent operations may experience additional latency when resharding is in progress). The radosgw process automatically identifies buckets that need to be resharded (if the number of the objects per shard is too large), and schedules a resharding for these buckets. A special thread is responsible for processing the scheduled reshard operations.</p>
+</div>
+<div class="paragraph">
+<p>The feature is enabled by default; no action is needed, and administrators should no longer worry about this implementation detail.</p>
+</div>
+<div class="paragraph">
+<p>The process for dynamic bucket resharding periodically checks all the Rados Gateway buckets and detects buckets that require resharding. If a bucket has grown over the value specified in the rgw_max_objs_per_shard parameter, Rados Gateway reshards the bucket dynamically in the background.</p>
+</div>
+<div class="paragraph">
+<p>Dynamic Resharding process can be monitored and controlled with the <code>radosgw-admin reshard</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>#  radosgw-admin reshard
+Expected one of the following:
+  add
+  bucket
+  cancel
+  list
+  process
+  stale
+  stale-instances
+  status</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_radosgw_data_layout"><a class="anchor" href="#_radosgw_data_layout"></a>6. RadosGW data Layout</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Although RADOS only knows about pools and objects with their Extended Attributes (xattrs) and object map (OMAP), conceptually, Ceph Object Gateway organizes its data into three different kinds:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>bucket index</p>
+</li>
+<li>
+<p>metadata</p>
+</li>
+<li>
+<p>data</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_bucket_index_we_have_already_covered_in_detail"><a class="anchor" href="#_bucket_index_we_have_already_covered_in_detail"></a>6.1. Bucket index we have already covered in detail.</h3>
+
+</div>
+<div class="sect2">
+<h3 id="_metadata"><a class="anchor" href="#_metadata"></a>6.2. Metadata</h3>
+<div class="paragraph">
+<p>There are three sections of metadata:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>bucket: Holds a mapping between bucket name and bucket instance ID.</p>
+</li>
+<li>
+<p>bucket.instance: Holds bucket instance information.</p>
+</li>
+<li>
+<p>user: Holds user information.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>They are represented in the default.rgw.meta pool with root namespace. A bucket record is loaded to obtain a marker, which serves as a bucket ID.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin metadata list bucket
+[
+    "bucket1"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>bucket.instance relation between bucket name and bucket instance id.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin metadata list bucket.instance
+[
+    "bucket1:7fb0a3df-9553-4a76-938d-d23711e67677.34162.1"
+]</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Account information</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The user ID in Ceph Object Gateway is a string, typically the actual user name from the user credentials and not a hashed or mapped identifier.
+When accessing a user’s data, the user record is loaded from an object USER_ID in the default.rgw.meta pool with users.uid namespace.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin metadata list user
+[
+    "sync-user",
+    "test"
+]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_data"><a class="anchor" href="#_data"></a>6.3. Data</h3>
+<div class="paragraph">
+<p>The object is located in the default.rgw.buckets.data pool. Object name is MARKER_KEY, for example, default.7593.4_image.png, where the marker is default.7593.4, and the key is image.png. These concatenated names are not parsed and are passed down to RADOS only.</p>
+</div>
+<div class="paragraph">
+<p>Get the name of the data pool for our default zone:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin zone get | grep data_pool</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I have 10 objects at the S3 object storage level:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint=http://ceph-node02:8080 s3 ls s3://bucket1
+2022-12-20 07:32:11       1330 file1
+2022-12-20 07:42:45       1330 file10
+2022-12-20 07:41:23       1330 file2
+2022-12-20 07:41:27       1330 file3
+2022-12-20 07:41:30       1330 file4
+2022-12-20 07:42:25       1330 file5
+2022-12-20 07:42:29       1330 file6
+2022-12-20 07:42:32       1330 file7
+2022-12-20 07:42:36       1330 file8
+2022-12-20 07:42:41       1330 file9</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And also 10 Objects at the Rados level:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data ls
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file5
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file7
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file2
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file10
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file6
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file8
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file9
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file3
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file4</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use the <code>radosgw-admin rados ls</code> command to list rados objects for a
+bucket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin bucket radoslist --bucket bucket1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An S3/RGW object might consist of several RADOS objects, the first of which is the head that contains the metadata, such as manifest, Access Control List (ACL), content type, ETag, and user-defined metadata. The metadata is stored in xattrs.</p>
+</div>
+<div class="paragraph">
+<p>In our example, we have a one-to-one relation because the objects I have uploaded are small in size, only 4kb, If I upload a bigger object it will get split into 4MB objects</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data  stat  7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file1
+default.rgw.buckets.data/7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_file1 mtime 2022-12-20T07:32:11.000000-0500, size 1330</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint=http://ceph-node02:8080 s3 cp awscliv2.zip s3://bucket1/bigfile
+# aws --endpoint=http://ceph-node02:8080 s3 ls s3://bucket1/bigfile
+2022-12-20 15:10:16   20971520 bigfile</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can see that for a single file uploaded, we now have several objects in
+rados, if the upload data size is greater than <code>rgw_obj_stripe_size</code> by default
+set to 4MB:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config get mon rgw_max_chunk_size
+4194304
+The chunk size is the size of RADOS I/O requests that RGW sends when accessing data objects. RGW read and write operations will never request more than this amount in a single request. This also defines the RGW head object size, as head operations need to be atomic, and anything larger than this would require more than a single operation. When RGW objects are written to the default storage class, up to this amount of payload data will be stored alongside metadata in the head object.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>multiple objects are saved, respectively, one header object and one or more tails Object
+(default 4MB).
+- The name format of the head object is (bucket_id)_objectname
+- The name format of the tail object: <code>(bucket_id)_shadow. (Object_Head: prefix) _ {Natural sequence starting from 1}</code></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/object_head_tail.png" alt="Object Head/Tail">
+</div>
+</div>
+<div class="paragraph">
+<p>Head object in our example</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data ls | grep bigfile$
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_bigfile</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The chunk size is the size of RADOS I/O requests that RGW sends when accessing data objects. RGW read and write operations will never request more than this amount in a single request. This also defines the RGW head object size, as head operations need to be atomic, and anything larger than this would require more than a single operation. When RGW objects are written to the default storage class, up to this amount of payload data will be stored alongside metadata in the head object.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph config get mon rgw_max_chunk_size
+4194304</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The header object has the metadata as xattr</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>rados -p default.rgw.buckets.data listxattr 7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_bigfile
+user.rgw.acl
+user.rgw.content_type
+user.rgw.etag
+user.rgw.idtag
+user.rgw.manifest
+user.rgw.pg_ver
+user.rgw.source_zone
+user.rgw.tail_tag
+user.rgw.x-amz-content-sha256
+user.rgw.x-amz-date</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tail objects in our example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data ls | grep shadow_bigfile
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.1_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.2_1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tail objects 4MB in size</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[root@ceph-node01 ~]# rados -p default.rgw.buckets.data stat 7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.1_1
+default.rgw.buckets.data/7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.1_1 mtime 2022-12-20T15:10:16.000000-0500, size 4194304</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the S3 uploaded object is 20MB in size, why do we only have two 4MB shadow
+files?. The answer to that is the multipart upload feature, covered in the
+next section</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[root@ceph-node01 ~]# rados -p default.rgw.buckets.data ls | grep bigfile
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.1_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.3
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.2_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_bigfile.2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV.2</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_s3_multipart_upload"><a class="anchor" href="#_s3_multipart_upload"></a>7. S3 Multipart Upload</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Multipart upload allows you to upload a single object as a set of parts. Each part is a contiguous portion of the object&#8217;s data. You can upload these object parts independently and in any order. If transmission of any part fails, you can retransmit that part without affecting other parts. After all parts of your object are uploaded, Amazon S3 assembles these parts and creates the object. In general, when your object size reaches 100 MB, you should consider using multipart uploads instead of uploading the object in a single operation.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/multipart.png" alt="S3 Multipart Upload">
+</div>
+</div>
+<div class="paragraph">
+<p>Using multipart upload provides the following advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Improved throughput – You can upload parts in parallel to improve throughput.</p>
+</li>
+<li>
+<p>Quick recovery from any network issues – Smaller part size minimizes the impact of restarting a failed upload due to a network error.</p>
+</li>
+<li>
+<p>Pause and resume object uploads – You can upload object parts over time. After you initiate a multipart upload, there is no expiry; you must explicitly complete or stop the multipart upload.</p>
+</li>
+<li>
+<p>Begin an upload before you know the final object size – You can upload an object as you are creating it.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Steps:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Multipart Upload Initiation: When a request comes to upload an object file, the first thing you get is the Upload ID. This is a unique number/identifier for your upload.</p>
+</li>
+<li>
+<p>Parts Upload: It’s important to remember that we need the part ID beside the upload ID. It means that there’s an Upload ID and Part ID for every upload. Please note if you upload a new file with an existing Part ID, this part will be overwritten.</p>
+</li>
+<li>
+<p>Multipart Upload Completion or Abort: To complete the multipart process, we must finish uploading all our parts. Only when the process is completed do we get the ACK that all the parts are okay, and only then can we mark the upload as completed. Please note that if the upload process is aborted, the multipart process gets stuck and never ends unless there’s a lifecycle rule or you re-upload the multipart objects files.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By default, the chuck size of the AWS cli can be configured with the following options in the .aws/config file, the default chunk size is 8MB</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>multipart_threshold is the transfer size threshold for which multipart uploads, downloads, and copies will automatically be triggered. For our script, files larger than 5GB will be uploaded with multipart.</p>
+</li>
+<li>
+<p>max_concurrent_requests is the maximum number of threads that will be used.</p>
+</li>
+<li>
+<p>multipart_chunksize is the chuck size the parts will be split in.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[profile]
+aws_access_key_id=foo
+aws_secret_access_key=bar
+s3 =
+  max_concurrent_requests = 20
+  max_queue_size = 10000
+  multipart_threshold = 64MB
+  multipart_chunksize = 8MB</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have an Upload ID(Bucket ID/Marker) and a Part ID:</p>
+</div>
+<div class="paragraph">
+<p>UploadID: .2~E_PYNwiBq0la0EuZcCOY30KgmRrf1pV. | PartID: . 1 (at the end of the line)</p>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s check it out with an example, we will set the client chunk size to
+5MB, and upload a 20MB file</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws configure set default.s3.multipart_chunksize 5MB
+# aws --endpoint=http://ceph-node02:8080 s3 cp text.txt s3://bucket1/5chuncks</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are sending 5 MB chunks to RGW, RGW has a stripe width of 4 MB, which means RGW will take the first 4 MB and create a "multipart" file and then a 1 MB "shadow" as a tail file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[root@ceph-node01 ~]# rados -p default.rgw.buckets.data ls | grep 5chuncks
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.3_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.4_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.4
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.1_1
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.3
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_5chuncks
+7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Multipart header file is 4MB, and the Tail Shadow file is 1MB</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data stat 7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2
+default.rgw.buckets.data/7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__multipart_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2 mtime 2022-12-21T03:07:49.000000-0500, size 4194304
+# rados -p default.rgw.buckets.data stat 7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2_1
+default.rgw.buckets.data/7fb0a3df-9553-4a76-938d-d23711e67677.34162.1__shadow_5chuncks.2~r3yyxqL2hYs5DW32L9UXR3uawF4VEKL.2_1 mtime 2022-12-21T03:07:49.000000-0500, size 1048576</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These parts are not assembled or merged on the RGW, this is their final resting
+status. The file "7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_5chuncks" is
+a header file; it contains the metadata of the full multipart
+file/object. It is not a merged file from all parts. From Rados, it&#8217;s a 0-byte file</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rados -p default.rgw.buckets.data stat 7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_5chuncks
+default.rgw.buckets.data/7fb0a3df-9553-4a76-938d-d23711e67677.34162.1_5chuncks mtime 2022-12-21T03:07:49.000000-0500, size 0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>More information on Multipart Upload can be found at
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html">AWS
+Multipart Upload</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_radosgw_garbage_collector"><a class="anchor" href="#_radosgw_garbage_collector"></a>8. RadosGW Garbage collector</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When users delete files or upload files with the same name, the files are overwritten (also in re-multipart), and Ceph will insert them into something called GC.</p>
+</div>
+<div class="paragraph">
+<p>Ceph does not remove the files immediately, we can use the commands to list all the files scheduled for removal:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin gc list</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin gc list --include-all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, Ceph waits for 2 hours between gc cycles. To manually run the gc deletion process, run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin gc process --include-all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>GC Tunables that can be configured for heavy delete RGW workloads:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Increase the amount concurrent io the cluster will spend on gc requests. (rgw_gc_max_concurrent_io)</p>
+</li>
+<li>
+<p>Decrease the amount of time rgw will wait before purging an object (rgw_gc_obj_min_wait)</p>
+</li>
+<li>
+<p>Decrease the amount of a RGW will hold a lease on the data to gc’d (rgw_gc_processor_max_time)</p>
+</li>
+<li>
+<p>Decrease the amount of time between the start of consecutive garbage collector threads (rgw_gc_processor_period)</p>
+</li>
+<li>
+<p>rgw_gc_max_trim_chunk</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The rgw_gc_max_objs option should NEVER be modified from it&#8217;s default value in a running cluster. This value should only be modified pre-deployment of the RGW&#8217;s.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

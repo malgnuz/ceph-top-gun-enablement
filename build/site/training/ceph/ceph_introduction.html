@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ceph Introduction :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_introduction.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_introduction.html">Ceph Introduction</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_introduction.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Ceph Introduction</h1>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_understanding_the_storage_micro_universe">1. Understanding the storage micro-universe</a>
+<ul class="sectlevel2">
+<li><a href="#_challenges">1.1. Challenges</a></li>
+<li><a href="#_software_defined_storage">1.2. Software defined storage</a></li>
+</ul>
+</li>
+<li><a href="#_ceph_introduction">2. Ceph introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_timeline">2.1. Timeline</a></li>
+<li><a href="#_goals">2.2. Goals</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="sect1">
+<h2 id="_understanding_the_storage_micro_universe"><a class="anchor" href="#_understanding_the_storage_micro_universe"></a>1. Understanding the storage micro-universe</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_challenges"><a class="anchor" href="#_challenges"></a>1.1. Challenges</h3>
+<div class="paragraph">
+<p>Storage in general faces a few challenges that have been around for quite some time:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Data growth</strong> - Since information technology has been around data simply keeps growing. The move
+from slow storage devices such as punch cards or tape simply accelerated the growth. The first reason
+being that tapes occupy more physical space to store the same amount of data, even though
+both tape and disk saw their density augment on a regular basis.</p>
+</li>
+<li>
+<p><strong>New technologies</strong> - First generation computers only had to deal with character oriented data while
+modern IT infrastructures deal with many different types of information combined with more
+information sharing technologies.</p>
+</li>
+<li>
+<p><strong>Legacy</strong> - IT evolutions force companies to preserve their existing investments (proprietary
+hardware and solutions) while being able to respond to the growing demand and expansion via scale out
+rather than scale up.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When dealing with evolutions, IT departments always have pay attention to the following items:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Storage costs</strong> - Traditional storage infrastructure involve large budgets to install, upgrade and
+maintain traditional hardware-driven solutions. This often leads to silos with the organization
+with specific solutions for specific use cases (e.g. SAN vs NAS or Open vs Mainframe). Combined
+with the sales strategy of traditional storage vendors it can very often lead to crazy expenses
+(e.g. keeping a storage array under maintenance can be as expensive as getting a new storage
+array).</p>
+</li>
+<li>
+<p><strong>Resource and time costs</strong> - Traditional storage infrastructure will often require to have dedicated
+teams to look after each system. Recruitment of versatile storage administrators can become tricky
+when the job market becomes tensed and as we all know, exceptional professional lead to exceptional
+packages.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Supporting different storage access types has always been a requirement for the past 25 years
+in the open system based infrastructure. The following access types are recognized as the basic
+types that any modern storage infrastructure must support:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Block access</strong> - Storage is presented as a storage device and access directly through the operating system.
+In most cases the device is formatted with a hierarchical filesystem to facilitate the consumption
+an d the management of the device. This is traditional within the realm of SANs (Storage Area Networks).</p>
+</li>
+<li>
+<p><strong>File access</strong> - Storage is presented over the network as readily consumable filesystem by a client application.
+The filesystem is managed directly by the storage subsystem hosting the data. Various protocols are
+used for this solution depending on the operating system deployed on the client side (NFS or Network FileSystem
+for UNIX and Linux environments, CIFS or Common Internet FileSystem for Microsoft Windows environments).</p>
+</li>
+<li>
+<p><strong>Object access</strong> - Storage is presented as a non structured collection of objects, each object being the
+combination of a data portion, often referred to as a <code>blob</code>, and a metadata portion that will be used
+to store the attributes of the object. Object storage is accessed via an API with each object being
+assigned a unique ID. The first commercial object storage solution was marketed by EMC<sup>TM</sup> as the Centera
+solution after their acquisition of FilePool a Belgium based company. The ancestor of object storage is an
+ICL solution developed in the 1960&#8217;s called CAFS.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_software_defined_storage"><a class="anchor" href="#_software_defined_storage"></a>1.2. Software defined storage</h3>
+<div class="paragraph">
+<p>SDS (Software Defined Storage) was designed as a way to avoid being locked into a proprietary hardware and to
+offer the ability to scale a storage infrastructure using cheap commodity hardware such as x86 servers and
+disk drives embarked into the servers.</p>
+</div>
+<div class="paragraph">
+<p>To become a valid player in the storage field SDS had to evolve enough to offer some of the basic
+features provided by proprietary storage infrastructures. It is also good to know that since the middle of
+the 2000s, many proprietary storage platforms are in fact closed source SDS solutions that run on either
+proprietary or common hardware.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Support for all storage access types (block, file and object)</p>
+</li>
+<li>
+<p>Be fault tolerant and be SPOF proof</p>
+</li>
+<li>
+<p>Run on commodity hardware</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This will provide the following benefits:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using commodity hardware will help maintain costs as low as possible</p>
+</li>
+<li>
+<p>Using commodity hardware is better suited for a scale out growth model</p>
+</li>
+<li>
+<p>Being software based allows the addition of features over time without the need of proprietary hardware</p>
+</li>
+<li>
+<p>Being software based enables the solution to easily be Open Source</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ceph_introduction"><a class="anchor" href="#_ceph_introduction"></a>2. Ceph introduction</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_timeline"><a class="anchor" href="#_timeline"></a>2.1. Timeline</h3>
+<div class="paragraph">
+<p>The Ceph project has a long history as you can see in the timeline below.</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/ceph101-timeline.png" alt="Ceph Project Timeline">
+</div>
+<div class="title">Figure 1. Ceph Project History</div>
+</div>
+<div class="paragraph">
+<p>It is a battle-tested software defined storage (SDS) solution that has been
+available as a storage backend for OpenStack and Kubernetes for quite some
+time.</p>
+</div>
+<div class="paragraph">
+<p>Ceph version that have been around. This table includes the information any good <code>Cepher</code>
+is used to discussed during conversations throughout the community.</p>
+</div>
+<table class="tableblock frame-all grid-all fit-content">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top">Name</th>
+<th class="tableblock halign-center valign-top">Version Number</th>
+<th class="tableblock halign-center valign-top">Initial release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Argonaut</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.48</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2012-07-03</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Bobtail</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.56</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2013-01-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Cuttlefish</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.61</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2013-05-07</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Dumpling</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.67</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2013-08-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Emperor</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.67</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2013-11-01*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Firefly</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.67</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2014-05-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Giant</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.87</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2014-10-01*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Hammer</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">0.94</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2015-04-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Infernalis</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">9.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2015-11-01*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Jewel</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">10.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2016-04-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Kraken</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">11.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2017-01-01*</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Luminous</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">12.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2017-08-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Mimic</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">13.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2018-06-01</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Nautilus</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">14.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2019-03-19</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Octopus</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">15.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2020-03-23</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Pacific</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">16.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2021-03-31</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>Quincy</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">17.2</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">2022-04-19</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Between  <code>Dumpling</code> and <code>Luminous</code>, all the second half versions released were recognized
+as development version (marked with a <em>*</em>) and never recommended for production use. Red Hat, after
+its Inktank acquisition has only released Red Hat Ceph Storage using one in 2 versions (RHCS 5
+being <code>Pacific</code> based, RHCS 4 being <code>Nautilus</code> based, RHCS 3 being <code>Luminous</code> based, RHCS 2 being
+<code>Jewel</code> based, RHCS 1.3 being <code>Hammer</code> based. The first RHCS named release was 1.2 based on <code>Firefly</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Also note the change of release numbering with <code>Infernalis</code>. Remember
+that the release cadence changed from 6 month to a 9 months one starting with <code>Mimic</code>. Although
+<code>Kraken</code> and <code>Luminous</code> were released the same year it is only due to <code>Kraken</code> being delayed
+for bug fixing reasons.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_goals"><a class="anchor" href="#_goals"></a>2.2. Goals</h3>
+<div class="paragraph">
+<p>The goals of Ceph were set as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Every component is scalable</p>
+</li>
+<li>
+<p>No single point of failure (SPOF)</p>
+</li>
+<li>
+<p>Be a software based solution</p>
+</li>
+<li>
+<p>Be Open Source</p>
+</li>
+<li>
+<p>Run on commodity hardware</p>
+</li>
+<li>
+<p>Reduce interventions through self management wherever possible</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

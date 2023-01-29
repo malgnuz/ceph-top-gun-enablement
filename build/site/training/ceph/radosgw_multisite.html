@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RadosGW Multisite :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_multisite.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_multisite.html">RGW Multisite Replication</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_multisite.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">RadosGW Multisite</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A single zone configuration typically consists of one zone group containing one zone and one or more ceph-radosgw instances where you may load-balance gateway client requests between the instances. In a single zone configuration, typically multiple gateway instances point to a single Ceph storage cluster.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/multisite-intro.png" alt="Multisite Diagram">
+</div>
+</div>
+<div class="paragraph">
+<p>Ceph by its own design is synchronous. And so that means from a client&#8217;s level, write is not acknowledged until all replication copies are written into the cluster. So, for example, if you have a two-way replication cluster with your failure domain at the host level, and your client writes into the cluster, that client does not receive acknowledgment until that second copy has been written to any other node than where the primary write happened. So, you can very quickly see where this would become unusable at the multisite level, especially when the cluster spanned vast geographic distances to one another.</p>
+</div>
+<div class="paragraph">
+<p>This is where asynchronous replication is used. This allows each cluster in the multisite to become eventually consistent with each other.</p>
+</div>
+<div class="paragraph">
+<p>So, from the top down, we have realm, Zone Group and zones and I&#8217;m going to explain all those right now. So, a realm represents a globally unique namespace and represents the highest level of the Ceph multisite cluster. Each realm can then contain either one or multiple zone groups and multiple zones. So next we have zone groups. These used to be called regions and they&#8217;re essentially made to define one or more multiple geographic areas. So next we have zones. These are the lowest level of the Ceph multisite configuration and they&#8217;re represented by one or more object gateways underneath one single Ceph cluster.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rgw_multisite_components"><a class="anchor" href="#_rgw_multisite_components"></a>2. RGW Multisite components</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Zone</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Defines a logical group consisting of one or more Ceph Object Gateway instances</p>
+</li>
+<li>
+<p>Configuring zones differs from typical Ceph configuration procedures, because not all of the settings end up in a Ceph configuration file</p>
+</li>
+<li>
+<p>There will be one zone that should be designated as the Master zone in a zonegroup</p>
+</li>
+<li>
+<p>The Master zone will handle all bucket and user creation</p>
+</li>
+<li>
+<p>Secondary zone can receive bucket and user operations, but will redirect them to the Master zone</p>
+</li>
+<li>
+<p>If the Master zone is down, bucket and user operations will fail</p>
+</li>
+<li>
+<p>It is possible to promote a secondary zone to Master zone. This a complex operation. It is recommended only when the Master zone will be down for a long period of time</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Zone Group</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A zone group is a set of one or more zones. Data stored in one zone in the zone group is
+replicated to all other zones in the zone group. One zone in every zone group is designated as
+the master zone for that group. The other zones in the zone group are secondary zones.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Realm</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A realm represents the global namespace for all objects and buckets in the multisite
+replication space. A realm contains one or more zone groups, each of which contains one
+or more zones. One zone group in the realm is designated as the master zone group, and
+the others are secondary zone groups. All RADOS Gateways in the environment pull their
+configuration from the RADOS Gateway in the master zone group and master zone.
+Because the master zone in the master zone group handles all metadata updates, operations such
+as creating users must occur in the master zone.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Multi-zone</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A more advanced configuration consists of one zone group and multiple zones, each zone with one or more ceph-radosgw instances. Each zone is backed by its own Ceph Storage Cluster. Multiple zones in a zone group provides disaster recovery for the zone group should one of the zones experience a significant failure. In Kraken, each zone is active and may receive write operations. In addition to disaster recovery, multiple active zones may also serve as a foundation for content delivery networks.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Multi-zone-group</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Formerly called ‘regions’, Ceph Object Gateway can also support multiple zone groups, each zone group with one or more zones. Objects stored to zones in one zone group within the same realm as another zone group will share a global object namespace, ensuring unique object IDs across zone groups and zones.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Multiple Realms</strong></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In Kraken, the Ceph Object Gateway supports the notion of realms, which can be a single zone group or multiple zone groups and a globally unique namespace for the realm. Multiple realms provide the ability to support numerous configurations and namespaces.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_multisite_lab"><a class="anchor" href="#_multisite_lab"></a>3. Multisite Lab.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this lab we are going to deploy an advanced configuration that consists
+of a single realm with one zone group and two zones, each zone with two Ceph RGW instances. Each
+zone is backed by its own Ceph Storage Cluster. Multiple zones in a zone group
+provides disaster recovery for the zone group should one of the zones
+experience a significant failure. Each zone is active and may receive write
+operations.</p>
+</div>
+<div class="paragraph">
+<p>The next diagram has a layout of RGW multisite in our Lab.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/multi_multi.jpeg" alt="RGW multisite Lab Layout">
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configure_the_master_realm_zonegroup_and_zone"><a class="anchor" href="#_configure_the_master_realm_zonegroup_and_zone"></a>3.1. Configure the Master Realm, Zonegroup and Zone.</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you have already completed the RadosGW introduction module, you will have
+the realm,zonegroup and zone(zone1) created, but with no endpoints configured,
+you will need to add valid rgw endpoints to the zonegroup and zone.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Run commands on the master/primary cluster.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a realm:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin realm create --rgw-realm=multisite --default
+{
+    "id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "name": "multisite",
+    "current_period": "0ad144e7-a880-43ab-8a64-c9deaf581280",
+    "epoch": 1
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create a zone group:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zonegroup create --rgw-zonegroup=multisite_zonegroup --endpoints=http://proxy01:8000 --master --default
+{
+    "id": "2e41dde9-80f4-4ec8-a099-ec0e8a60938d",
+    "name": "multisite_zonegroup",
+    "api_name": "multisite_zonegroup",
+    "is_master": "true",
+    "endpoints": [],
+    "hostnames": [],
+    "hostnames_s3website": [],
+    "master_zone": "",
+    "zones": [],
+    "placement_targets": [],
+    "default_placement": "",
+    "realm_id": "ce31cd75-37c4-4b10-91db-1cda1ca12d95",
+    "sync_policy": {
+        "groups": []
+    }
+}</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you have more than one RGW service running per zone, as you would do for
+production, you can add all the rgw address to the endpoints list
+--endpoints=http://proxy01:8000,http://ceph-node02:8000 for example, if we want
+the sync to survive DNS outages we can use the IP for the endpoints instead
+of the Hostnames.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a zone:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zone create --rgw-zonegroup=multisite_zonegroup --rgw-zone=zone1 --access-key=sync --secret=sync --master --default --endpoints=http://proxy01:8000
+{
+    "id": "0e06b95f-3b6e-4a1c-95e8-b857f699e9e3",
+    "name": "zone1",
+    "domain_root": "zone1.rgw.meta:root",
+    "control_pool": "zone1.rgw.control",
+    "gc_pool": "zone1.rgw.log:gc",
+    "lc_pool": "zone1.rgw.log:lc",
+    "log_pool": "zone1.rgw.log",
+    "intent_log_pool": "zone1.rgw.log:intent",
+    "usage_log_pool": "zone1.rgw.log:usage",
+    "roles_pool": "zone1.rgw.meta:roles",
+    "reshard_pool": "zone1.rgw.log:reshard",
+    "user_keys_pool": "zone1.rgw.meta:users.keys",
+    "user_email_pool": "zone1.rgw.meta:users.email",
+    "user_swift_pool": "zone1.rgw.meta:users.swift",
+    "user_uid_pool": "zone1.rgw.meta:users.uid",
+    "otp_pool": "zone1.rgw.otp",
+    "system_key": {
+        "access_key": "sync",
+        "secret_key": "sync"
+    },
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "zone1.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone1.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone1.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    "realm_id": "b3f73708-67c5-4b19-b378-6af9cc66c0b0",
+    "notif_pool": "zone1.rgw.log:notif"
+}</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We can have one or mode REALMS,ZONEGROUPS or ZONES, if we don&#8217;t specifiy
+them on the radosgw-admin command with --rgw-realm , --rgw-zonegroup= ,
+--rgw-zone= , the radosgw-admin command will use the ones set as the defaul
+using the --default flag like we did in the previous commands.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Commit the changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[ceph: root@ceph-mon01 /]# radosgw-admin period update --rgw-realm=multisite --commit</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Deploy the RGW daemons with the name <code>multi.zone1</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">[ceph: root@ceph-mon01 /]# ceph orch apply rgw multi.zone1 --realm=multisite --zone=zone1 --placement="2 proxy01 ceph-node02" --port=8000</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-texinfo hljs" data-lang="texinfo">Scheduled multi.zone1 update...
+# ceph orch ps | grep rgw
+rgw.multi.zone1.ceph-node02.lviwfb  ceph-node02  *:8000       running (3m)      3m ago   3m    45.7M        -  16.2.8-85.el8cp  b2c997ff1898  0e3521f3a162
+rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     4m ago  30m    61.9M        -  16.2.8-85.el8cp  b2c997ff1898  4de70934f04e</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_sync_user"><a class="anchor" href="#_create_sync_user"></a>3.2. Create Sync User</h3>
+<div class="paragraph">
+<p>Create a system user that we will use to configure the sync between sites.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin user create --uid=syncuser --display-name="syncuser" --access-key=sync --secret=sync --system</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configure_seconday_zone"><a class="anchor" href="#_configure_seconday_zone"></a>3.3. Configure Seconday Zone</h3>
+<div class="paragraph">
+<p>Steps to configure the RADOS Gateway instance on the secondary zone.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Run commands on the seconday Ceph cluster</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin realm pull --rgw-realm=multisite  --url=http://proxy01:8000 --access-key=sync --secret=sync --default
+2022-12-23T09:26:56.377-0500 7fccf8715500  1 error read_lastest_epoch .rgw.root:periods.e7ccb8e8-4a93-4a87-9a6d-8a650696e839.latest_epoch
+2022-12-23T09:26:56.415-0500 7fccf8715500  1 Set the period's master zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 as the default
+{
+    "id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+    "name": "multisite",
+    "current_period": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+    "epoch": 2
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Pull the period.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin period pull --url=http://proxy01:8000 --access-key=sync --secret=sync
+{
+    "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+    "epoch": 5,
+    "predecessor_uuid": "68a74587-6404-4798-83e0-6cd3bf417288",
+    "sync_status": [],
+    "period_map": {
+        "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+        "zonegroups": [
+            {
+                "id": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
+                "name": "multisite_zonegroup",
+                "api_name": "multisite_zonegroup",
+                "is_master": "true",
+                "endpoints": [],
+                "hostnames": [],
+                "hostnames_s3website": [],
+                "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                "zones": [
+                    {
+                        "id": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                        "name": "zone1",
+                        "endpoints": [],
+                        "log_meta": "false",
+                        "log_data": "false",
+                        "bucket_index_max_shards": 11,
+                        "read_only": "false",
+                        "tier_type": "",
+                        "sync_from_all": "true",
+                        "sync_from": [],
+                        "redirect_zone": ""
+                    }
+                ],
+                "placement_targets": [
+                    {
+                        "name": "default-placement",
+                        "tags": [],
+                        "storage_classes": [
+                            "SSD",
+                            "STANDARD"
+                        ]
+                    },
+                    {
+                        "name": "ssd",
+                        "tags": [
+                            "allowed-ssd"
+                        ],
+                        "storage_classes": [
+                            "STANDARD"
+                        ]
+                    }
+                ],
+                "default_placement": "default-placement",
+                "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+                "sync_policy": {
+                    "groups": []
+                }
+            }
+        ],
+        "short_zone_ids": [
+            {
+                "key": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                "val": 2695141038
+            }
+        ]
+    },
+    "master_zonegroup": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
+    "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+    "period_config": {
+        "bucket_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        },
+        "user_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        }
+    },
+    "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+    "realm_name": "multisite",
+    "realm_epoch": 2
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a secondary zone.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin zone create --rgw-zone=zone2 --rgw-zonegroup=multisite_zonegroup --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default
+2022-12-23T09:28:04.140-0500 7f905d907500  0 failed reading obj info from .rgw.root:zone_info.c5dc9503-6c11-4851-91bd-f1d5ca61473c: (2) No such file or directory
+2022-12-23T09:28:04.140-0500 7f905d907500  0 WARNING: could not read zone params for zone id=c5dc9503-6c11-4851-91bd-f1d5ca61473c name=zone1
+{
+    "id": "5c14f28b-72f2-4323-aa35-24bd1cb8fc0e",
+    "name": "zone2",
+    "domain_root": "zone2.rgw.meta:root",
+    "control_pool": "zone2.rgw.control",
+    "gc_pool": "zone2.rgw.log:gc",
+    "lc_pool": "zone2.rgw.log:lc",
+    "log_pool": "zone2.rgw.log",
+    "intent_log_pool": "zone2.rgw.log:intent",
+    "usage_log_pool": "zone2.rgw.log:usage",
+    "roles_pool": "zone2.rgw.meta:roles",
+    "reshard_pool": "zone2.rgw.log:reshard",
+    "user_keys_pool": "zone2.rgw.meta:users.keys",
+    "user_email_pool": "zone2.rgw.meta:users.email",
+    "user_swift_pool": "zone2.rgw.meta:users.swift",
+    "user_uid_pool": "zone2.rgw.meta:users.uid",
+    "otp_pool": "zone2.rgw.otp",
+    "system_key": {
+        "access_key": "sync",
+        "secret_key": "sync"
+    },
+    "placement_pools": [
+        {
+            "key": "default-placement",
+            "val": {
+                "index_pool": "zone2.rgw.buckets.index",
+                "storage_classes": {
+                    "STANDARD": {
+                        "data_pool": "zone2.rgw.buckets.data"
+                    }
+                },
+                "data_extra_pool": "zone2.rgw.buckets.non-ec",
+                "index_type": 0
+            }
+        }
+    ],
+    "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+    "notif_pool": "zone2.rgw.log:notif"
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the changes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin period update --commit
+Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
+{
+    "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+    "epoch": 7,
+    "predecessor_uuid": "68a74587-6404-4798-83e0-6cd3bf417288",
+    "sync_status": [],
+    "period_map": {
+        "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+        "zonegroups": [
+            {
+                "id": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
+                "name": "multisite_zonegroup",
+                "api_name": "multisite_zonegroup",
+                "is_master": "true",
+                "endpoints": [
+                    "http://proxy01:8000"
+                ],
+                "hostnames": [],
+                "hostnames_s3website": [],
+                "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                "zones": [
+                    {
+                        "id": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                        "name": "zone1",
+                        "endpoints": [
+                            "http://proxy01:8000"
+                        ],
+                        "log_meta": "false",
+                        "log_data": "true",
+                        "bucket_index_max_shards": 11,
+                        "read_only": "false",
+                        "tier_type": "",
+                        "sync_from_all": "true",
+                        "sync_from": [],
+                        "redirect_zone": ""
+                    },
+                    {
+                        "id": "ec5a7187-95e1-4bf2-8519-208175c81487",
+                        "name": "zone2",
+                        "endpoints": [
+                            "http://proxy02:8000"
+                        ],
+                        "log_meta": "false",
+                        "log_data": "true",
+                        "bucket_index_max_shards": 11,
+                        "read_only": "false",
+                        "tier_type": "",
+                        "sync_from_all": "true",
+                        "sync_from": [],
+                        "redirect_zone": ""
+                    }
+                ],
+                "placement_targets": [
+                    {
+                        "name": "default-placement",
+                        "tags": [],
+                        "storage_classes": [
+                            "SSD",
+                            "STANDARD"
+                        ]
+                    },
+                    {
+                        "name": "ssd",
+                        "tags": [
+                            "allowed-ssd"
+                        ],
+                        "storage_classes": [
+                            "STANDARD"
+                        ]
+                    }
+                ],
+                "default_placement": "default-placement",
+                "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+                "sync_policy": {
+                    "groups": []
+                }
+            }
+        ],
+        "short_zone_ids": [
+            {
+                "key": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                "val": 2695141038
+            },
+            {
+                "key": "ec5a7187-95e1-4bf2-8519-208175c81487",
+                "val": 3374434257
+            }
+        ]
+    },
+    "master_zonegroup": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
+    "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+    "period_config": {
+        "bucket_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        },
+        "user_quota": {
+            "enabled": false,
+            "check_on_raw": false,
+            "max_size": -1,
+            "max_size_kb": 0,
+            "max_objects": -1
+        }
+    },
+    "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+    "realm_name": "multisite",
+    "realm_epoch": 2
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create the RADOS Gateway service for the secondary zone.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph orch apply rgw multi.zone2 --realm=multisite --zone=zone2 --placement="2 proxy02 ceph-mon02" --port=8000</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use the radosgw-admin sync status command, we can see the sync is started and a
+full copy of the master zone is being synced with the secondary zone</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync status
+          realm e72107cb-4b3f-49b9-abb0-83c68a9967f9 (multisite)
+      zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 (multisite_zonegroup)
+           zone ec5a7187-95e1-4bf2-8519-208175c81487 (zone2)
+   current time 2022-12-23T14:41:08Z
+  metadata sync syncing
+                full sync: 1/64 shards
+                full sync: 21 entries to sync
+                incremental sync: 63/64 shards
+                metadata is behind on 1 shards
+                behind shards: [0]
+      data sync source: c5dc9503-6c11-4851-91bd-f1d5ca61473c (zone1)
+                        syncing
+                        full sync: 63/128 shards
+                        full sync: 77 buckets to sync
+                        incremental sync: 65/128 shards
+                        data is behind on 63 shards
+                        behind shards: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,36,37,38,39,40,41,42,43,44,45,46,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,105,106,107,108,109,110,111,112,113,114,115,116]</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The output can differ depending on the sync status. The shards are described as two different types during sync:
+- Behind shards are shards that need a full data sync and shards needing an incremental data sync because they are not up-to-date.
+- Recovery shards are shards that encountered an error during sync and marked for retry. The error mostly occurs on minor issues like acquiring a lock on a bucket. This will typically resolve itself.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you encounter sync errors in your configuration, with shards falling behind
+, you can run the commandi <code># radosgw-admin  sync error list</code>.
+Also increasing the verbosity of
+the RGW logs is a good place to start looking for errors, to increase the
+verbosity you can follow the steps of this
+<a href="https://access.redhat.com/solutions/2085183">KCS</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>After a while if we run the same command we will probably see metadata and data in sync:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync status
+          realm 4818713d-4bdf-4ef7-ab7b-c9ceb8009bdb (multisite)
+      zonegroup ce0533e9-ebe7-45f4-8126-91e9f9253599 (multisite_zonegroup)
+           zone d0492b20-abca-463a-8972-9eae824537fd (zone2)
+   current time 2022-12-24T10:52:29Z
+  metadata sync syncing
+                full sync: 0/64 shards
+                incremental sync: 64/64 shards
+                metadata is caught up with master
+      data sync source: 4913e13d-17a9-4c6f-96a4-91b87d2cfe68 (zone1)
+                        syncing
+                        full sync: 0/128 shards
+                        incremental sync: 128/128 shards
+                        data is caught up with source</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With this current configuration every data object will be synced
+bi-directionally on both sites, so we can upload objects to site1 or
+site2(Active/Active) and they
+we will get replicated in async mode between sites, using the terme eventually
+consistent.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Remember that metadata changes should only be done on the master node,
+the master node will take care of replicating the metadata changes to the rest
+of the zones in the zonegroup</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>By default, the objects are not verified again after the synchronization of an object was successful. To enable that, you can set rgw_sync_obj_etag_verify to true. After enabling the optional objects that will be synchronized going forward, an additional MD5 checksum will verify that it is computed on the source and the destination. This is to ensure the integrity of the objects fetched from a remote server over HTTP including multisite sync. This option can decrease the performance of your RGW as more computation is needed.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We can see the sync direction configuration using <code>radosgw-admin sync info</code>
+command, we can see that sources and destinations are replicating <code>*</code> all
+buckets and their data between sites.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync info
+{
+    "sources": [
+        {
+            "id": "all",
+            "source": {
+                "zone": "zone1",
+                "bucket": "*"
+            },
+            "dest": {
+                "zone": "zone2",
+                "bucket": "*"
+            },
+            "params": {
+                "source": {
+                    "filter": {
+                        "tags": []
+                    }
+                },
+                "dest": {},
+                "priority": 0,
+                "mode": "system",
+                "user": ""
+            }
+        }
+    ],
+    "dests": [
+        {
+            "id": "all",
+            "source": {
+                "zone": "zone2",
+                "bucket": "*"
+            },
+            "dest": {
+                "zone": "zone1",
+                "bucket": "*"
+            },
+            "params": {
+                "source": {
+                    "filter": {
+                        "tags": []
+                    }
+                },
+                "dest": {},
+                "priority": 0,
+                "mode": "system",
+                "user": ""
+            }
+        }
+    ],</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>For multi-site only, you can check out the metadata log (mdlog), the bucket index log (bilog) and the data log (datalog). You can list them and also trim them which is not needed in most cases as rgw_sync_log_trim_interval is set to 20 minutes as default. You shouldn’t have to trim it at any time as it could cause side effects otherwise.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s check if metadata and data replication is working
+fine, all metadata changes have to be in the primary site, so I&#8217;m going to
+create a user, and we can check how it&#8217;s synced to the secondary site.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[ceph-node01 ~]# radosgw-admin user create --uid=multiuser --display-name="multiuser" --access-key=multiuser --secret=multiuser --system
+
+[root@ceph-mon01 ~]# radosgw-admin user list
+[
+    "syncuser",
+    "dashboard",
+    "multiuser"
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using the multiuser user we just created let&#8217;s upload some objects from each
+site and check that they are getting replicated in both directions</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We change the endpoint in the AWS CLI when we want to interact with the primary
+or secondary cluster, proxy01 is zone1, and proxy02 is zone2.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint http://proxy01:8000 s3 mb s3://bucket1
+# aws --endpoint http://proxy01:8000 s3 ls
+2022-12-29 03:59:14 bucket1
+# aws --endpoint http://proxy02:8000 s3 ls
+2022-12-29 03:59:14 bucket1
+# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
+2022-12-29 04:18:01       1330 file1
+# aws --endpoint  http://proxy02:8000 s3 cp /etc/hosts s3://bucket1/file2
+# aws --endpoint  http://proxy01:8000 s3 ls s3://bucket1/
+2022-12-29 04:18:01       1330 file1
+2022-12-29 04:18:54       1330 file2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have now confirmed that metadata and data sync replication is working fine
+in our deployment.</p>
+</div>
+<div class="paragraph">
+<p>There is a new feature in RGW multisite called Sync policies that gives greater
+flexibility on how we sync our data.</p>
+</div>
+<div class="paragraph">
+<p>Multisite bucket-granularity sync policy provides fine grained control of data movement between buckets in different zones. It extends the zone sync mechanism. Previously buckets were being treated symmetrically, that is – each (data) zone holds a mirror of that bucket that should be the same as all the other zones. Whereas leveraging the bucket-granularity sync policy is possible for buckets to diverge, and a bucket can pull data from other buckets (ones that don’t share its name or its ID) in different zone. The sync process was assuming therefore that the bucket sync source and the bucket sync destination were always referring to the same bucket, now that is not the case anymore.</p>
+</div>
+<div class="paragraph">
+<p>The sync policy supersedes the old zonegroup coarse configuration (sync_from*). The sync policy can be configured at the zonegroup level (and if it is configured it replaces the old style config), but it can also be configured at the bucket level.</p>
+</div>
+<div class="paragraph">
+<p>In the sync policy multiple groups that can contain lists of data-flow configurations can be defined, as well as lists of pipe configurations. The data-flow defines the flow of data between the different zones. It can define symmetrical data flow, in which multiple zones sync data from each other, and it can define directional data flow, in which the data moves in one way from one zone to another.</p>
+</div>
+<div class="paragraph">
+<p>This new feature opens up many configuration options for our multisite
+replication, in this lab we are just going to show one example, were we
+configure bucket replication granularity, and only configure replication
+between sites for bucket1. you can check more examples in the upstream <a href="https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples">DOC</a></p>
+</div>
+<div class="paragraph">
+<p>We configure the zonegroup sync policy group that needs to be in place(flow<br>
+pipe) to be able to configure bucket sync policy</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Any changes to the zonegroup policy needs to be applied on the zonegroup master zone, and require period update and commit.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>+----------------------------+----------------------------------------+
+|  Value                     | Description                            |
++============================+========================================+
+| ``enabled``                | sync is allowed and enabled            |
++----------------------------+----------------------------------------+
+| ``allowed``                | sync is allowed                        |
++----------------------------+----------------------------------------+
+| ``forbidden``              | sync (as defined by this group) is not |
+|                            | allowed and can override other groups  |
++----------------------------+----------------------------------------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We create the zonegroup sync group and set the replication status to allowed</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync group create --group-id=group1 --status=allowed
+{
+    "groups": [
+        {
+            "id": "group1",
+            "data_flow": {},
+            "pipes": [],
+            "status": "allowed"
+        }
+    ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we create a flow for the group, setting the flow bi-derectional/symmetrical
+for zones: zone1,zone2</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync group flow create --group-id=group1  --flow-id=flow-symmetrical --flow-type=symmetrical --zones=zone1,zone2
+{
+    "groups": [
+        {
+            "id": "group1",
+            "data_flow": {
+                "symmetrical": [
+                    {
+                        "id": "flow-symmetrical",
+                        "zones": [
+                            "zone2",
+                            "zone1"
+                        ]
+                    }
+                ]
+            },
+            "pipes": [],
+            "status": "allowed"
+        }
+    ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally we set on the zonegroup sync policy a pipe were we allow replication of
+all buckets from all zones in the group</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>radosgw-admin sync group pipe create --group-id=group1 --pipe-id=pipe1 --source-zones='*' --source-bucket='*' --dest-zones='*' --dest-bucket='*'
+{
+    "groups": [
+        {
+            "id": "group1",
+            "data_flow": {
+                "symmetrical": [
+                    {
+                        "id": "flow-symmetrical",
+                        "zones": [
+                            "zone2",
+                            "zone1"
+                        ]
+                    }
+                ]
+            },
+            "pipes": [
+                {
+                    "id": "pipe1",
+                    "source": {
+                        "bucket": "*",
+                        "zones": [
+                            "*"
+                        ]
+                    },
+                    "dest": {
+                        "bucket": "*",
+                        "zones": [
+                            "*"
+                        ]
+                    },
+                    "params": {
+                        "source": {
+                            "filter": {
+                                "tags": []
+                            }
+                        },
+                        "dest": {},
+                        "priority": 0,
+                        "mode": "system",
+                        "user": ""
+                    }
+                }
+            ],
+            "status": "allowed"
+        }
+    ]
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We need to do a period update so the changes we made to the zonegroup
+replication are reflected on both sites</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin period update --commit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But remember that the status of the replication for the zonegroup is set to
+<code>allowed</code> not <code>enabled</code> so there is currently no replication between sites, we
+can confirm it with the s3 cli.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[root@ceph-node01 ~]# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket1/file11
+upload: ../etc/hosts to s3://bucket1/file11
+[root@ceph-node01 ~]# aws --endpoint  http://proxy01:8000 s3 ls s3://bucket1/
+2022-12-29 04:18:01       1330 file1
+2022-12-29 04:38:20       1330 file11
+2022-12-29 04:18:54       1330 file2
+[root@ceph-node01 ~]# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
+2022-12-29 04:18:01       1330 file1
+2022-12-29 04:18:54       1330 file2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now that the zonegroup is in place and is <code>allowing</code> replication, we can
+configure the sync policy at the bucket level, we only want to enable sync for
+bucket <code>bucket1</code> , we create a new sync group and pipe for <code>bucket1</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync group create --bucket=bucket1 --group-id=bucket1-default --status=enabled
+{
+    "groups": [
+        {
+            "id": "bucket1-default",
+            "data_flow": {},
+            "pipes": [],
+            "status": "enabled"
+        }
+    ]
+}
+
+# radosgw-admin sync group pipe create --bucket=bucket1 --group-id=bucket1-default --pipe-id=pipe1 --source-zones='*' --dest-zones='*'
+# radosgw-admin sync group get --bucket bucket1
+[
+    {
+        "key": "bucket1-default",
+        "val": {
+            "id": "bucket1-default",
+            "data_flow": {},
+            "pipes": [
+                {
+                    "id": "pipe1",
+                    "source": {
+                        "bucket": "*",
+                        "zones": [
+                            "*"
+                        ]
+                    },
+                    "dest": {
+                        "bucket": "*",
+                        "zones": [
+                            "*"
+                        ]
+                    },
+                    "params": {
+                        "source": {
+                            "filter": {
+                                "tags": []
+                            }
+                        },
+                        "dest": {},
+                        "priority": 0,
+                        "mode": "system",
+                        "user": "multiuser"
+                    }
+                }
+            ],
+            "status": "enabled"
+        }
+    }
+]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can check the replication policies configured for a bucket with the help of
+the <code>radosgw-admin sync info</code> command, because the flow we configured for
+replication is bi-directional, we can see that bucket replication for bucket1
+is configured as source and destination</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync info --bucket bucket1
+{
+    "sources": [
+        {
+            "id": "pipe1",
+            "source": {
+                "zone": "zone2",
+                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
+            },
+            "dest": {
+                "zone": "zone1",
+                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
+            },
+            "params": {
+                "source": {
+                    "filter": {
+                        "tags": []
+                    }
+                },
+                "dest": {},
+                "priority": 0,
+                "mode": "system",
+                "user": "multiuser"
+            }
+        }
+    ],
+    "dests": [
+        {
+            "id": "pipe1",
+            "source": {
+                "zone": "zone1",
+                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
+            },
+            "dest": {
+                "zone": "zone2",
+                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
+            },
+            "params": {
+                "source": {
+                    "filter": {
+                        "tags": []
+                    }
+                },
+                "dest": {},
+                "priority": 0,
+                "mode": "system",
+                "user": "multiuser"
+            }
+        }
+    ],
+    "hints": {
+        "sources": [],
+        "dests": []
+    },
+    "resolved-hints-1": {
+        "sources": [],
+        "dests": []
+    },
+    "resolved-hints": {
+        "sources": [],
+        "dests": []
+    }
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Bucket policy modifications don&#8217;t need a period update, they are automaticly
+detected, so let&#8217;s go ahead and test if bucket replication is working for
+bucket1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket1/file111
+upload: ../etc/hosts to s3://bucket1/file111
+# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
+2022-12-29 04:18:01       1330 file1
+2022-12-29 04:42:34       1330 file111
+2022-12-29 04:18:54       1330 file2</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You could achieve the same bucket granular replication by using the
+<code>radosgw-admin bucket sync [enable/disable] --bucket=&lt;bucket&gt;</code> command, but
+take into account the multisite sync policies are so much more powerfull and
+flexible</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Just to double check we can create a new bucket called <code>bucket2</code> and see how
+this bucket is not getting replicated as there is no policy in place to enable
+this replication.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># aws --endpoint http://proxy01:8000 s3 mb s3://bucket2
+# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket2/file1
+upload: ../etc/hosts to s3://bucket2/file1
+# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket2/
+#</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we want to also enable sync in this bucket we can go ahead with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin sync group create --bucket=bucket2 --group-id=bucket2-default --status=enabled
+# radosgw-admin sync group pipe create --bucket=bucket2 --group-id=bucket2-default --pipe-id=pipe1 --source-zones='*' --dest-zones='*'
+# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket2/file2
+upload: ../etc/hosts to s3://bucket2/file2
+# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket2/
+2022-12-29 05:10:03       1330 file2</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

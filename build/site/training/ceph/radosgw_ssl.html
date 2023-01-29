@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RadosGW &amp; Ingress SSL :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_ssl.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph RadosGW</li>
+    <li><a href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_ssl.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">RadosGW &amp; Ingress SSL</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The first ingredient we need to configure SSL endpoint is the "SSL Certificate" itself, which must be obtained through an official certification authority, or CA. It’s the CA’s responsibility to confirm the certificate’s identity, as well as assert its authenticity. For demonstration purposes, we’ll use a self-sign certificate. Acquiring an SSL certificate through an authorised CA is recommended for a production environment.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_ssl_for_the_rgw_daemon"><a class="anchor" href="#_configuring_ssl_for_the_rgw_daemon"></a>2. Configuring SSL for the RGW daemon</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To configure SSL in our RGW daemon, we will use an RGW spec definition.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Some parameters, such as the network to be used by RGW instances or the SSL certificate content, can only be defined by using the service specification file.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We have pre-created a self-signed certificate that you can use as your RGW
+instance certificate. It&#8217;s available in the admin node of the cluster, for
+example, <code>ceph-node01.example.com</code> in the <code>/root/certificates</code> folder</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ls -l /root/certificates/
+total 8
+-rw-r--r-- 1 root root 34 Jan  2 06:24 certificate.key
+-rw-r--r-- 1 root root 34 Jan  2 06:24 certificate.pem</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If any modifications are needed to the certificates, like a different SAN or just
+creating a new certificate, the CA cert/key is available on the <code>workstation.example.com</code>
+machine on the same path <code>/root/certificates/</code></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The Certificate has a SAN for ceph-node02, so we are going to configure the RGW
+service to run on <code>node ceph-node02.example.com</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># openssl x509 -in /root/certificates/certificate.pem -noout -text | grep -A1 'Subject Alternative Name'
+            X509v3 Subject Alternative Name:
+                DNS:example.com, DNS:s3zone1.example.com, DNS:s3zone2.example.com, DNS:s3.example.com, DNS:ceph-node02.example.com</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are going to add a label called <code>rgws</code> to host <code>ceph-node02.example.com</code> so
+we later can use the label in the RGW spec placement section.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch host label add ceph-node02 rgws
+Added label rgws to host ceph-node02
+
+# ceph orch host ls
+HOST        ADDR           LABELS              STATUS
+ceph-node01  192.168.56.64  _admin osd mon mgr
+ceph-node02  192.168.56.65  osd mon rgw rgws
+ceph-node03  192.168.56.66  osd mds mon
+proxy01     192.168.56.25  mgmt
+4 hosts in cluster</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here is a cephadm sample spec file, where we create a new RGW service with SSL
+using port 8443, for placement we are using labels, it will select a host with
+the label rgws set, we also need to copy and paste the certificate and key into the
+spec file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ cat &lt;&lt;EOF &gt;&gt; /root/rgw-ssl.spec
+service_type: rgw
+service_id: objectgw
+service_name: rgw.objectgw
+placement:
+  count: 1
+  label: "rgws"
+spec:
+  rgw_realm: default
+  rgw_zone: default
+  ssl: true
+  rgw_frontend_port: 8443
+  rgw_frontend_type: beast
+  rgw_frontend_ssl_certificate: |
+     -----BEGIN CERTIFICATE-----
+$( cat /root/certificates/certificate.pem | grep -v CERTIFICATE | awk '{$1="     "$1}1' )
+     -----END CERTIFICATE-----
+     -----BEGIN RSA PRIVATE KEY-----
+$( cat /root/certificates/certificate.key | grep -v PRIVATE | awk '{$1="     "$1}1' )
+     -----END RSA PRIVATE KEY-----
+EOF</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once we have the spec file ready we can apply the configuration</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i /root/rgw-ssl.spec
+Scheduled rgw.objectgw update...
+# ceph orch ps | grep rgw
+rgw.objectgw.ceph-node02.xqvwoe  ceph-node02  *:8443       running (18m)     8m ago  18m    60.0M        -  16.2.8-85.el8cp  b2c997ff1898  7435e5359df8</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Quick test with curl to check that we can access the RGW endpoint using
+HTTPS/SSL.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># curl https://ceph-node02.example.com:8443
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"&gt;&lt;Owner&gt;&lt;ID&gt;anonymous&lt;/ID&gt;&lt;DisplayName&gt;&lt;/DisplayName&gt;&lt;/Owner&gt;&lt;Buckets&gt;&lt;/Buckets&gt;&lt;/ListAllMyBucketsResult&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_ssl_for_the_ingress_service"><a class="anchor" href="#_configuring_ssl_for_the_ingress_service"></a>3. Configuring SSL for the Ingress Service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When using the cephadm Ingress service can configure the SSL termination at
+the HAproxy level.</p>
+</div>
+<div class="paragraph">
+<p>When doing the SSL termination at the HAproxy/Load Balancer level, we need to
+disable SSL in the RGW daemons. In the previous exercise, we enabled SSL on our
+RGW service, so the first step will be to disable SSL from our RGW service.</p>
+</div>
+<div class="paragraph">
+<p>We are going to continue using RGW specification files. we are modifying the
+following things in our spec file:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>count: 2 , we need at least 2 RGW daemons running for the Ingress service to
+work</p>
+</li>
+<li>
+<p>label: rgw , we are setting the label for placement to rgw instead of rgws</p>
+</li>
+<li>
+<p>ssl: false, we disable ssl, this is the default, but just leaving there for
+clarity</p>
+</li>
+<li>
+<p>rgw_frontend_port: using port 8080 instead of 8043</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat &lt;&lt;EOF &gt;&gt; /root/rgw-nossl.spec
+service_type: rgw
+service_id: objectgw
+service_name: rgw.objectgw
+placement:
+  count: 2
+  label: "rgw"
+spec:
+  rgw_realm: default
+  rgw_zone: default
+  ssl: false
+  rgw_frontend_port: 8080
+  rgw_frontend_type: beast
+EOF</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We add the rgw label to node proxy01, so the second instance of our RGW service
+gets deployed in node proxy01</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch host label add proxy01 rgw
+Added label rgw to host proxy01</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We now apply the spec file, so the configuration changes take place.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i /root/rgw-nossl.spec
+Scheduled rgw.objectgw update...
+
+# ceph orch ps | grep rgw
+rgw.objectgw.ceph-node02.seoxpk  ceph-node02  *:8080       running (5m)     2m ago   5m    54.1M        -  16.2.8-85.el8cp  b2c997ff1898  be29114c01ce
+rgw.objectgw.proxy01.dcsrvq     proxy01     *:8080       running (2m)     2m ago   2m    78.1M        -  16.2.8-85.el8cp  b2c997ff1898  73385e654861</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now lets create the ingress service spec file, we use port 443 and IP
+192.168.56.100 for the frontend, haproxy and keepalive will run on hosts
+ceph-node02 &amp; ceph-node03</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"> cat &lt;&lt; EOF &gt;  rgw-ingress.yaml
+service_type: ingress
+service_id: rgw.default
+placement:
+  hosts:
+    - ceph-node02
+    - ceph-node03
+spec:
+  backend_service: rgw.objectgw
+  virtual_ip: 192.168.56.100/24
+  frontend_port: 443
+  monitor_port:  1967
+  ssl_cert: |
+     -----BEGIN CERTIFICATE-----
+$( cat /root/certificates/certificate.pem | grep -v CERTIFICATE | awk '{$1="     "$1}1' )
+     -----END CERTIFICATE-----
+     -----BEGIN RSA PRIVATE KEY-----
+$( cat /root/certificates/certificate.key | grep -v PRIVATE | awk '{$1="     "$1}1' )
+     -----END RSA PRIVATE KEY-----
+EOF</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can now apply the spec file</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i rgw-ingress.yaml
+Scheduled ingress.rgw.default update...</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>It could be that you get one haproxy instance in a failed state. This is
+because of resource contention in our lab nodes. The problem gets fixed with a
+restart of the haproxy daemon</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch ps  | grep rgw.default
+haproxy.rgw.default.ceph-node02.kueked     ceph-node02  *:443,1967   error             5m ago   6m        -        -  &lt;unknown&gt;        &lt;unknown&gt;     &lt;unknown&gt;
+haproxy.rgw.default.ceph-node03.uwzado     ceph-node03  *:443,1967   running (5m)      4m ago   6m    9239k        -  2.2.19-7ea3822   6b6ff8a83cd7  eeec4109ddd9
+keepalived.rgw.default.ceph-node02.qwacfu  ceph-node02               running (5m)      5m ago   5m    18.0M        -  2.1.5            f68c62a66d49  12a59ba5f81f
+keepalived.rgw.default.ceph-node03.exqenp  ceph-node03               running (5m)      4m ago   5m    18.0M        -  2.1.5            f68c62a66d49  55a00e06bf28
+# ceph orch daemon restart haproxy.rgw.default.ceph-node02.kueked
+Scheduled to restart haproxy.rgw.default.ceph-node02.kueked on host 'ceph-node02'
+# ceph orch ps  | grep rgw.default
+haproxy.rgw.default.ceph-node02.kueked     ceph-node02  *:443,1967   running (43s)    38s ago  11m    8732k        -  2.2.19-7ea3822   6b6ff8a83cd7  d90de802e811
+haproxy.rgw.default.ceph-node03.uwzado     ceph-node03  *:443,1967   running (10m)    10m ago  11m    9239k        -  2.2.19-7ea3822   6b6ff8a83cd7  eeec4109ddd9
+keepalived.rgw.default.ceph-node02.qwacfu  ceph-node02               running (10m)    38s ago  10m    18.0M        -  2.1.5            f68c62a66d49  12a59ba5f81f
+keepalived.rgw.default.ceph-node03.exqenp  ceph-node03               running (11m)    10m ago  11m    18.0M        -  2.1.5            f68c62a66d49  55a00e06bf28</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We can check that SSL is being terminated at the haproxy level on the config
+file the frontend bind sectopm has a ssl cert entry pointing to our certificate
+<code>/var/lib/haproxy/haproxy.pem</code></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Comunications from HAproxy to the RGW instances is in clear text through HTTP.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /var/lib/ceph/6e282f42-8a83-11ed-909f-2cc260754989/haproxy.rgw.default.ceph-node02.kueked/haproxy/haproxy.cfg
+# This file is generated by cephadm.
+...
+
+frontend frontend
+    bind 192.168.56.100:443 ssl crt /var/lib/haproxy/haproxy.pem
+    default_backend backend
+
+backend backend
+    option forwardfor
+    balance static-rr
+    option httpchk HEAD / HTTP/1.0
+    server rgw.objectgw.ceph-node02.seoxpk 192.168.56.65:8080 check weight 100
+    server rgw.objectgw.proxy01.dcsrvq 192.168.56.25:8080 check weight 100</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s test with curl command against the VIP that has an FQDN of
+<code><a href="https://s3zone1.example.com" class="bare">https://s3zone1.example.com</a></code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># curl https://s3zone1.example.com
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"&gt;&lt;Owner&gt;&lt;ID&gt;anonymous&lt;/ID&gt;&lt;DisplayName&gt;&lt;/DisplayName&gt;&lt;/Owner&gt;&lt;Buckets&gt;&lt;/Buckets&gt;&lt;/ListAllMyBucketsResult&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

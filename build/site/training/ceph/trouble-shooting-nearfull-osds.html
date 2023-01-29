@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/trouble-shooting-nearfull-osds.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Ceph Troubleshooting</li>
+    <li><a href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/trouble-shooting-nearfull-osds.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect1">
+<h2 id="_troubleshooting_nearfull_and_full_osds_scenarios"><a class="anchor" href="#_troubleshooting_nearfull_and_full_osds_scenarios"></a>Troubleshooting nearfull and full OSDs scenarios</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This document describes the procedure to handle the scenarios when a
+RHCS 4 cluster reaches either the nearfull ratio or the full ratio.</p>
+</div>
+<div class="sect2">
+<h3 id="_thresholds_to_monitor_osds_capacity"><a class="anchor" href="#_thresholds_to_monitor_osds_capacity"></a>Thresholds to monitor OSDs capacity</h3>
+<div class="paragraph">
+<p>A Ceph cluster will prevent writing operations to a full OSD in order to
+avoid losing data. Some warnings are triggered when cluster&#8217;s OSDs and
+pools reach some thresholds.</p>
+</div>
+<div class="paragraph">
+<p>The following is a RHCS cluster with <code>full</code>, <code>nearfull</code> and
+<code>backfillfull</code> OSDs:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>ceph health detail
+HEALTH_ERR 1 full osd(s); 1 backfillfull osd(s); 1 nearfull osd(s)
+osd.X is full at 97%
+osd.Y is backfill full at 91%
+osd.Z is near full at 87%</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The three parameters that monitor OSD&#8217;s capacity with their
+corresponding default values can be checked in the following table:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mon_osd_full_ratio</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The percentage of disk space used before an OSD
+is considered full</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.95</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mon_osd_nearfull_ratio</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The percentage of disk space used before an
+OSD is considered nearfull</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.85</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>osd_backfill_full_ratio</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The RHCS cluster refuses to accept backfill
+requests when the OSD&#8217;s full ratio is above this value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.90</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The parameters shown above cannot be changed after creating the RHCS
+cluster. However, the parameters: <code>full_ratio</code>, <code>nearfull_ratio</code> and
+<code>backfillfull_ratio</code> can be adjusted temporarily as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>ceph osd set-nearfull-ratio &lt;float[0.0-1.0]&gt;
+ceph osd set-full-ratio &lt;float[0.0-1.0]&gt;
+ceph osd set-backfillfull-ratio &lt;float[0.0-1.0]&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In a later section we will see when these parameters can be changed to
+handle a <code>full</code> or <code>nearfull</code> OSD scenarios.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_checking_osds_utilization"><a class="anchor" href="#_checking_osds_utilization"></a>Checking OSDs utilization</h3>
+<div class="paragraph">
+<p>The <code>ceph df</code> command can be used to check the overall cluster or pools
+fullness. This command shows a similar output as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ceph df
+RAW STORAGE:
+    CLASS           SIZE            AVAIL           USED         RAW USED          %RAW USED
+    &lt;CLASS&gt;      &lt;TOTAL_SIZE&gt;      &lt;AVAILABLE_SPACE&gt; &lt;USED_SPACE&gt; &lt;RAW_USED_SPACE&gt; &lt;%_RAW_USED_SPACE&gt;
+    TOTAL
+
+POOLS:
+    POOL                         ID        STORED           OBJECTS       USED            %USED         MAX AVAIL
+ &lt;POOL_NAME&gt;                 &lt;POOL_ID&gt;  &lt;BYTES_STORED&gt;   &lt;NUM_OBJECTS&gt; &lt;USED_SPACE&gt;  &lt;%_USED_SPACE&gt;   &lt;AVAILABLE_SPACE&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another utility to check the OSDs utilization is the <code>ceph osd df</code>
+command which shows the use of each OSD within a RHCS cluster. The
+following is the output of this command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ceph osd df
+   ID       CLASS    WEIGHT  REWEIGHT SIZE    RAW USE DATA    OMAP   META     AVAIL   %USE VAR  PGS STATUS
+                    TOTAL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both commands shown above will help in order to handle the <code>nearfull</code>
+and <code>full</code> OSDs scenarios as it explained below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_a_nearfull_osds_scenario"><a class="anchor" href="#_troubleshooting_a_nearfull_osds_scenario"></a>Troubleshooting a <code>Nearfull</code> OSDs scenario</h3>
+<div class="paragraph">
+<p>When a RHCS cluster reaches the capacity set by the
+<code>mon_osd_nearfull_ratio</code> parameter the cluster will be in
+<code>HEALTH_WARN # nearfull osds</code> state. The main causes of this situation
+are as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The OSDs are not balanced among the OSD nodes in the cluster. It could
+be due to unequal number of OSD daemons in some OSD nodes, or the weight
+of some OSDs in the CRUSH map is not adequate to ther capacity.</p>
+</li>
+<li>
+<p>The Placement Group count is not proper as per the number of the OSDs,
+use case, target PGs per OSD, and OSD utilization.</p>
+</li>
+<li>
+<p>The cluster uses inappropiate CRUSH tunables.</p>
+</li>
+<li>
+<p>The back-end storage for OSDs is almost full.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In order to solve this situation please execute the following steps in
+order:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify that the PG count is sufficient and increase it if needed.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>With the help of pg-autoscaling recommendations it is easy to check if
+the PG count is sufficient. By default in RHCS 4, the pg-autoscaling is
+in <code>warn</code> mode so it will not automatically adjust the PG count, it will
+just recommend the expected PG count of each pool.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd pool autoscale-status
+POOL                       SIZE TARGET SIZE RATE RAW CAPACITY  RATIO TARGET RATIO EFFECTIVE RATIO BIAS PG_NUM NEW PG_NUM AUTOSCALE</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Before making any changes related to the PG count, please be sure the
+<code>TARGET RATIO</code> of each pool is set accordinly to your use cases.</p>
+</div>
+<div class="paragraph">
+<p>Then ensure the column <code>NEW_PG_NUM</code> is empty. Otherwise, adjust each
+pool with the <code>NEW_PG_NUM</code> recommended value:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd pool set {pool-name} pg_num [pg_num]
+# podman exec ceph-mon-$(hostname -s) ceph osd pool set {pool-name} pgp_num [pgp_num]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the RHCS cluster keeps in <code>HEALTH_WARN # nearfull osds</code> state execute
+the next step.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+<p>Verify that the RHCS cluster uses CRUSH tunables optimal for its
+version.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>From a MON node:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Extract and decompile the CRUSH map from the RHCS cluster:</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>crushmapfile=$(date +%Y%m%d)
+# podman exec ceph-mon-$(hostname -s) ceph osd getcrushmap -o /etc/ceph/${crushmapfile}
+# podman exec ceph-mon-$(hostname -s) crushtool -d /etc/ceph/${crushmapfile} -o /etc/ceph/${crushmapfile}.txt</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Open the CRUSH map and look for the tunable values. They are set at
+the begining of the CRUSH map, under the <code># begin crush map</code> comment.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For RHCS 4 the optimal tunables are as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>tunable choose_local_tries 0
+tunable choose_local_fallback_tries 0
+tunable choose_total_tries 50
+tunable chooseleaf_descend_once 1
+tunable chooseleaf_vary_r 1
+tunable chooseleaf_stable 1
+tunable straw_calc_version 1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the tunables shown above differ from the values set in the RHCS
+cluster then they need to be set to <code>optimal</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Setting the tunables to the <code>optimal</code> profile.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>From a MON node:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd crush tunables optimal</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>NOTE</strong>: Changing the CRUSH tunables will result in data movement.</p>
+</div>
+<div class="paragraph">
+<p>Please for further details check the
+<a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html-single/storage_strategies_guide/#crush_tunables">CRUSH
+tunables</a> section in the Storage Stategies guide for RHCS 4.
+Furthermore, you could test the impact of tunable modifications into the
+RHCS cluster following this
+<a href="https://access.redhat.com/solutions/2159151">article</a> on the Red Hat
+Customer Portal.</p>
+</div>
+<div class="paragraph">
+<p>If the RHCS cluster keeps in <code>HEALTH_WARN # nearfull osds</code> state
+continue executing the next step.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>Change the weight of OSDs by utilization.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A RHCS cluster may become imbalanced even though CRUSH is an algorithm
+continuosly looking for a uniform probability distribution for write
+requests. In this situation OSDs can be reweight by utilization by
+executing the <code>reweight-by-utilization</code> command.</p>
+</div>
+<div class="paragraph">
+<p>However, this step can be skipped since RHCS 4 includes the <strong>Ceph
+Manager balancer module</strong> which optimizes the placement of PGs across
+OSDs in order to achieve a balanced distribution. Enabling this module
+is covered in the next step, but in order to have a complete procedure,
+below you will find how to reweight OSDs by utilization manually.</p>
+</div>
+<div class="paragraph">
+<p>From a MON node:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Test the reweight operation to determine which and how many PGs and
+OSDs will be affected:</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) test-reweight-by-utilization [threshold] [weight_change_amount] [number_of_OSDs] --no-increasing</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>NOTE:</strong> Limiting the number of OSDs to reweight prevents significant
+rebalancing.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s review the optional parameters this command allows in the
+following table:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default Value</th>
+<th class="tableblock halign-left valign-top">Valid Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threshold</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">It is a percentage of OSD utilization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&gt; 100</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>weight_change_amount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">It is the amount to change the weight</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.05</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.0 - 1.0</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_OSDs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The maximum number of OSDs to reweight</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n/a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n/a</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>Reweight OSDs by utilization:</p>
+</li>
+</ul>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) reweight-by-utilization [threshold] [weight_change_amount] [number_of_OSDs] --no-increasing</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will generate data movement. But after the rebalance if the RHCS
+cluster keeps in <code>HEALTH_WARN # nearfull osds</code> state continue executing
+the next step.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="4">
+<li>
+<p>Enable the <strong>Ceph Manager balancer module</strong>:</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The <strong>Ceph Manager balancer module</strong> is the recommended approach to
+achieve a balanced distribution instead of using the
+<code>reweight-by-utilization</code> command. This module optimizes the placement
+of PGs accross OSDs.</p>
+</div>
+<div class="paragraph">
+<p>From a MON node:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph mgr module enable balancer
+# podman exec ceph-mon-$(hostname -s) ceph balancer on</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will generate data movement into the RHCS cluster. Wait until it
+finishes but if the RHCS cluster keeps in <code>HEALTH_WARN # nearfull osds</code>
+state then either scale the cluster adding a new OSD node or delete
+unnecessary data.</p>
+</div>
+<div class="paragraph">
+<p>Scaling the cluster by adding a new OSD node is out of the scope of this
+document. Please refer to the
+<a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html/operations_guide">RHCS
+Operations Guide</a> which provides a step by step procedure about adding a
+new OSD node to the cluster.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_a_full_osds_scenario"><a class="anchor" href="#_troubleshooting_a_full_osds_scenario"></a>Troubleshooting a <code>Full</code> OSDs scenario</h3>
+<div class="paragraph">
+<p>When a RHCS cluster reaches the capacity set by the <code>mon_osd_full_ratio</code>
+parameter the cluster will be in <code>HEALTH_ERR # full osds</code> state to
+prevent clients from performing I/O operations and to avoid losing data.</p>
+</div>
+<div class="paragraph">
+<p>To handle this situation Red Hat recommends to execute the following
+steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Check the <code>%RAW USED</code> through <code>ceph df</code> command.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the <code>%RAW USED</code> value is above 70% there are two options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Scale the cluster by adding a new OSD node. This is the best way to
+deal with this situation since it is a long-term solution. This is the
+option recommended by Red Hat.</p>
+</li>
+<li>
+<p>Delete unnecessary data. This is a short-term solution just to avoid
+production downtime.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Scaling the cluster by adding a new OSD node is out of the scope of this
+document. Please refer to the
+<a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/4/html/operations_guide">RHCS
+Operations Guide</a> which provides a step by step procedure about adding a
+new OSD node to the cluster.</p>
+</div>
+<div class="paragraph">
+<p>This procedure will cover the removal of the unnecessary data.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="2">
+<li>
+<p>Check the current value of <code>full_ratio</code> (0.95 by default) from a MON
+node:</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd dump | grep -i ^full_ratio
+full_ratio 0.95</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>Increase the value of <code>full_ratio</code> to <strong>0.97</strong>:</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd set-full-ratio 0.97
+osd set-full-ratio 0.97</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>NOTE</strong>: Setting <code>set-full-ratio</code> higher than 0.97 makes the recovery
+process extremelly difficult and the RHCS cluster might not be able to
+recover full OSDs at all.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="4">
+<li>
+<p>Verify the parameter was successfully set to <strong>0.97</strong>:</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd dump | grep -i ^full_ratio
+full_ratio 0.97</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="5">
+<li>
+<p>Monitor the RHCS cluster:</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># watch podman exec ceph-mon-$(hostname -s) ceph -s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As soon as the cluster changes its state from <code>full</code> to <code>nearfull</code>,
+please proceed deleting any unnecessary data.</p>
+</div>
+<div class="paragraph">
+<p>After deleting any unnecessary data, check the <code>%RAW_USED</code> through
+<code>ceph df</code> command. Also check the cluster status through <code>ceph -s</code>. If
+the RHCS cluster state is <code>HEALTH OK</code> and the <code>%RAW_USED</code> has an
+acceptable value then carry on rolling back the <code>full_ratio</code> parameter.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="6">
+<li>
+<p>Rollback <code>full_ratio</code> parameter to its default value (0.95):</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd set-full-ratio 0.95
+osd set-full-ratio 0.95</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="7">
+<li>
+<p>Verify the parameter was successfully set to <strong>0.95</strong>:</p>
+</li>
+</ol>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># podman exec ceph-mon-$(hostname -s) ceph osd dump | grep -i ^full_ratio
+full_ratio 0.95</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

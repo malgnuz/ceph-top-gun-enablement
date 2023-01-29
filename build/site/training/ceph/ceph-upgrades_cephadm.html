@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ceph Upgrades(cephadm) :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph-upgrades_cephadm.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph-upgrades_cephadm.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Ceph Upgrades(cephadm)</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As a storage administrator, you can use the cephadm Orchestrator to upgrade
+Ceph Storage from 5.0 and higher</p>
+</div>
+<div class="paragraph">
+<p>The automated upgrade process follows Ceph best practices.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The upgrade order starts with Ceph Managers, Ceph Monitors, then other daemons.</p>
+</li>
+<li>
+<p>Each daemon is restarted only after Ceph indicates that the cluster will remain available.</p>
+</li>
+<li>
+<p>The storage cluster health status is likely to switch to HEALTH_WARNING during the upgrade. When the upgrade is complete, the health status should switch to HEALTH_OK.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Cephadm strictly enforces an order to upgrade daemons that is still present in staggered upgrade scenarios. The current upgrade order is:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Ceph Manager nodes</p>
+</li>
+<li>
+<p>Ceph Monitor nodes</p>
+</li>
+<li>
+<p>Ceph-crash daemons</p>
+</li>
+<li>
+<p>Ceph OSD nodes</p>
+</li>
+<li>
+<p>Ceph Metadata Server (MDS) nodes</p>
+</li>
+<li>
+<p>Ceph Object Gateway (RGW) nodes</p>
+</li>
+<li>
+<p>Ceph RBD-mirror node</p>
+</li>
+<li>
+<p>CephFS-mirror node</p>
+</li>
+<li>
+<p>Ceph iSCSI gateway node</p>
+</li>
+<li>
+<p>Ceph NFS nodes</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you specify parameters that upgrade daemons out of order, the upgrade command blocks and notes which daemons you need to upgrade before you proceed.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lab_pre_req"><a class="anchor" href="#_lab_pre_req"></a>2. Lab pre-req</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You will need a running 5.2 cluster. If you use the latest image
+available, you will get 5.3. To deploy with the specific 5.2 container image
+tag, you need to specify the <code>--image</code> parameter in the bootstrap command</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Cephadm version and the ceph image version have to be the same for the deployment to work correctly</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#ansible -i /usr/share/cephadm-ansible/inventory -a 'yum install cephadm-16.2.8-85.el8cp.noarch -y' all --limit '!workstation'
+
+#cephadm \
+        --image registry.redhat.io/rhceph/rhceph-5-rhel8:5-287 \
+	bootstrap \
+	--registry-json /root/registry.json \
+	--dashboard-password-noupdate \
+	--ssh-user=root --ssh-private-key /root/.ssh/ceph --ssh-public-key /root/.ssh/ceph.pub \
+	--mon-ip 192.168.56.61 \
+	--apply-spec /root/cluster-spec.yaml</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_minor_version_upgrade_5_2_to_5_3"><a class="anchor" href="#_minor_version_upgrade_5_2_to_5_3"></a>3. Minor version Upgrade 5.2 to 5.3</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Check current version, we are running upstream pacific version, downstream 5.2 Asyc release</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph versions
+{
+    "mon": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 3
+    },
+    "mgr": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 1
+    },
+    "osd": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 3
+    },
+    "mds": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 1
+    },
+    "rgw": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 1
+    },
+    "overall": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 9
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Check out the Upstream to Downstream version Matrix <a href="https://access.redhat.com/solutions/2045583">here</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Update the cephadm and cephadm-ansible packages</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># dnf update cephadm cephadm-ansible -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the preflight playbook with the upgrade_ceph_packages parameter set to true on the bootstrapped host in the storage cluster</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ansible-playbook -i /usr/share/cephadm-ansible/inventory /usr/share/cephadm-ansible/cephadm-preflight.yml  --extra-vars "ceph_origin=rhcs upgrade_ceph_packages=true" --limit '!client'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ensure all the hosts are online and that the storage cluster is healthy</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph -s
+  cluster:
+    id:     2fa6c3f2-91d4-11ed-802f-2cc26078e4ef
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum ceph-node01,ceph-node02,ceph-node03 (age 19m)
+    mgr: ceph-node01.lhbakg(active, since 19m)
+    mds: 1/1 daemons up
+    osd: 3 osds: 3 up (since 19m), 3 in (since 14h)
+    rgw: 1 daemon active (1 hosts, 1 zones)
+
+  data:
+    volumes: 1/1 healthy
+    pools:   8 pools, 225 pgs
+    objects: 213 objects, 8.6 KiB
+    usage:   32 MiB used, 30 GiB / 30 GiB avail
+    pgs:     225 active+clean</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set the OSD noout, noscrub, and nodeep-scrub flags to prevent OSDs from getting marked out during upgrade and to avoid unnecessary load on the cluster</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd set noout
+noout is set
+# ceph osd set noscrub
+noscrub is set
+# ceph osd set nodeep-scrub
+nodeep-scrub is set</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check service versions and the available target containers, we can see that all
+of out container images need to be updated from <code>16.2.8-85.el8cp</code> to <code>16.2.10-94.el8cp</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch upgrade check registry.redhat.io/rhceph/rhceph-5-rhel8:latest
+{
+    "needs_update": {
+        "crash.ceph-node01": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "crash.ceph-node02": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "crash.ceph-node03": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "crash.proxy01": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "mds.cephfs.ceph-node03.rstcql": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "mgr.ceph-node01.lhbakg": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8:latest",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "mon.ceph-node01": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8:latest",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "mon.ceph-node02": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "mon.ceph-node03": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "osd.0": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "osd.1": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "osd.2": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        },
+        "rgw.objectgw.ceph-node02.kascxr": {
+            "current_id": "b2c997ff18982fb497d5c1f86df0c59ce2f1be15817d4f651320fb29006385e6",
+            "current_name": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:3075e8708792ebd527ca14849b6af4a11256a3f881ab09b837d7af0f8b2102ea",
+            "current_version": "16.2.8-85.el8cp"
+        }
+    },
+    "non_ceph_image_daemons": [
+        "node-exporter.ceph-node01",
+        "node-exporter.ceph-node02",
+        "node-exporter.ceph-node03",
+        "alertmanager.proxy01",
+        "grafana.proxy01",
+        "node-exporter.proxy01",
+        "prometheus.proxy01"
+    ],
+    "target_digest": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81",
+    "target_id": "34880245f74a1270bb43a8cd9a76f7799b1644a4784f1d7bcf7a144e8ad08320",
+    "target_name": "registry.redhat.io/rhceph/rhceph-5-rhel8:latest",
+    "target_version": "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)",
+    "up_to_date": []
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Since version 5.3 you can do staggered-upgrades where the admin has total
+control over the order and timing of the daemons, this can come in handy for
+critical production deployments, with a great number of OSDs.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Just to test the staggered-upgrades feature, we are going to update first the
+mon and mgrs services</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch upgrade start --image registry.redhat.io/rhceph/rhceph-5-rhel8:latest --daemon-types mgr,mon
+Error EINVAL: Need at least 2 running mgr daemons for upgrade
+# ceph -s | grep mgr
+    mgr: ceph-node01.lhbakg(active, since 30m)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>cephadm will check that it can upgrade every component before starting without
+affecting the service, we can see that in this example it&#8217;s complaining that it
+only has one manager so he can&#8217;t failover the service during upgrade</p>
+</div>
+<div class="paragraph">
+<p>let&#8217;s deploy a failover mgr daemon</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply mgr 'ceph-node01,ceph-node02'
+Scheduled mgr update...
+# ceph -s | grep mgr
+    mgr: ceph-node01.lhbakg(active, since 35m), standbys: ceph-node02.xbkpxz</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s re-run the same update command as before:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch upgrade start --image registry.redhat.io/rhceph/rhceph-5-rhel8:latest --daemon-types mgr,mon
+Initiating upgrade to registry.redhat.io/rhceph/rhceph-5-rhel8:latest</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With <code>ceph -s</code> or <code>ceph progress</code> we can check the upgrade has started</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>ceph orch upgrade status</code> gives us a detailed view</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph progress
+Upgrade to 16.2.10-94.el8cp (18s)
+    [............................]
+
+# ceph orch upgrade status
+{
+    "target_image": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81",
+    "in_progress": true,
+    "which": "Upgrading daemons of type(s) mgr,mon",
+    "services_complete": [
+        "mon",
+        "mgr"
+    ],
+    "progress": "5/5 daemons upgraded",
+    "message": "Pulling registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81 image on host proxy01"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the upgrade finishes let&#8217;s check our versions</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch upgrade status
+{
+    "target_image": null,
+    "in_progress": false,
+    "which": "&lt;unknown&gt;",
+    "services_complete": [],
+    "progress": null,
+    "message": ""
+}
+# ceph versions
+{
+    "mon": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 3
+    },
+    "mgr": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 2
+    },
+    "osd": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 3
+    },
+    "mds": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 1
+    },
+    "rgw": {
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 1
+    },
+    "overall": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 5,
+        "ceph version 16.2.8-85.el8cp (0bdc6db9a80af40dd496b05674a938d406a9f6f5) pacific (stable)": 5
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We will now upgrade the rest of the components</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can also limit and filter the upgrade on certain hosts <code># ceph orch upgrade
+start --image registry.redhat.io/rhceph/rhceph-5-rhel8:latest --daemon-types
+osd --hosts host02</code></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch upgrade start --image registry.redhat.io/rhceph/rhceph-5-rhel8:latest
+Initiating upgrade to registry.redhat.io/rhceph/rhceph-5-rhel8:latest
+# ceph orch upgrade status
+{
+    "target_image": "registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81",
+    "in_progress": true,
+    "which": "Upgrading all daemon types on all hosts",
+    "services_complete": [
+        "crash",
+        "mon",
+        "mgr"
+    ],
+    "progress": "10/21 daemons upgraded",
+    "message": "Currently upgrading osd daemons"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once it&#8217;s done</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph versions
+{
+    "mon": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 3
+    },
+    "mgr": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 2
+    },
+    "osd": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 3
+    },
+    "mds": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 1
+    },
+    "rgw": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 1
+    },
+    "overall": {
+        "ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)": 10
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can remove the flags and are ready to go.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd unset noout
+noout is unset
+# ceph osd unset noscrub
+noscrub is unset
+# ceph osd unset nodeep-scrub
+nodeep-scrub is unset</code></pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
