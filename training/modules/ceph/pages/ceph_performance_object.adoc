@@ -34,95 +34,106 @@ the most popular benchmarking tools:
 
 === Cosbench
 
-https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf has all installation and config information.
+https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf[Cosbench User Guide] has all installation and config information.
 
-Installation on Ubuntu:
+==== Dependencies & Installation:
 
-+ apt-get install openjdk-7-headless-jre
-+ Download latest COSBench release zip from https://github.com/intel-cloud/cosbench/releases 
-+ Unzip and extract. 
-+ Make .sh files executable 
+----
+# yum install nc
+# yum install java-1.8.0-openjdk.x86_64
+# systemctl stop iptables; systemctl disable iptables
+# systemctl stop firewalld; systemctl disable firewalld
+# wget https://github.com/intel-cloud/cosbench/releases/download/v0.4.2.c4/0.4.2.c4.zip
+# unzip 0.4.2.c4.zip
+# cd 0.4.2.c4
+# chmod 755 *.sh
+----
 
-    find . -name '*.sh' -exec chmod +x {} \;
 
-Architecture:
+==== Architecture:
 
-+ There is a controller node to drive and aggregate results.
-+ There are driver nodes to run test driver processes. Each driver node can host multiple driver processes.
+* There is a controller node to drive and aggregate results.
+* There are driver nodes to run test driver processes. Each driver node can host multiple driver processes.
 
 image::cos_intro.png[Cos Intro]
 
-./start_driver.sh – Run this on each driver node. Can do it on master node too if master node is itself the lone driver node. 
+`./start_driver.sh` – Run this on each driver node. Can do it on master node too if master node is itself the lone driver node. 
 Can specify "[num_drivers][IP address of all drivers][base port]" as optional args. 
 Each driver then runs at port [base_port + index]. 
 Default driver base port is 18088.
 
-./start_controller.sh – only on master node. Its _conf/controller.conf_ should have entries for each worker node 
+`./start_controller.sh` – only on master node. Its `_conf/controller.conf_` should have entries for each worker node 
 in [driver&lt;n&gt;] sections. Default controller port is 19088.
 
 
-Configuration files:
+==== Configuration files:
 
-+ conf/controller.conf – specifies how many drivers, and URLs of all driver process endpoints. 
+* conf/controller.conf – specifies how many drivers, and URLs of all driver process endpoints. 
   If driver nodes run multiple driver processes, this should have endpoints for every process.
 
-+ conf/driver.conf – these are actually overwritten by start-driver.sh. So no point modifying these directly. 
+* conf/driver.conf – these are actually overwritten by start-driver.sh. So no point modifying these directly. 
   Instead modify conf/driver_template.conf.
   
   
   
 Actual testing procedure is configured using a **workload configuration file** in conf/.
 
-+ Attached a working Ceph S3 workload configuration - cosbench-ceph-s3-workload.conf - based on the default S3 workload conf conf/s3-config-sample.xml
+* Attached a working Ceph S3 workload configuration - cosbench-ceph-s3-workload.conf - based on the default S3 workload conf conf/s3-config-sample.xml
 
-+ Note the &lt;storage&gt; tag attributes. 
+* Note the &lt;storage&gt; tag attributes. 
 
-    + _endpoint_ should be the RGW host:port. For actual AWS S3 testing, just remove the endpoint attribute and 
+.  `_endpoint_` should be the RGW host:port. For actual AWS S3 testing, just remove the endpoint attribute and 
       path_style_access can be removed too.
       
-    + path_style_access=true is extremely important for Ceph S3; Otherwise, the Amazon S3 SDK library used by 
+. `path_style_access=true` is extremely important for Ceph S3; Otherwise, the Amazon S3 SDK library used by 
       COSBench defaults to virtual host style access, tries to contact bucket URLs like 
       http://s3testqwer1.cephmon1 and if RGW host is not configured for virtual host addressing, 
       S3 client fails with “Unknown name or service s3testqwer1.cephmon1”
       
-+ Another example S3 workload configuration: http://www.spinics.net/lists/ceph-users/msg28805.html . The multiple &lt;storage&gt; elements are not necessary – COSBench code seems to inherit global elements in each work stage or work element.
+* Another example S3 workload configuration: http://www.spinics.net/lists/ceph-users/msg28805.html . The multiple &lt;storage&gt; elements are not necessary – COSBench code seems to inherit global elements in each work stage or work element.
 
-+ For actual AWS S3 endpoints:
+* For actual AWS S3 endpoints:
   
    + Bucket names should be globally unique across all S3 users. Since default name s3testqwer&lt;n&gt; is likely to be created by somebody else, 
      COSBench fails with 403 access denied errors with default
      
-**Start a test**: ./cli.sh submit conf/s3test.conf
+* **Start a test**:
+----
+./cli.sh submit conf/s3test.conf
+----
 
-**Monitor a test**: From a browser, open http://&lt;cosbench-controller-node:19088/controller/. Then open the item under active workload, and drill down into workload, work stage and missions by clicking on “view details”.
+* **Monitor a test**: From a browser, open http://&lt;cosbench-controller-node:19088/controller/. Then open the item under active workload, and drill down into workload, work stage and missions by clicking on “view details”.
 
 
 
-Troubleshooting:
+==== Troubleshooting:
 
 Log files and logging levels:
 
-+ log/system.log – the controller`s log.Logging level is set by log_level in [controller] section of conf/controller.conf. Set to DEBUG|INFO 
+* log/system.log – the controller`s log.Logging level is set by log_level in [controller] section of conf/controller.conf. Set to DEBUG|INFO 
 log/mission/[mission-id].log – Actual worker logs. This is where any S3 client errors are recorded.
 Set “log_level” to DEBUG|INFO in [driver_n_ ] sections of conf/controller.conf
 Set “log_level” to DEBUG|INFO in [driver] section of conf/driver_template.conf.
 
-+ "Error 403 Access denied for actual AWS S3 endpoint" - Check if the bucket has a globally unique name. 
+*  `"Error 403 Access denied for actual AWS S3 endpoint"` - Check if the bucket has a globally unique name. 
   The default s3testqwer&lt;n&gt; bucket names in workload configs are likely to be owned by somebody else already.
   
   
-+ Error
+* Error
+
+-----
   "[INFO] [NoneStorage] - performing PUT at /s3testqwer1
    [WARN] [S3Storage] - below exception encountered when creating bucket s3testqwer1: Unable to execute HTTP request: s3testqwer1.cephmon1...
    [NoneStorage] - performing PUT at /s3testqwer2/myobjects10
    [S3Storage] - below exception encountered when creating object myobjects10 at s3testqwer2: Unable to execute HTTP request: s3testqwer2.cephmon1: Name or service not known"
+----
 
 The error here is that S3 client is attempting to use virtual host style URLs [http://bucket.host]() but Ceph RGW is not configured to handle it by default. 
 Instead, tell S3 client to use path style URLs, by suffixing bucket and object names to URL. Set &lt;storage ... config=“....path_style_access=true”&gt; in workload config file.  
 
 image::cosbench1.png[cos image1]
 
-Example template for cosbench
+==== Example template for cosbench
 
 ----
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -158,6 +169,213 @@ Example template for cosbench
 
 </workload>
 ----
+
+
+=== Warp
+
+The warp benchmarking tool is a cloud ready S3 benchmarking tool that can be used to simulate a variety of object workloads.
+
+This doc is intended to provide a quick how-to when deploying warp for ODF or RGW deployments.
+
+==== Installing warp
+Warp has two main modes of execution, as a client and a server. The client is effectively the workload generator, and is told the attributes of the workload to execute by the server. The server component may also run in multiple modes;
+workload orchestration with the client
+results analysis
+Results comparisons
+You need to install warp on a server that has the ‘oc’ binary and access to the target k8s/OCP cluster.
+
+Download warp using git or wget/unzip.
+
+Using ‘git’ (your resulting directory will be called ‘warp’)
+----
+# git clone https://github.com/minio/warp.git
+----
+
+Using wget and unzip (your resulting directory will be called warp-master)
+----
+# wget https://github.com/minio/warp/archive/refs/heads/master.zip && unzip master.zip
+----
+
+
+==== Using Warp
+Unlike tools like the benchmark operator, the warp clients are designed to persist. By default, each worker removes the objects it used from the target S3 instance as the final stage of the benchmark job (this can be changed with a --keep-data flag). Therefore when testing different workloads, you only need to deploy the clients once, and then submit different jobs to exercise different workload profiles.
+
+Another default behavior is the generation of the analysis file. The server will attempt to create this on the root filesystem of the pod, which will typically fail with permissions. There are several ways to ensure the analysis data is persisted, shown here.
+
+==== Configuring warp for ODF/Noobaa
+The project folder provides sample yaml files for the client and server in the projects k8s directory.
+
+To enable warp to run against an ODF noobaa environment
+Create an OBC and extract the ACCESS/SECRET keys
+
+[OPTIONAL] Create a separate namespace for the warp clients and jobs
+
+Deploy the warp clients
+Modify the StatefulSet definition in warp.yaml file as follows
+[Optional] If the target environment is using self-signed certs, you will need to tell the clients to skip SSL verification. You do this by updating the spec.template.spec.containers.args to include ‘--insecure’ as an args option
+Create the clients
+----
+# oc -n <namespace> create -f warp.yaml
+----
+
+
+. Deploy the server (batch job)
+. Modify warp-job.yaml
++
+[Optional] give the job a specific name that reflects the type of run
++
+. Update the environment variables for WARP_ACCESS_KEY and WARP_SECRET_KEY with the credentials from step 1.
+. Update the args passed to the container
+. The first argument is the client action. Use ‘get’ for an initial smoke test
++
+[Optional] ‘--objects’ defines the object count each client will act against (default is 2,500)
++
+. ‘--bucket’ updated to reflect the bucket created by the OBC
+. ‘--warp-client’ to reflect the internal dns names of the clients
+. ‘--host’ should be used the internal S3 endpoint
+. Add a ‘--tls’ parameter
+. ‘--concurrent’ is an int that governs the level of concurrency the client attempts with the server
+. ‘--obj.size’ should be set to the object size for the workload e.g. 16MiB
+. Submit the job
+----
+# oc -n <namespace> create -f warp-job.yaml
+----
+
+
+High level results are in the output of the job (output example)
+----
+# oc logs job.batch/warp-job
+----
+
+
+==== Configuring warp for ODF/RGW
+
+Create an object store user using the following yaml file.
+
+----
+# cat rgw_user.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephObjectStoreUser
+metadata:
+  name: ceph-rgw-user
+  namespace: openshift-storage
+spec:
+  store: ocs-storagecluster-cephobjectstore
+  displayName: ceph-rgw-user
+
+# oc create -f rgw_user.yaml
+----
+
+Discover the secret name from the rgw user
+----
+# oc get cephobjectstoreuser/<user name> -o jsonpath='{.status.info.secretName}'
+----
+
+Retrieve the Access key, Secret Key and Endpoint from the newly created user’s secret.
+----
+# oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.AccessKey | base64 -d
+# oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.SecretKey | base64 -d
+# oc -n openshift-storage get secrets rook-ceph-object-user-ocs-storagecluster-cephobjectstore-ceph-rgw-user -o json | jq -r .data.Endpoint | base64 -d
+----
+
+Or as a one-liner
+----
+# oc get secret <secret-name> -o go-template='AccessKey={{.data.AccessKey | base64decode}}{{"\n"}}SecretKey={{.data.SecretKey | base64decode}}{{"\n"}}Endpoint={{.data.Endpoint | base64decode }}{{"\n"}}'
+----
+
+Prepare the warp client file and start the pods. Sample file is present here.
+Prepare the warp-job file. Sample file is present here.
+
+==== Analysis File Handling
+The most important component of any test run is the results file, and warp is no different. There are several ways to expose the detailed results.
+
+* Simple
+
+To save the status file (zst) you can create a PVC that binds to an external NFS server. Now when you run the job with the ‘--benchdata’ parameter defined, the output stats will be written to the mountpoint, which can later be used as input for the analyze feature.
+
+* Programmatic
+The data from a run can be exposed over http in JSON format (--serve), avoiding the requirement for PVC’s and NFS servers (as long as you’re happy with test results remaining local to your environment!). In fact the http endpoint supports the following endpoints (ref)
+
+* `v1/stop`
+Stops an active job, pod stays active due to the serve loop
+* `v1/status`
+JSON response, last_status and data_ready are two key fields
+* `v1/aggregated`
+Aggregated summary of the run in JSON format (This is probably the most useful - but it is very verbose!)
+* `v1/operations/json`
+Provides a JSON representation of the zst file
+* `v1/operations`
+Downloads the zst file
+e.g. curl localhost:7762/v1/operations -o my-testrun.zst
+
+==== Analysis
+
+The warp binary has an analyze mode, which takes as input the zst file from a test run and produces a summary of the run’s performance, and may optionally be used to generate a CSV file that covers each op request.
+
+You can run the analysis job as a pod in OCP, or execute it locally - all you really need is the zst file.
+
+*Example*
+
+----
+# podman run --rm -v /var/lib/nfs/data:/mnt minio/warp:latest analyze --analyze.v /mnt/warp-get-32mb.csv.zst
+
+
+Operation: PUT (15). Ran 15s. Concurrency: 3. Warp Instances: 3.
+
+
+Requests considered: 4:
+ * Avg: 2.815s, 50%: 2.997s, 90%: 3.439s, 99%: 3.439s, Fastest: 2.24s, Slowest: 3.439s                                            	 
+Throughput:
+* Average: 34.56 MiB/s, 1.08 obj/s
+
+
+Throughput, split into 6 x 1s:
+ * Fastest: 40.0MiB/s, 1.25 obj/s (1s, starting 00:33:45 UTC)
+ * 50% Median: 34.3MiB/s, 1.07 obj/s (1s, starting 00:33:47 UTC)
+ * Slowest: 31.0MiB/s, 0.97 obj/s (1s, starting 00:33:49 UTC)
+
+Operation: GET (768). Ran 1m1s. Concurrency: 3. Warp Instances: 3.
+
+Requests considered: 751:
+
+ * Avg: 225ms, 50%: 35ms, 90%: 622ms, 99%: 1.953s, Fastest: 26ms, Slowest: 5.297s                                                 	 
+ * TTFB: Avg: 118ms, Best: 8ms, 25th: 9ms, Median: 11ms, 75th: 21ms, 90th: 185ms, 99th: 1.316s, Worst: 5.277s                     	 
+ * First Access: Avg: 1.947s, 50%: 1.946s, 90%: 5.297s, 99%: 5.297s, Fastest: 631ms, Slowest: 5.297s                              	 
+ * First Access TTFB: Avg: 1.395s, Best: 611ms, 25th: 905ms, Median: 1.275s, 75th: 1.371s, 90th: 5.277s, 99th: 5.277s, Worst: 5.277s   
+ * Last Access: Avg: 744ms, 50%: 638ms, 90%: 1.891s, 99%: 1.891s, Fastest: 34ms, Slowest: 1.891s                                  	 
+ * Last Access TTFB: Avg: 319ms, Best: 9ms, 25th: 26ms, Median: 32ms, 75th: 946ms, 90th: 1.288s, 99th: 1.288s, Worst: 1.288s      	 
+
+Throughput:
+* Average: 424.93 MiB/s, 13.28 obj/s
+
+Throughput, split into 56 x 1s:
+ * Fastest: 1092.6MiB/s, 34.14 obj/s (1s, starting 00:34:38 UTC)
+ * 50% Median: 385.5MiB/s, 12.05 obj/s (1s, starting 00:34:30 UTC)
+ * Slowest: 39.7MiB/s, 1.24 obj/s (1s, starting 00:34:04 UTC)
+----
+
+
+
+
+
+==== Evaluation of Warp
+
+The warp project should not be considered feature complete, and has gaps relating to our current workflows and expectations.
+
+The Good:
+* It’s simple to use and you can be running a benchmark in minutes within kubernetes
+* It supports bare-metal and k8s based deployments
+* It can provide extremely verbose output (per op), that could benefit problem determination
+* It’s written in golang, so dependencies aren’t a problem!
+* It supports GET/PUT/LIST/STAT/MIXED/MULTIPART
+* It outputs high level and detailed stats
+
+The Bad:
+* By default the output format is txt or at best csv - you need the http handler to access summary analysis in JSON format
+* Logs don’t have timestamps!
+* There isn’t a UI, so organizing jobs and managing a suit of tests is an exercise for the user
+* Documentation is incomplete - another read-the-code™ project?
+* Owned by a competitor, with some feature specific to the minio platform (e.g. server profiling)
 
 
 
