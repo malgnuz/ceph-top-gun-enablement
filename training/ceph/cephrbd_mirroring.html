@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>RGW Authentication/Authorization. :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_auth.html">
+    <title>RBD Mirroring :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/cephrbd_mirroring.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -130,7 +130,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -172,7 +172,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -281,176 +281,284 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="radosgw_auth.html">RGW Auth &amp; Authz</a></li>
+    <li>Ceph RADOS Block Device</li>
+    <li><a href="cephrbd_mirroring.html">RBD Mirroring</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_auth.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/cephrbd_mirroring.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">RGW Authentication/Authorization.</h1>
-<div id="preamble">
-<div class="sectionbody">
-<div class="ulist">
-<div class="title">Goals</div>
-<ul>
-<li>
-<p>Review RGW Authentication methods</p>
-</li>
-<li>
-<p>Evaluate Pros and Cons of Each Auth Method</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
+<h1 class="page">RBD Mirroring</h1>
 <div class="sect1">
 <h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In order to access Object Storage using the s3 protocol you need to provide an s3 access key and secret key. The actual content of the access key can be varied by the implementation of the s3 API but it serves as your identity. When you send a request to the S3 API, the API will check it knows about your s3 access key and look up the associated secret key. The secret key is a shared secret between you and the S3 API and should not be sent over the wire to S3. Instead, the secret key is used to create a Hash-based Message Authentication Code (HMAC) to sign each request that is sent to s3 where it will be validated and upon successful validation will be executed. S3 treats a successful validation as proof that you hold the secret key and therefore are the identity you have sent.</p>
+<p>Ceph supports mirroring RBD Images for any purpose you can see fit, the major
+one being disaster recovery. However the mirroring implmentation took different
+options and are specific to the environment (client side) consuming the Ceph
+cluster.</p>
 </div>
-<div class="paragraph">
-<p>The following options are available to authenticate against RGW.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>RGW local database authentication.</p>
-</li>
-<li>
-<p>LDAP authentication.</p>
-</li>
-<li>
-<p>Keystone authentication .</p>
-</li>
-<li>
-<p>Secure Token Service (STS)</p>
-</li>
-<li>
-<p>with LDAP(STS-lite).</p>
-</li>
-<li>
-<p>with keystone(STS-lite).</p>
-</li>
-<li>
-<p>with OpenID connect authentication</p>
-</li>
-</ul>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Both existing RBD mirroring implementation are asynchronous
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_radosgw_authentication_methods"><a class="anchor" href="#_radosgw_authentication_methods"></a>2. RadosGW authentication methods.</h2>
+<h2 id="_architecture"><a class="anchor" href="#_architecture"></a>2. Architecture</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_rgw_local_user_database_using_sts"><a class="anchor" href="#_rgw_local_user_database_using_sts"></a>2.1. RGW local user database using STS.</h3>
 <div class="paragraph">
-<p>RadosGW by default has a local user database to manage authentication and authorization, the user information and credentials are stored in a rados pool, so there is no extra work needed to set up this authentication setup, it works with STS, an admin user can create roles and policies for the roles and then indicate the RGW local users that will be authorized to assume the new role.</p>
+<p>The RBD asynchronous mirroring are performed by adding a new daemon to the
+Ceph cluster. This daemon is known as the <code>rbd-mirror</code> daemon.</p>
 </div>
-<div class="paragraph">
-<p>The STS assume role workflow is shown in the following diagram:</p>
-</div>
-<div class="imageblock">
+<div class="imageblock text-center unresolved">
 <div class="content">
-<img src="_images/STS_local.png" alt="STS local">
+<img src="RBDMirroringArchitecture.png" alt="RBD Mirroring Architecture">
 </div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_ldap_authentication"><a class="anchor" href="#_ldap_authentication"></a>2.2. LDAP authentication</h3>
-<div class="paragraph">
-<p>We can configure LDAP as an authentication backend for RadosGW, the configuration is straightforward; we only have to set some parameters in the RGW config, like LDAP search filters, bind users, etc.</p>
+<div class="title">Figure 1. kRBD Diagram</div>
 </div>
 <div class="paragraph">
-<p>When using LDAP authentication the s3 access key is a base64 encoded JSON snippet which contains the LDAP user and password. No secret key is used. This is sent over the wire to the radosgw server then performs an LDAP login, on successful login the radosgw will grant access and the user is created in the radosgw database with the type “LDAP”, So RGW knows that is has to validate this user with LDAP when it needs to be authenticated.</p>
+<p>In the RBD Mirroring architecture, the <code>rbd-mirror</code> daemon is usually deployed
+in the cluster that will receive the mirror of the RBD Image.</p>
 </div>
 <div class="paragraph">
-<p>Using LDAP authentication has been tested and works ok with current Hadoop S3A drivers using the SimpleAWSCredentialsProvider. With this use case, no temporary credentials(STS) would be used.
-One important drawback of using LDAP is the security concerns of the current implementation, as the user login and password are sent to RGW in the HTTP headers, also these headers can potentially be stored in RGW if we set the debug level to 20 in the RGW service(need to be root). User credentials are also exposed if users generate a signed S3 URL <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html" class="bare">https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html</a>.</p>
+<p>The RBD Images that get mirrored are controlled by the following option:</p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_ldap_authentication_with_sts_lite"><a class="anchor" href="#_ldap_authentication_with_sts_lite"></a>2.3. LDAP authentication with STS-Lite</h3>
-<div class="paragraph">
-<p>LDAP is able to implement the GetSessionToken STS API call, so all the same points would be valid from the previous LDAP chapters, with the difference that with this implementation, we would be able to use temporary credentials(STS), so the user will only use his LDAP user/password base64 encoded key once to get the temporary credentials and token, and from that point use the new provided credentials on the application.
-The advantage of this approach is that the user&#8217;s LDAP credentials are only used once to get access to the temporary STS credentials, so we are reducing the risk of exposing the user&#8217;s AD credentials.
-Because the full STS implementation is not available, we are missing the AssumeRole call, we are not able to assume roles and policies, so the bucket policies have to be managed at the bucket level.
-We haven’t tested this configuration but looking at the S3A available credential providers, we would need to use the TemporaryAWSCredentialsProvider available. Using this provider, the client sets the temporary credentials that have been provided by the STS API in ENV vars or the config files. With this provider, there is no refresh of tokens available, so once the token expires, the client won’t have access to s3 with the provided credentials.
-The lifetime of a token can be set by the user when calling the GetSessionToken API call with the parameter ‘DurationSeconds’, you can set this option to the maximum configured in RGW by the ceph configuration parameter ‘rgw sts max session duration’. So if needed, the duration/expiration of a token can be configured to the longest-running job. There is also a minimum value for the DurationSeconds, which is dictated by the AWS STS API. This value is 900 seconds and cannot be lowered. <a href="https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html" class="bare">https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html</a>
-To partially reduce the security concerns we have with LDAP, we can deploy dedicated STS RGW services that would only provide the STS API endpoint, so we would reduce the exposure of the AD user credentials in the RGW log files when in debug mode 20 only to a couple of RGW nodes, as the users would only send their AD credentials to the dedicated STS RGW endpoints to get their temporary credentials, then they would access the S3 RGW endpoints using the STS temporary keys.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_ligth.png" alt="STS light" width="840" height="680">
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_keystone_authentication"><a class="anchor" href="#_keystone_authentication"></a>2.4. Keystone Authentication.</h3>
-<div class="paragraph">
-<p>Keystone is the Openstack authentication &amp; authorization service available in the Red Hat Openstack product.
-The radosgw can be integrated with Openstack keystone. Keystone can have multiple identity services configured like LDAP or Active Directory. Users and Groups from the backend are synchronised with keystone and made available to openstack.
-The LDAP/AD users or groups can be mapped to Openstack projects/tenants roles. Once a group is mapped to a tenant, all users from that LDAP/AD group will have access to OSP resources, for example, creating EC2 credentials(access/secret key) to access S3 resources.
-The simplified workflow is users first authenticate against keystone and then use the keystone API ec2 credentials created, This API call only needs to be run once as it creates a long-lived s3 access and secret key for that user. The provided credentials can then be used to access s3 resources.
-Using LDAP authentication has been tested and works ok with current hadoop S3A drivers using the SimpleAWSCredentialsProvider. With this use case no temporary credentials(STS) would be used.
-If needed, credential rotation can be done at the Openstack tenant level, user generated credentials can be re-created by the user at any time using the keystone API.
-Keystone integration with RGW can only manage bucket policies at the project/tenant level, there is no user granularity, so all users from a project/tenant will have the same access to S3 resources. A user can belong to more than one tenant/project, if needed we can share buckets between different tenants using bucket policies at the tenant level.
-There is a benefit of having only tenant granularity, Bucket policy management would be reduced as it is managed at the tenant/group level, but it can also be a negative aspect if you need user granularity for your S3 buckets.
-One of the biggest drawbacks of keystone is having to deploy and maintain the lifecycle of a Openstack Cluster. To deploy RH OSP in a supported fashion we need 3 nodes(can be virtualized in RHV) to ensure the HA of the deployment.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_keystone_sts_lite"><a class="anchor" href="#_keystone_sts_lite"></a>2.5. Keystone STS-Lite</h3>
-<div class="paragraph">
-<p>Like with LDAP STS-lite there is an implementation in keystone of the GetSessionToken STS API call, the same arguments that we made in the ldap sts-lite chapter are valid here.</p>
-</div>
-<div class="paragraph">
-<p>We haven’t tested this configuration but looking at the S3A available credential providers we would need to use the TemporaryAWSCredentialsProvider available, using this provider the client sets the temporary credentials that have been provided by the STS API in ENV vars or the config files, with this provider there is no refresh of tokens available, so once the token expires the client won’t have access to s3 with the provided credentials.</p>
-</div>
-<div class="paragraph">
-<p>The lifetime of a token can be set by the user when calling the GetSessionToken API call, with the parameter ‘DurationSeconds’, you can set this option to the maximum configured in RGW by the ceph configuration parameter ‘rgw sts max session duration’. So if needed the duration/expiration of a token can be configured to the longest running job.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_oauthoidc_sts_authentication"><a class="anchor" href="#_oauthoidc_sts_authentication"></a>2.6. OAUTH(OIDC) + STS authentication.</h3>
-<div class="paragraph">
-<p>With OAUTH authentication we use an OIDC service to authenticate against, we need to have an OpenID Connect/ OAuth2 compatible service. Red Hat has tested the integration with RGW of the following OIDC products: Red Hat SSO and keycloak IDPs. Consulting has successfully integrated a F5 OIDC provider but had to modify the F5 providers configuration to match url paths defined by Keycloak due to a hardcoded path in the 4.2 code <a href="https://gitlab.cee.redhat.com/ceph/ceph/-/blob/ceph-4.2-rhel-patches/src/rgw/rgw_rest_sts.cc#L194" class="bare">https://gitlab.cee.redhat.com/ceph/ceph/-/blob/ceph-4.2-rhel-patches/src/rgw/rgw_rest_sts.cc#L194</a>.</p>
-</div>
-<div class="paragraph">
-<p>With this method the authentication of a users follows this high level workflow:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
+<div class="ulist">
+<ul>
 <li>
-<p>The user first authenticates against a OIDC to get a JWT(token),</p>
+<p>A Mirror pair of clusters must be first defined</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The clusters in a pair are known as peer clusters</p>
+</li>
+</ul>
+</div>
 </li>
 <li>
-<p>The user would then run the assume role with web identity API call against the STS API, the body of the call would need to have the role the user is trying to access and also the path to the JWT token we created in step 1.</p>
+<p>Pool mode mirrroring: All new images created in the pool get mirrored</p>
 </li>
 <li>
-<p>RGW will check with the OIDC provider the validity of the token.</p>
+<p>Image mode mirroring: Only the images explicitely set in the pool get mirrored</p>
 </li>
-<li>
-<p>STS will create and provide temporary credentials for the user</p>
-</li>
-<li>
-<p>The user will be able to access the S3 resources with a certain role.</p>
-</li>
-</ol>
+</ul>
 </div>
 <div class="paragraph">
-<p>A diagram of the previously mentioned workflow is available in the following diagram</p>
+<p>To enable pool mode mirroring, use  <code>rbd mirror pool enable {pool-name} {mode}</code>
+where <code>{mode}</code> can be:</p>
 </div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_oidc.png" alt="STS OIDC">
+<div class="ulist">
+<ul>
+<li>
+<p><code>pool</code> to enable pool mode mirroring</p>
+</li>
+<li>
+<p><code>image</code> to enable image mode mirroring</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Red Hat OpenShift Data Foundation uses <code>image</code> mode.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To disable miroring use <code>rbd mirror pool disable {pool-name}</code></p>
+</div>
+<div class="paragraph">
+<p>When using <code>image</code> mode mirroring, you must explicitely name the RBD Images that
+are mirrored between the two clusters.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When using Red Hat OpenShift Data Foundation Regional DR the <code>RamenDR</code>
+pods will toggle the mirroring flag on the RBD Images automatically.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To create a pair of peer cluster you must use the <code>rbd mirror pool peer bootstrap create [--site-name {local-site-name}] {pool-name}</code>
+command. This command will create a bootstrap token which can then be imported in the
+remote cluster via the <code>rbd mirror pool peer bootstrap import [--site-name {local-site-name}] [--direction {rx-only or rx-tx}] {pool-name} {token-path}</code> command.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can also manually peer the cluster by copying the remote cluster
+<code>cephx</code> credentials on the machine where the <code>rbd</code> command will be used.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To enable mirroring of an image, use the <code>rbd mirror image enable {pool-name}/{image-name} {mode}</code> command.
+`{mode} can be set to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>snapshot</code> to enable snapshot based mirroring</p>
+</li>
+<li>
+<p><code>journal</code> to enable journal based mirroring</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+See subsequent chapters for the differebces between the two modes.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+When operating a standalone Ceph cluster the RBD Mirroring parameters
+must be applied to each cluster.
+</td>
+</tr>
+</table>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_journal_based_mirroring"><a class="anchor" href="#_journal_based_mirroring"></a>3. Journal based mirroring</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is the oldest RBD Mirroring technology that was implemented for OpenStack.
+It is compatible only with <code>librbd</code> based clients in environments such as
+OpenStack and Proxmox.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This mode is not compatible with <code>krbd</code> hence not compatible
+with Red Hat OpenShift Data Foundation as of today.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The journal based mirroring follows the following steps:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Client issues a write against the RBD Image</p>
+</li>
+<li>
+<p><code>librbd</code> writes the IO to the RBD Image</p>
+</li>
+<li>
+<p><code>librbd</code> writes the IO to the RBD journal</p>
+</li>
+<li>
+<p><code>librbd</code> acknowledges the IO to the client</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As the journal gets written, the <code>rbd-mirror</code> daemon picks up the IO
+from the RBD journal and mirrors the IO onto the remote RBD Image.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+As the RBD Images are identical between the 2 clusters, writing to the
+remote RBD Image will also cause 2 writes; One to the RBD Image, one to the RBD
+Image journal.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_snapshot_based_mirroring"><a class="anchor" href="#_snapshot_based_mirroring"></a>4. Snapshot based mirroring</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This mirroring method is compatible with both kernel RBD client and <code>librbd</code> clients.
+It is the solution implemented for Red Hat OpenShift Data Foundation Regional DR
+capabilities.</p>
+</div>
+<div class="paragraph">
+<p>Once you have enabled RBD Mirroring <code>snapshot</code> mode for the image, you have
+to configure the snapshot scheduling for the RBD Image. This schedule defines
+how often a snapshot of the RBD Image is taken so that the snapshot can be
+mirrored to the target Ceph cluster.</p>
+</div>
+<div class="paragraph">
+<p>To create a schedule, use the <code>rbd mirror snapshot schedule add [--pool {pool-name}] [--image {image-name}] {interval} [{start-time}]</code>
+command. The interval can be specified in days, hours, or minutes using <code>d</code>, <code>h</code>, <code>m</code>
+suffix respectively. The optional start-time can be specified using the ISO 8601 time format.</p>
+</div>
+<div class="paragraph">
+<p>To list existing schedules for a RBD Image use <code>rbd mirror schedule ls --pool {pool-name} --recursive</code>.</p>
+</div>
+<div class="paragraph">
+<p>To view the status of an existing schedule, use <code>rbd mirror snapshot schedule status [--pool {pool-name}] [--image {image-name}]</code>
+to view when the next snapshot will be taken for the RBD Image.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Make sure to allow for enough time between 2 snapshot for the entire
+content of the snapshot to be replicated between the two clusters.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
