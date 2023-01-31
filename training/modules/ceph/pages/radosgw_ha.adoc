@@ -17,6 +17,35 @@ RGW is a restful HTTP endpoint that can be load-balanced for HA and increase
 performance. There are some great examples of different RadosGW load-balancing mechanisms in this
 https://github.com/mmgaggle/ceph-lb[repo]
 
+== Load-Balancing Network and DNS considerations
+
+When deploying Ceph for a full blown Multi-Petabyte Object Storage Solution.
+With requirements for High, Sustained throughputs Load-Balacing the RGW HTTP
+endpoints with the help of BGP adn ECMP is a very good option
+
+The keepalived + haproxy stack provided by the ingress service has it's
+limitations. 
+
+=== Network Fabric
+The network fabric at each site needs to provide sufficient bisectional bandwidth to support the declustered writing and reading of erasure coded object shards. It is recommended that each site’s network fabric have either zero (1:1), or very low oversubscription (eg. 2:1). The most common network topology for a site supporting a Ceph storage cluster is the spine and leaf topology. Path diversity and load sharing in the spine and leaf topology should be achieved by using multiple routes and equal cost multipath (ECMP). This allows the CRUSH algorithm the ability to spread erasure coded chunks or object replicas across network failure domains (osd-failure-domain=rack).
+
+=== Intersite Networking(Multi-site)
+Networking between zones that participate in the same zone group will be utilized for asynchronous replication traffic. As such, the amount of intersite bandwidth must be equal to or greater than ingest throughput to prevent synchronization lag from growing and increasing data loss risks. Intersite networking will not be relied on for read traffic or reconstitution of objects because all objects are locally durable. Path diversity is recommended for intersite networking, and all intersite networks should be routed instead of switched to isolate failure domains. Ceph object gateway synchronization should be configured to use the HTTPS endpoint so replication traffic is encrypted with SSL/TLS.
+Load Balancing
+
+image::Load-Balance.png[Load Balance Haproxy,840,680]
+
+=== Local HAproxy per RadosGW service
+Ceph object gateway incorporates Civetweb, an embedded webserver. One challenge with Civetweb is that it requires a thread per TCP connection. We have found that running a local HAProxy instance in front of each Ceph object gateway to be beneficial because a smaller Ceph object gateway thread pool can service a larger number of connections. To keep connections between clients and HAProxy open, and close connections between HAproxy and the Ceph object gateway after each HTTP request we recommend the use of the http-server-close HAProxy configuration option.
+
+Each storage host should also run a routing agent (eg. quagga) to advertise a route to the /32 network of the virtual IP address bound to the loopback interface which HAproxy is listening on. Upstream devices should use hardware-based equal cost multipath (ECMP) for load sharing and path diversity across storage hosts. If the routing agent loses adjacency with it’s upstream router due to software or hardware malfunction, the route will be withdrawn so the failed host will stop receiving traffic. Systemd can be employed to stop the quagga service if either the HAproxy or Ceph object gateway service crashes or stops.
+
+=== Using BGP and ECMP for Load-Balancing
+This scenario requires upstream devices to be configured, and the required commands to configure will vary depending on the devices' network operating system. This makes this scenario more challenging to implement. On the other hand the resulting storage service is fault tolerant and active/active up to the ECMP width supported by upstream devices (commonly 32 or 64).
+
+
+== Ingress Service for Load Balancing RGW
+
 Since RHCS 5.1, Ceph provides a cephadm service called ingress that provides an
 HA and load-balancing stack based on keepalive and haproxy.
 
