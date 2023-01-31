@@ -48,6 +48,7 @@ permanently and store it in the database. You can change most configuration sett
 cluster is running.
 
 Use ceph config commands to query the database and view configuration information.
+
 * `ceph config ls` to list all possible configuration settings.
 * `ceph config help` setting, for help with a particular configuration setting.
 * `ceph config dump`, to show the cluster configuration database settings.

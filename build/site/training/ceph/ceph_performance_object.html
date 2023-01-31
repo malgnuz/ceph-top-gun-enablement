@@ -325,18 +325,104 @@ the most popular benchmarking tools:</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>Using an Object performance benchmarking tool like cosbench or warp to run
+different load tests that will help us get very valuable baseline data so we
+can get a rough estimate on the amount of nodes needed to reach a certain IO
+throughput target in the Ceph cluster.</p>
+</div>
+<div class="paragraph">
+<p>To generate a considerable amount of load on the Ceph cluster we will need a
+certain number of client nodes to concurrently execute and put load on the S3
+endpoint/Ceph cluster.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_tools"><a class="anchor" href="#_tools"></a>2. Tools</h2>
+<h2 id="_what_is_our_objective"><a class="anchor" href="#_what_is_our_objective"></a>2. What is our Objective?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before starting the Benchmarking tests set your objectives. here is an example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Baseline performance testing. Looking for our limits.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Set the Goal</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>During this initial test our <strong>goal is to understand the limits of our cluster</strong>,
+Ideally we will have enough clients so that we can saturate and take to the
+limit the cluster, we then need to understand what is causing the performance
+bottleneck, if it’s something related to our Ceph configuration, that can be
+tuned to increase the performance or if we are seeing resource saturation
+spinning drives,network stack. <strong>If our limitation/bottlenect is coming from the
+hardware resources we have achieved the objective of this testing</strong> .</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Configure the Benchmark workload(Ideally very similar to production)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>We want to work during the tests with 3 types of object sizes:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Small objects(1/15/30MB).  Throughput Testing.</p>
+</li>
+<li>
+<p>Medium(32/64/128MB). Throughput Testing.</p>
+</li>
+<li>
+<p>Mini &amp; Tiny (4KB-1MB). Objects per second Testing. Understanding the performance hit when working with small objects.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Workload types:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>GET. 80%. PUT. 15%. DELETE. 5%</p>
+</li>
+<li>
+<p>GET 75%.  PUT. 15%. DELETE. 5%. STATS 5%.</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>What do we extract from the results
+Once we finish this testing we need to have a clear understanding of the maximum throughput we are able to achieve on the full cluster, Individually with different object sizes and globally with a mix of object sizes, with the maximum total throughput of the cluster we will be able to calculate the maximum throughput per cluster node, this can be used in the future to calculate the number of nodes needed to achieve a certain target throughput.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tools"><a class="anchor" href="#_tools"></a>3. Tools</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_cosbench"><a class="anchor" href="#_cosbench"></a>2.1. Cosbench</h3>
+<h3 id="_cosbench"><a class="anchor" href="#_cosbench"></a>3.1. Cosbench</h3>
 <div class="paragraph">
 <p><a href="https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf">Cosbench User Guide</a> has all installation and config information.</p>
 </div>
 <div class="sect3">
-<h4 id="_dependencies_installation"><a class="anchor" href="#_dependencies_installation"></a>2.1.1. Dependencies &amp; Installation:</h4>
+<h4 id="_dependencies_installation"><a class="anchor" href="#_dependencies_installation"></a>3.1.1. Dependencies &amp; Installation:</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># yum install nc
@@ -351,7 +437,7 @@ the most popular benchmarking tools:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_architecture"><a class="anchor" href="#_architecture"></a>2.1.2. Architecture:</h4>
+<h4 id="_architecture"><a class="anchor" href="#_architecture"></a>3.1.2. Architecture:</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -379,7 +465,7 @@ in [driver&lt;n&gt;] sections. Default controller port is 19088.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_configuration_files"><a class="anchor" href="#_configuration_files"></a>2.1.3. Configuration files:</h4>
+<h4 id="_configuration_files"><a class="anchor" href="#_configuration_files"></a>3.1.3. Configuration files:</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -449,7 +535,7 @@ S3 client fails with “Unknown name or service s3testqwer1.cephmon1”</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>2.1.4. Troubleshooting:</h4>
+<h4 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a>3.1.4. Troubleshooting:</h4>
 <div class="paragraph">
 <p>Log files and logging levels:</p>
 </div>
@@ -489,7 +575,7 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_template_for_cosbench"><a class="anchor" href="#_example_template_for_cosbench"></a>2.1.5. Example template for cosbench</h4>
+<h4 id="_example_template_for_cosbench"><a class="anchor" href="#_example_template_for_cosbench"></a>3.1.5. Example template for cosbench</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
@@ -529,7 +615,7 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
 </div>
 </div>
 <div class="sect2">
-<h3 id="_warp"><a class="anchor" href="#_warp"></a>2.2. Warp</h3>
+<h3 id="_warp"><a class="anchor" href="#_warp"></a>3.2. Warp</h3>
 <div class="paragraph">
 <p>The warp benchmarking tool is a cloud ready S3 benchmarking tool that can be used to simulate a variety of object workloads.</p>
 </div>
@@ -537,7 +623,7 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
 <p>This doc is intended to provide a quick how-to when deploying warp for ODF or RGW deployments.</p>
 </div>
 <div class="sect3">
-<h4 id="_installing_warp"><a class="anchor" href="#_installing_warp"></a>2.2.1. Installing warp</h4>
+<h4 id="_installing_warp"><a class="anchor" href="#_installing_warp"></a>3.2.1. Installing warp</h4>
 <div class="paragraph">
 <p>Warp has two main modes of execution, as a client and a server. The client is effectively the workload generator, and is told the attributes of the workload to execute by the server. The server component may also run in multiple modes;
 workload orchestration with the client
@@ -566,7 +652,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_using_warp"><a class="anchor" href="#_using_warp"></a>2.2.2. Using Warp</h4>
+<h4 id="_using_warp"><a class="anchor" href="#_using_warp"></a>3.2.2. Using Warp</h4>
 <div class="paragraph">
 <p>Unlike tools like the benchmark operator, the warp clients are designed to persist. By default, each worker removes the objects it used from the target S3 instance as the final stage of the benchmark job (this can be changed with a --keep-data flag). Therefore when testing different workloads, you only need to deploy the clients once, and then submit different jobs to exercise different workload profiles.</p>
 </div>
@@ -575,7 +661,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_configuring_warp_for_odfnoobaa"><a class="anchor" href="#_configuring_warp_for_odfnoobaa"></a>2.2.3. Configuring warp for ODF/Noobaa</h4>
+<h4 id="_configuring_warp_for_odfnoobaa"><a class="anchor" href="#_configuring_warp_for_odfnoobaa"></a>3.2.3. Configuring warp for ODF/Noobaa</h4>
 <div class="paragraph">
 <p>The project folder provides sample yaml files for the client and server in the projects k8s directory.</p>
 </div>
@@ -676,7 +762,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_configuring_warp_for_odfrgw"><a class="anchor" href="#_configuring_warp_for_odfrgw"></a>2.2.4. Configuring warp for ODF/RGW</h4>
+<h4 id="_configuring_warp_for_odfrgw"><a class="anchor" href="#_configuring_warp_for_odfrgw"></a>3.2.4. Configuring warp for ODF/RGW</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -727,7 +813,7 @@ spec:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_analysis_file_handling"><a class="anchor" href="#_analysis_file_handling"></a>2.2.5. Analysis File Handling</h4>
+<h4 id="_analysis_file_handling"><a class="anchor" href="#_analysis_file_handling"></a>3.2.5. Analysis File Handling</h4>
 <div class="paragraph">
 <p>The most important component of any test run is the results file, and warp is no different. There are several ways to expose the detailed results.</p>
 </div>
@@ -772,7 +858,7 @@ e.g. curl localhost:7762/v1/operations -o my-testrun.zst</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_analysis"><a class="anchor" href="#_analysis"></a>2.2.6. Analysis</h4>
+<h4 id="_analysis"><a class="anchor" href="#_analysis"></a>3.2.6. Analysis</h4>
 <div class="paragraph">
 <p>The warp binary has an analyze mode, which takes as input the zst file from a test run and produces a summary of the run’s performance, and may optionally be used to generate a CSV file that covers each op request.</p>
 </div>
@@ -823,7 +909,7 @@ Throughput, split into 56 x 1s:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_evaluation_of_warp"><a class="anchor" href="#_evaluation_of_warp"></a>2.2.7. Evaluation of Warp</h4>
+<h4 id="_evaluation_of_warp"><a class="anchor" href="#_evaluation_of_warp"></a>3.2.7. Evaluation of Warp</h4>
 <div class="paragraph">
 <p>The warp project should not be considered feature complete, and has gaps relating to our current workflows and expectations.</p>
 </div>
@@ -879,7 +965,7 @@ Throughput, split into 56 x 1s:
 </div>
 </div>
 <div class="sect1">
-<h2 id="_links"><a class="anchor" href="#_links"></a>3. Links</h2>
+<h2 id="_links"><a class="anchor" href="#_links"></a>4. Links</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><a href="https://old.ceph.com/planet/tooling-for-large-scale-red-hat-ceph-storage-performance-testing/" class="bare">https://old.ceph.com/planet/tooling-for-large-scale-red-hat-ceph-storage-performance-testing/</a></p>

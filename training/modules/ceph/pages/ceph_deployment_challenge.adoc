@@ -14,7 +14,7 @@
 * Review the the Ceph deployment with Cephadm
 * Setting specific CPU/memory targets for the ceph containers
 * Review the Pool and replica concepts.
-* Review scaling out the cluster with mode nodes
+* Review scaling out the cluster with more nodes
 * Review PG autoscaler configuration
 * Review the configuration of segregated physical pools
 
