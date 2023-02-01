@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -309,6 +312,58 @@ RGW is a restful HTTP endpoint that can be load-balanced for HA and increase
 performance. There are some great examples of different RadosGW load-balancing mechanisms in this
 <a href="https://github.com/mmgaggle/ceph-lb">repo</a></p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_load_balancing_network_and_dns_considerations"><a class="anchor" href="#_load_balancing_network_and_dns_considerations"></a>2. Load-Balancing Network and DNS considerations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When deploying Ceph for a full blown Multi-Petabyte Object Storage Solution.
+With requirements for High, Sustained throughputs Load-Balacing the RGW HTTP
+endpoints with the help of BGP adn ECMP is a very good option</p>
+</div>
+<div class="paragraph">
+<p>The keepalived + haproxy stack provided by the ingress service has it&#8217;s
+limitations.</p>
+</div>
+<div class="sect2">
+<h3 id="_network_fabric"><a class="anchor" href="#_network_fabric"></a>2.1. Network Fabric</h3>
+<div class="paragraph">
+<p>The network fabric at each site needs to provide sufficient bisectional bandwidth to support the declustered writing and reading of erasure coded object shards. It is recommended that each site’s network fabric have either zero (1:1), or very low oversubscription (eg. 2:1). The most common network topology for a site supporting a Ceph storage cluster is the spine and leaf topology. Path diversity and load sharing in the spine and leaf topology should be achieved by using multiple routes and equal cost multipath (ECMP). This allows the CRUSH algorithm the ability to spread erasure coded chunks or object replicas across network failure domains (osd-failure-domain=rack).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_intersite_networkingmulti_site"><a class="anchor" href="#_intersite_networkingmulti_site"></a>2.2. Intersite Networking(Multi-site)</h3>
+<div class="paragraph">
+<p>Networking between zones that participate in the same zone group will be utilized for asynchronous replication traffic. As such, the amount of intersite bandwidth must be equal to or greater than ingest throughput to prevent synchronization lag from growing and increasing data loss risks. Intersite networking will not be relied on for read traffic or reconstitution of objects because all objects are locally durable. Path diversity is recommended for intersite networking, and all intersite networks should be routed instead of switched to isolate failure domains. Ceph object gateway synchronization should be configured to use the HTTPS endpoint so replication traffic is encrypted with SSL/TLS.
+Load Balancing</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/Load-Balance.png" alt="Load Balance Haproxy" width="840" height="680">
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_local_haproxy_per_radosgw_service"><a class="anchor" href="#_local_haproxy_per_radosgw_service"></a>2.3. Local HAproxy per RadosGW service</h3>
+<div class="paragraph">
+<p>Ceph object gateway incorporates Civetweb, an embedded webserver. One challenge with Civetweb is that it requires a thread per TCP connection. We have found that running a local HAProxy instance in front of each Ceph object gateway to be beneficial because a smaller Ceph object gateway thread pool can service a larger number of connections. To keep connections between clients and HAProxy open, and close connections between HAproxy and the Ceph object gateway after each HTTP request we recommend the use of the http-server-close HAProxy configuration option.</p>
+</div>
+<div class="paragraph">
+<p>Each storage host should also run a routing agent (eg. quagga) to advertise a route to the /32 network of the virtual IP address bound to the loopback interface which HAproxy is listening on. Upstream devices should use hardware-based equal cost multipath (ECMP) for load sharing and path diversity across storage hosts. If the routing agent loses adjacency with it’s upstream router due to software or hardware malfunction, the route will be withdrawn so the failed host will stop receiving traffic. Systemd can be employed to stop the quagga service if either the HAproxy or Ceph object gateway service crashes or stops.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_bgp_and_ecmp_for_load_balancing"><a class="anchor" href="#_using_bgp_and_ecmp_for_load_balancing"></a>2.4. Using BGP and ECMP for Load-Balancing</h3>
+<div class="paragraph">
+<p>This scenario requires upstream devices to be configured, and the required commands to configure will vary depending on the devices' network operating system. This makes this scenario more challenging to implement. On the other hand the resulting storage service is fault tolerant and active/active up to the ECMP width supported by upstream devices (commonly 32 or 64).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ingress_service_for_load_balancing_rgw"><a class="anchor" href="#_ingress_service_for_load_balancing_rgw"></a>3. Ingress Service for Load Balancing RGW</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Since RHCS 5.1, Ceph provides a cephadm service called ingress that provides an
 HA and load-balancing stack based on keepalive and haproxy.</p>
@@ -334,7 +389,7 @@ If SSL is used, then SSL must be configured and terminated by the ingress servic
 </div>
 </div>
 <div class="sect1">
-<h2 id="_deploying_a_new_rgw_daemon"><a class="anchor" href="#_deploying_a_new_rgw_daemon"></a>2. Deploying a new RGW daemon</h2>
+<h2 id="_deploying_a_new_rgw_daemon"><a class="anchor" href="#_deploying_a_new_rgw_daemon"></a>4. Deploying a new RGW daemon</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Currently, in our lab, we have a single RGW service/daemon running. We need at
@@ -375,7 +430,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 </div>
 <div class="sect1">
-<h2 id="_deploying_the_ingress_service"><a class="anchor" href="#_deploying_the_ingress_service"></a>3. Deploying the Ingress Service</h2>
+<h2 id="_deploying_the_ingress_service"><a class="anchor" href="#_deploying_the_ingress_service"></a>5. Deploying the Ingress Service</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Now that we have two RGW instances running, we can deploy an ingress service to

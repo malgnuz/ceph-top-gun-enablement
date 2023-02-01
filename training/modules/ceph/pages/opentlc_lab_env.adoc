@@ -209,6 +209,8 @@ cephadm-ansible-run.sh   <--- runs Cephadm-ansible preflight playbook
 cluster-install.sh       <--- Deploys the cephcluster with cephadm
 cluster-postinstall.sh   <--- Configures Ceph post deploy, ceph rbd pool and cephfs deployment
 cluster-wait-until-installed.sh  <--- waits until ceph is healthy
+one_step_cluster_deploy.sh <--- Deploy full cluster in one go
+purge_ceph_cluster.sh  <--- Purge/Delete current cluster
 zap-disks.sh <--- Zaps Disks
 ----
 
@@ -223,11 +225,16 @@ this file to your needs:
 For a fully automated deployment of Ceph in the lab, we can run:
 
 ----
-# bash cephadm-ansible-run.sh && bash zap-disks.sh && bash cluster-install.sh &&
-bash cluster-postinstall.sh
+# bash one_step_cluster_deploy.sh
 ----
 
 This will provide a ceph cluster with 1 OSD per node, and with the RGW and MDS
 services running, also the observability stack will be moved to a specific node
 tagged in ansible inside the mgr group
 
+
+To purge the cluster you can use the script:
+
+----
+# bash purge_ceph_cluster.sh
+----

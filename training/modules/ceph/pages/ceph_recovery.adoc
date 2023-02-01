@@ -210,7 +210,7 @@ automatically reestablished when a new connection is made or a
 placement group switches OSDs |30 seconds |
 |===
 
-*WARNING:* Modifying the parameters described above can help to minimise
+WARNING: Modifying the parameters described above can help to minimise
 the I/O pause upon unexpected failure in one of the OSD nodes but not
 completely resolve it. Also, setting these parameters with less than
 default values will generate false alarms for Ceph clusters if there is
@@ -218,10 +218,10 @@ a situation like a high load on nodes, network congestion is high, or the
 network quality is bad. Therefore these parameter changes should be
 tested in a lab environment before production.
 
-*NOTE:* Tuning the parameters described above might increase Ceph
+NOTE: Tuning the parameters described above might increase Ceph
 resource consumption and Ceph network traffic.
 
-*WARNING:* Changing default OSD heartbeat parameters is not supported. A
+WARNING: Changing default OSD heartbeat parameters is not supported. A
 Support Exception (through a support case) is needed to change
 these parameters in Ceph.
 

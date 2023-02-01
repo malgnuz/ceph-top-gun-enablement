@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>RGW Authentication/Authorization. :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_auth.html">
+    <title>Dashboard And Metrics :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_dashboard_metrics.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -94,7 +94,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -175,7 +175,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -290,176 +290,271 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="radosgw_auth.html">RGW Auth &amp; Authz</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_auth.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_dashboard_metrics.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">RGW Authentication/Authorization.</h1>
-<div id="preamble">
-<div class="sectionbody">
-<div class="ulist">
-<div class="title">Goals</div>
-<ul>
-<li>
-<p>Review RGW Authentication methods</p>
-</li>
-<li>
-<p>Evaluate Pros and Cons of Each Auth Method</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
+<h1 class="page">Dashboard And Metrics</h1>
 <div class="sect1">
 <h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In order to access Object Storage using the s3 protocol you need to provide an s3 access key and secret key. The actual content of the access key can be varied by the implementation of the s3 API but it serves as your identity. When you send a request to the S3 API, the API will check it knows about your s3 access key and look up the associated secret key. The secret key is a shared secret between you and the S3 API and should not be sent over the wire to S3. Instead, the secret key is used to create a Hash-based Message Authentication Code (HMAC) to sign each request that is sent to s3 where it will be validated and upon successful validation will be executed. S3 treats a successful validation as proof that you hold the secret key and therefore are the identity you have sent.</p>
+<p>As a storage administrator, the Red Hat Ceph Storage Dashboard provides management and monitoring capabilities, allowing you to administer and configure the cluster, as well as visualize information and performance statistics related to it. The dashboard uses a web server hosted by the ceph-mgr daemon.</p>
 </div>
 <div class="paragraph">
-<p>The following options are available to authenticate against RGW.</p>
+<p>Further details availablen en the Dashboard documentation <a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/5/html-single/dashboard_guide/index#doc-wrapper">Link</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_components"><a class="anchor" href="#_components"></a>2. Components</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The functionality of the dashboard is provided by multiple components.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>RGW local database authentication.</p>
+<p>The Cephadm application for deployment.</p>
 </li>
 <li>
-<p>LDAP authentication.</p>
+<p>The embedded dashboard ceph-mgr module.</p>
 </li>
 <li>
-<p>Keystone authentication .</p>
+<p>The embedded Prometheus ceph-mgr module.</p>
 </li>
 <li>
-<p>Secure Token Service (STS)</p>
+<p>The Prometheus time-series database.</p>
 </li>
 <li>
-<p>with LDAP(STS-lite).</p>
+<p>The Prometheus node-exporter daemon, running on each host of the storage cluster.</p>
 </li>
 <li>
-<p>with keystone(STS-lite).</p>
+<p>The Grafana platform to provide monitoring user interface and alerting.</p>
 </li>
 <li>
-<p>with OpenID connect authentication</p>
+<p>The Alert Manager daemon for Alerting.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/dash_dashboard-architecture.png" alt="Dashboard Architecture">
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dashboard_management_features"><a class="anchor" href="#_dashboard_management_features"></a>3. Dashboard Management Features</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>View cluster hierarchy: You can view the CRUSH map, for example, to determine which host a specific OSD ID is running on. This is helpful if there is an issue with an OSD.
+Configure manager modules: You can view and change parameters for Ceph manager modules.</p>
+</li>
+<li>
+<p>Embedded Grafana Dashboards: Ceph Dashboard Grafana dashboards might be embedded in external applications and web pages to surface information and performance metrics gathered by the Prometheus module.</p>
+</li>
+<li>
+<p>View and filter logs: You can view event and audit cluster logs and filter them based on priority, keyword, date, or time range.</p>
+</li>
+<li>
+<p>Toggle dashboard components: You can enable and disable dashboard components so only the features you need are available.</p>
+</li>
+<li>
+<p>Manage OSD settings: You can set cluster-wide OSD flags using the dashboard. You can also Mark OSDs up, down or out, purge and reweight OSDs, perform scrub operations, modify various scrub-related configuration options, select profiles to adjust the level of backfilling activity. You can set and change the device class of an OSD, display and sort OSDs by device class. You can deploy OSDs on new drives and hosts.</p>
+</li>
+<li>
+<p>iSCSI management: Create, modify, and delete iSCSI targets.</p>
+</li>
+<li>
+<p>Viewing Alerts: The alerts page allows you to see details of current alerts.
+Quality of Service for images: You can set performance limits on images, for example limiting IOPS or read BPS burst rates.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_monitoring_features"><a class="anchor" href="#_monitoring_features"></a>4. Monitoring features</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Username and password protection: You can access the dashboard only by providing a configurable user name and password.
+Overall cluster health: Displays performance and capacity metrics. This also displays the overall cluster status, storage utilization, for example, number of objects, raw capacity, usage per pool, a list of pools and their status and usage statistics.</p>
+</li>
+<li>
+<p>Hosts: Provides a list of all hosts associated with the cluster along with the running services and the installed Ceph version.</p>
+</li>
+<li>
+<p>Performance counters: Displays detailed statistics for each running service.</p>
+</li>
+<li>
+<p>Monitors: Lists all Monitors, their quorum status and open sessions.</p>
+</li>
+<li>
+<p>Configuration editor: Displays all the available configuration options, their descriptions, types, default, and currently set values. These values are editable.</p>
+</li>
+<li>
+<p>Cluster logs: Displays and filters the latest updates to the cluster’s event and audit log files by priority, date, or keyword.</p>
+</li>
+<li>
+<p>Device management: Lists all hosts known by the Orchestrator. Lists all drives attached to a host and their properties. Displays drive health predictions, SMART data, and blink enclosure LEDs.</p>
+</li>
+<li>
+<p>View storage cluster capacity: You can view raw storage capacity of the Red Hat Ceph Storage cluster in the Capacity panels of the Ceph dashboard.</p>
+</li>
+<li>
+<p>Pools: Lists and manages all Ceph pools and their details. For example: applications, placement groups, replication size, EC profile, quotas, CRUSH ruleset, etc.</p>
+</li>
+<li>
+<p>OSDs: Lists and manages all OSDs, their status and usage statistics as well as detailed information like attributes, like OSD map, metadata, and performance counters for read and write operations. Lists all drives associated with an OSD.</p>
+</li>
+<li>
+<p>iSCSI: Lists all hosts that run the tcmu-runner service, displays all images and their performance characteristics, such as read and write operations or traffic amd also displays the iSCSI gateway status and information about active initiators.</p>
+</li>
+<li>
+<p>Images: Lists all RBD images and their properties such as size, objects, and features. Create, copy, modify and delete RBD images. Create, delete, and rollback snapshots of selected images, protect or unprotect these snapshots against modification. Copy or clone snapshots, flatten cloned images.</p>
+</li>
+<li>
+<p>RBD Mirroring: Enables and configures RBD mirroring to a remote Ceph server. Lists all active sync daemons and their status, pools and RBD images including their synchronization state.</p>
+</li>
+<li>
+<p>Ceph File Systems: Lists all active Ceph file system (CephFS) clients and associated pools, including their usage statistics. Evict active CephFS clients, manage CephFS quotas and snapshots, and browse a CephFS directory structure.</p>
+</li>
+<li>
+<p>Object Gateway (RGW): Lists all active object gateways and their performance counters. Displays and manages, including add, edit, delete, object gateway users and their details, for example quotas, as well as the users’ buckets and their details, for example, owner or quotas.</p>
+</li>
+<li>
+<p>NFS: Manages NFS exports of CephFS and Ceph object gateway S3 buckets using the NFS Ganesha.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dashboard_access"><a class="anchor" href="#_dashboard_access"></a>5. Dashboard Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>you can access the dashboard with the credentials provided on bootstrapping the cluster.</p>
+</div>
+<div class="paragraph">
+<p>Cephadm installs the dashboard by default. Following is an example of the dashboard URL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">URL: https://ceph-mon01:8443/
+User: admin
+Password: asdwern31</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can find the Ceph dashboard credentials in the var/log/ceph/cephadm.log file. Search with the "Ceph Dashboard is now available at" string.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You have to change the password the first time you log into the dashboard with the credentials provided on bootstrapping only if --dashboard-password-noupdate option is not used while bootstrapping.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cephadm_bootstrap_dashboard_options"><a class="anchor" href="#_cephadm_bootstrap_dashboard_options"></a>6. Cephadm Bootstrap Dashboard options</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>–initial-dashboard-user INITIAL_DASHBOARD_USER - Use this option while bootstrapping to set initial-dashboard-user.</p>
+</li>
+<li>
+<p>–initial-dashboard-password INITIAL_DASHBOARD_PASSWORD - Use this option while bootstrapping to set initial-dashboard-password.</p>
+</li>
+<li>
+<p>–ssl-dashboard-port SSL_DASHBOARD_PORT - Use this option while bootstrapping to set custom dashboard port other than default 8443.</p>
+</li>
+<li>
+<p>–dashboard-key DASHBOARD_KEY - Use this option while bootstrapping to set Custom key for SSL.</p>
+</li>
+<li>
+<p>–dashboard-crt DASHBOARD_CRT - Use this option while bootstrapping to set Custom certificate for SSL.</p>
+</li>
+<li>
+<p>–skip-dashboard - Use this option while bootstrapping to deploy Ceph without dashboard.</p>
+</li>
+<li>
+<p>–dashboard-password-noupdate - Use this option while bootstrapping if you used above two options and don’t want to reset password at the first time login.</p>
+</li>
+<li>
+<p>–allow-fqdn-hostname - Use this option while bootstrapping to allow hostname that is fully-qualified.</p>
+</li>
+<li>
+<p>–skip-prepare-host - Use this option while bootstrapping to skip preparing the host.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_radosgw_authentication_methods"><a class="anchor" href="#_radosgw_authentication_methods"></a>2. RadosGW authentication methods.</h2>
+<h2 id="_accessing_grafana_from_the_dashboard"><a class="anchor" href="#_accessing_grafana_from_the_dashboard"></a>7. Accessing Grafana from the Dashboard.</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_rgw_local_user_database_using_sts"><a class="anchor" href="#_rgw_local_user_database_using_sts"></a>2.1. RGW local user database using STS.</h3>
 <div class="paragraph">
-<p>RadosGW by default has a local user database to manage authentication and authorization, the user information and credentials are stored in a rados pool, so there is no extra work needed to set up this authentication setup, it works with STS, an admin user can create roles and policies for the roles and then indicate the RGW local users that will be authorized to assume the new role.</p>
+<p>To get access to the Grafana Dashboard from the Ceph Dashboard UI we need to
+have direct access from the client broswer to the Grafana IP server on port
+3000</p>
 </div>
 <div class="paragraph">
-<p>The STS assume role workflow is shown in the following diagram:</p>
+<p>So for example in our OpenTLC lab, from our local client broser we need access
+and DNS name resolution to:</p>
 </div>
-<div class="imageblock">
+<div class="listingblock">
 <div class="content">
-<img src="_images/STS_local.png" alt="STS local">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">https://proxy01.example.com:8443    ---&gt; For Dashboard Access
+https://proxy01.example.com:3000/public/build/6925.008b323….js.map ----&gt; To get ceph metric dashboards from Grafana
+http://proxy01.example.com:9095/   ---&gt; To get details on promethus Alertmanager alarms</code></pre>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_ldap_authentication"><a class="anchor" href="#_ldap_authentication"></a>2.2. LDAP authentication</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>We can configure LDAP as an authentication backend for RadosGW, the configuration is straightforward; we only have to set some parameters in the RGW config, like LDAP search filters, bind users, etc.</p>
+<p>If Grafana is using a Custom TLS certificate, Open the Grafana URL directly in the client internet browser and accept the security exception to see the graphs on the Ceph dashboard. Reload the browser to view the changes.</p>
 </div>
-<div class="paragraph">
-<p>When using LDAP authentication the s3 access key is a base64 encoded JSON snippet which contains the LDAP user and password. No secret key is used. This is sent over the wire to the radosgw server then performs an LDAP login, on successful login the radosgw will grant access and the user is created in the radosgw database with the type “LDAP”, So RGW knows that is has to validate this user with LDAP when it needs to be authenticated.</p>
-</div>
-<div class="paragraph">
-<p>Using LDAP authentication has been tested and works ok with current Hadoop S3A drivers using the SimpleAWSCredentialsProvider. With this use case, no temporary credentials(STS) would be used.
-One important drawback of using LDAP is the security concerns of the current implementation, as the user login and password are sent to RGW in the HTTP headers, also these headers can potentially be stored in RGW if we set the debug level to 20 in the RGW service(need to be root). User credentials are also exposed if users generate a signed S3 URL <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html" class="bare">https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html</a>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_ldap_authentication_with_sts_lite"><a class="anchor" href="#_ldap_authentication_with_sts_lite"></a>2.3. LDAP authentication with STS-Lite</h3>
-<div class="paragraph">
-<p>LDAP is able to implement the GetSessionToken STS API call, so all the same points would be valid from the previous LDAP chapters, with the difference that with this implementation, we would be able to use temporary credentials(STS), so the user will only use his LDAP user/password base64 encoded key once to get the temporary credentials and token, and from that point use the new provided credentials on the application.
-The advantage of this approach is that the user&#8217;s LDAP credentials are only used once to get access to the temporary STS credentials, so we are reducing the risk of exposing the user&#8217;s AD credentials.
-Because the full STS implementation is not available, we are missing the AssumeRole call, we are not able to assume roles and policies, so the bucket policies have to be managed at the bucket level.
-We haven’t tested this configuration but looking at the S3A available credential providers, we would need to use the TemporaryAWSCredentialsProvider available. Using this provider, the client sets the temporary credentials that have been provided by the STS API in ENV vars or the config files. With this provider, there is no refresh of tokens available, so once the token expires, the client won’t have access to s3 with the provided credentials.
-The lifetime of a token can be set by the user when calling the GetSessionToken API call with the parameter ‘DurationSeconds’, you can set this option to the maximum configured in RGW by the ceph configuration parameter ‘rgw sts max session duration’. So if needed, the duration/expiration of a token can be configured to the longest-running job. There is also a minimum value for the DurationSeconds, which is dictated by the AWS STS API. This value is 900 seconds and cannot be lowered. <a href="https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html" class="bare">https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html</a>
-To partially reduce the security concerns we have with LDAP, we can deploy dedicated STS RGW services that would only provide the STS API endpoint, so we would reduce the exposure of the AD user credentials in the RGW log files when in debug mode 20 only to a couple of RGW nodes, as the users would only send their AD credentials to the dedicated STS RGW endpoints to get their temporary credentials, then they would access the S3 RGW endpoints using the STS temporary keys.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_ligth.png" alt="STS light" width="840" height="680">
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_keystone_authentication"><a class="anchor" href="#_keystone_authentication"></a>2.4. Keystone Authentication.</h3>
-<div class="paragraph">
-<p>Keystone is the Openstack authentication &amp; authorization service available in the Red Hat Openstack product.
-The radosgw can be integrated with Openstack keystone. Keystone can have multiple identity services configured like LDAP or Active Directory. Users and Groups from the backend are synchronised with keystone and made available to openstack.
-The LDAP/AD users or groups can be mapped to Openstack projects/tenants roles. Once a group is mapped to a tenant, all users from that LDAP/AD group will have access to OSP resources, for example, creating EC2 credentials(access/secret key) to access S3 resources.
-The simplified workflow is users first authenticate against keystone and then use the keystone API ec2 credentials created, This API call only needs to be run once as it creates a long-lived s3 access and secret key for that user. The provided credentials can then be used to access s3 resources.
-Using LDAP authentication has been tested and works ok with current hadoop S3A drivers using the SimpleAWSCredentialsProvider. With this use case no temporary credentials(STS) would be used.
-If needed, credential rotation can be done at the Openstack tenant level, user generated credentials can be re-created by the user at any time using the keystone API.
-Keystone integration with RGW can only manage bucket policies at the project/tenant level, there is no user granularity, so all users from a project/tenant will have the same access to S3 resources. A user can belong to more than one tenant/project, if needed we can share buckets between different tenants using bucket policies at the tenant level.
-There is a benefit of having only tenant granularity, Bucket policy management would be reduced as it is managed at the tenant/group level, but it can also be a negative aspect if you need user granularity for your S3 buckets.
-One of the biggest drawbacks of keystone is having to deploy and maintain the lifecycle of a Openstack Cluster. To deploy RH OSP in a supported fashion we need 3 nodes(can be virtualized in RHV) to ensure the HA of the deployment.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_keystone_sts_lite"><a class="anchor" href="#_keystone_sts_lite"></a>2.5. Keystone STS-Lite</h3>
-<div class="paragraph">
-<p>Like with LDAP STS-lite there is an implementation in keystone of the GetSessionToken STS API call, the same arguments that we made in the ldap sts-lite chapter are valid here.</p>
-</div>
-<div class="paragraph">
-<p>We haven’t tested this configuration but looking at the S3A available credential providers we would need to use the TemporaryAWSCredentialsProvider available, using this provider the client sets the temporary credentials that have been provided by the STS API in ENV vars or the config files, with this provider there is no refresh of tokens available, so once the token expires the client won’t have access to s3 with the provided credentials.</p>
-</div>
-<div class="paragraph">
-<p>The lifetime of a token can be set by the user when calling the GetSessionToken API call, with the parameter ‘DurationSeconds’, you can set this option to the maximum configured in RGW by the ceph configuration parameter ‘rgw sts max session duration’. So if needed the duration/expiration of a token can be configured to the longest running job.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_oauthoidc_sts_authentication"><a class="anchor" href="#_oauthoidc_sts_authentication"></a>2.6. OAUTH(OIDC) + STS authentication.</h3>
-<div class="paragraph">
-<p>With OAUTH authentication we use an OIDC service to authenticate against, we need to have an OpenID Connect/ OAuth2 compatible service. Red Hat has tested the integration with RGW of the following OIDC products: Red Hat SSO and keycloak IDPs. Consulting has successfully integrated a F5 OIDC provider but had to modify the F5 providers configuration to match url paths defined by Keycloak due to a hardcoded path in the 4.2 code <a href="https://gitlab.cee.redhat.com/ceph/ceph/-/blob/ceph-4.2-rhel-patches/src/rgw/rgw_rest_sts.cc#L194" class="bare">https://gitlab.cee.redhat.com/ceph/ceph/-/blob/ceph-4.2-rhel-patches/src/rgw/rgw_rest_sts.cc#L194</a>.</p>
-</div>
-<div class="paragraph">
-<p>With this method the authentication of a users follows this high level workflow:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>The user first authenticates against a OIDC to get a JWT(token),</p>
-</li>
-<li>
-<p>The user would then run the assume role with web identity API call against the STS API, the body of the call would need to have the role the user is trying to access and also the path to the JWT token we created in step 1.</p>
-</li>
-<li>
-<p>RGW will check with the OIDC provider the validity of the token.</p>
-</li>
-<li>
-<p>STS will create and provide temporary credentials for the user</p>
-</li>
-<li>
-<p>The user will be able to access the S3 resources with a certain role.</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>A diagram of the previously mentioned workflow is available in the following diagram</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_oidc.png" alt="STS OIDC">
-</div>
-</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>

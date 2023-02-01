@@ -1,0 +1,124 @@
+= Dashboard And Metrics
+
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
+== Introduction
+
+As a storage administrator, the Red Hat Ceph Storage Dashboard provides management and monitoring capabilities, allowing you to administer and configure the cluster, as well as visualize information and performance statistics related to it. The dashboard uses a web server hosted by the ceph-mgr daemon.
+
+Further details availablen en the Dashboard documentation https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/5/html-single/dashboard_guide/index#doc-wrapper[Link]
+
+== Components
+
+The functionality of the dashboard is provided by multiple components.
+
+* The Cephadm application for deployment.
+* The embedded dashboard ceph-mgr module.
+* The embedded Prometheus ceph-mgr module.
+* The Prometheus time-series database.
+* The Prometheus node-exporter daemon, running on each host of the storage cluster.
+* The Grafana platform to provide monitoring user interface and alerting.
+* The Alert Manager daemon for Alerting.
+
+image::dash_dashboard-architecture.png[Dashboard Architecture]
+
+== Dashboard Management Features
+
+. View cluster hierarchy: You can view the CRUSH map, for example, to determine which host a specific OSD ID is running on. This is helpful if there is an issue with an OSD.
+Configure manager modules: You can view and change parameters for Ceph manager modules.
+. Embedded Grafana Dashboards: Ceph Dashboard Grafana dashboards might be embedded in external applications and web pages to surface information and performance metrics gathered by the Prometheus module.
+. View and filter logs: You can view event and audit cluster logs and filter them based on priority, keyword, date, or time range.
+. Toggle dashboard components: You can enable and disable dashboard components so only the features you need are available.
+. Manage OSD settings: You can set cluster-wide OSD flags using the dashboard. You can also Mark OSDs up, down or out, purge and reweight OSDs, perform scrub operations, modify various scrub-related configuration options, select profiles to adjust the level of backfilling activity. You can set and change the device class of an OSD, display and sort OSDs by device class. You can deploy OSDs on new drives and hosts.
+. iSCSI management: Create, modify, and delete iSCSI targets.
+. Viewing Alerts: The alerts page allows you to see details of current alerts.
+Quality of Service for images: You can set performance limits on images, for example limiting IOPS or read BPS burst rates.
+
+== Monitoring features
+
+. Username and password protection: You can access the dashboard only by providing a configurable user name and password.
+Overall cluster health: Displays performance and capacity metrics. This also displays the overall cluster status, storage utilization, for example, number of objects, raw capacity, usage per pool, a list of pools and their status and usage statistics.
+. Hosts: Provides a list of all hosts associated with the cluster along with the running services and the installed Ceph version.
+. Performance counters: Displays detailed statistics for each running service.
+. Monitors: Lists all Monitors, their quorum status and open sessions.
+. Configuration editor: Displays all the available configuration options, their descriptions, types, default, and currently set values. These values are editable.
+. Cluster logs: Displays and filters the latest updates to the cluster’s event and audit log files by priority, date, or keyword.
+. Device management: Lists all hosts known by the Orchestrator. Lists all drives attached to a host and their properties. Displays drive health predictions, SMART data, and blink enclosure LEDs.
+. View storage cluster capacity: You can view raw storage capacity of the Red Hat Ceph Storage cluster in the Capacity panels of the Ceph dashboard.
+. Pools: Lists and manages all Ceph pools and their details. For example: applications, placement groups, replication size, EC profile, quotas, CRUSH ruleset, etc.
+. OSDs: Lists and manages all OSDs, their status and usage statistics as well as detailed information like attributes, like OSD map, metadata, and performance counters for read and write operations. Lists all drives associated with an OSD.
+. iSCSI: Lists all hosts that run the tcmu-runner service, displays all images and their performance characteristics, such as read and write operations or traffic amd also displays the iSCSI gateway status and information about active initiators.
+. Images: Lists all RBD images and their properties such as size, objects, and features. Create, copy, modify and delete RBD images. Create, delete, and rollback snapshots of selected images, protect or unprotect these snapshots against modification. Copy or clone snapshots, flatten cloned images.
+
+. RBD Mirroring: Enables and configures RBD mirroring to a remote Ceph server. Lists all active sync daemons and their status, pools and RBD images including their synchronization state.
+. Ceph File Systems: Lists all active Ceph file system (CephFS) clients and associated pools, including their usage statistics. Evict active CephFS clients, manage CephFS quotas and snapshots, and browse a CephFS directory structure.
+. Object Gateway (RGW): Lists all active object gateways and their performance counters. Displays and manages, including add, edit, delete, object gateway users and their details, for example quotas, as well as the users’ buckets and their details, for example, owner or quotas.
+. NFS: Manages NFS exports of CephFS and Ceph object gateway S3 buckets using the NFS Ganesha.
+
+== Dashboard Access
+
+you can access the dashboard with the credentials provided on bootstrapping the cluster.
+
+Cephadm installs the dashboard by default. Following is an example of the dashboard URL:
+
+----
+URL: https://ceph-mon01:8443/
+User: admin
+Password: asdwern31
+----
+
+[TIP]
+====
+You can find the Ceph dashboard credentials in the var/log/ceph/cephadm.log file. Search with the "Ceph Dashboard is now available at" string.
+====
+
+[TIP]
+====
+You have to change the password the first time you log into the dashboard with the credentials provided on bootstrapping only if --dashboard-password-noupdate option is not used while bootstrapping.
+====
+
+== Cephadm Bootstrap Dashboard options
+
+* –initial-dashboard-user INITIAL_DASHBOARD_USER - Use this option while bootstrapping to set initial-dashboard-user.
+* –initial-dashboard-password INITIAL_DASHBOARD_PASSWORD - Use this option while bootstrapping to set initial-dashboard-password.
+* –ssl-dashboard-port SSL_DASHBOARD_PORT - Use this option while bootstrapping to set custom dashboard port other than default 8443.
+* –dashboard-key DASHBOARD_KEY - Use this option while bootstrapping to set Custom key for SSL.
+* –dashboard-crt DASHBOARD_CRT - Use this option while bootstrapping to set Custom certificate for SSL.
+* –skip-dashboard - Use this option while bootstrapping to deploy Ceph without dashboard.
+* –dashboard-password-noupdate - Use this option while bootstrapping if you used above two options and don’t want to reset password at the first time login.
+* –allow-fqdn-hostname - Use this option while bootstrapping to allow hostname that is fully-qualified.
+* –skip-prepare-host - Use this option while bootstrapping to skip preparing the host.
+
+== Accessing Grafana from the Dashboard.
+
+To get access to the Grafana Dashboard from the Ceph Dashboard UI we need to
+have direct access from the client broswer to the Grafana IP server on port
+3000
+
+So for example in our OpenTLC lab, from our local client broser we need access
+and DNS name resolution to:
+
+----
+https://proxy01.example.com:8443    ---> For Dashboard Access
+https://proxy01.example.com:3000/public/build/6925.008b323….js.map ----> To get ceph metric dashboards from Grafana
+http://proxy01.example.com:9095/   ---> To get details on promethus Alertmanager alarms
+----
+
+[IMPORTANT]
+====
+If Grafana is using a Custom TLS certificate, Open the Grafana URL directly in the client internet browser and accept the security exception to see the graphs on the Ceph dashboard. Reload the browser to view the changes.
+====
+

@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -407,8 +410,8 @@ will get <code>404 Not found</code> Error</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ aws --endpoint=http://cepha:8080 s3api create-bucket --bucket test-bucket
-$ aws --endpoint=http://cepha:8080 s3api list-buckets</pre>
+<pre>$ aws --endpoint=http://ceph-mon01:8080 s3api create-bucket --bucket test-bucket
+$ aws --endpoint=http://ceph-mon01:8080 s3api list-buckets</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -416,10 +419,10 @@ $ aws --endpoint=http://cepha:8080 s3api list-buckets</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ aws --endpoint=http://cepha:8080  s3api put-object --bucket test-bucket --key hosts --body /etc/hosts
+<pre>$ aws --endpoint=http://ceph-mon01:8080  s3api put-object --bucket test-bucket --key hosts --body /etc/hosts
 We can check that the bucket doesn't have versioning enabled
 
-$ aws --endpoint=http://cepha:8080 s3api get-bucket-versioning --bucket test-bucket
+$ aws --endpoint=http://ceph-mon01:8080 s3api get-bucket-versioning --bucket test-bucket
 $</pre>
 </div>
 </div>
@@ -428,7 +431,7 @@ $</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+<pre>$ aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 Versions:
 - ETag: '"caec50b70cb6e003ddfec1a57aead3a3"'
   IsLatest: true
@@ -447,10 +450,10 @@ Versions:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ aws --endpoint=http://cepha:8080 s3api put-bucket-versioning --bucket test-bucket --versioning-configuration Status=Enabled
+<pre>$ aws --endpoint=http://ceph-mon01:8080 s3api put-bucket-versioning --bucket test-bucket --versioning-configuration Status=Enabled
 Check versioning status
 
-$ aws --endpoint=http://cepha:8080 s3api get-bucket-versioning --bucket test-bucket
+$ aws --endpoint=http://ceph-mon01:8080 s3api get-bucket-versioning --bucket test-bucket
 MFADelete: Disabled
 Status: Enabled</pre>
 </div>
@@ -460,7 +463,7 @@ Status: Enabled</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ aws --endpoint=http://cepha:8080 s3api put-object --bucket test-bucket --key hosts --body /etc/passwd
+<pre>$ aws --endpoint=http://ceph-mon01:8080 s3api put-object --bucket test-bucket --key hosts --body /etc/passwd
 ETag: '"8548115237be791aa151131e65a3f6a8"'
 VersionId: XijnUuqgtCnsXeJdqerekOnyVVI6HiC</pre>
 </div>
@@ -470,7 +473,7 @@ VersionId: XijnUuqgtCnsXeJdqerekOnyVVI6HiC</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 Versions:
 - ETag: '"8548115237be791aa151131e65a3f6a8"'
   IsLatest: true
@@ -499,10 +502,10 @@ Versions:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api put-object --bucket test-bucket --key hosts --body /etc/resolv.conf
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api put-object --bucket test-bucket --key hosts --body /etc/resolv.conf
 ETag: '"3ca32d1a15752be2026a7171a8853f18"'
 VersionId: QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ
-[root@bastion ~]# aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket | grep -E '(ETag|IsLatest|VersionId)'
+[root@bastion ~]# aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket | grep -E '(ETag|IsLatest|VersionId)'
 - ETag: '"3ca32d1a15752be2026a7171a8853f18"'
   IsLatest: true
   VersionId: QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ
@@ -519,7 +522,7 @@ VersionId: QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>aws --endpoint=http://cepha:8080 s3api delete-object --bucket test-bucket --key hosts
+<pre>aws --endpoint=http://ceph-mon01:8080 s3api delete-object --bucket test-bucket --key hosts
 DeleteMarker: true
 VersionId: QXCXW4WwVPYuJ4XI0akcHWYzih39TYH</pre>
 </div>
@@ -529,7 +532,7 @@ VersionId: QXCXW4WwVPYuJ4XI0akcHWYzih39TYH</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-objects  --bucket test-bucket
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-objects  --bucket test-bucket
 #</pre>
 </div>
 </div>
@@ -538,7 +541,7 @@ VersionId: QXCXW4WwVPYuJ4XI0akcHWYzih39TYH</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 DeleteMarkers:
 - IsLatest: true
   Key: hosts
@@ -585,7 +588,7 @@ Versions:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api get-object --bucket test-bucket --key hosts  loca.hosts
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api get-object --bucket test-bucket --key hosts  loca.hosts
 An error occurred (NoSuchKey) when calling the GetObject operation: Unknown</pre>
 </div>
 </div>
@@ -594,7 +597,7 @@ An error occurred (NoSuchKey) when calling the GetObject operation: Unknown</pre
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api get-object --bucket test-bucket --key hosts --version-id 'QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ' host3
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api get-object --bucket test-bucket --key hosts --version-id 'QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ' host3
 AcceptRanges: bytes
 ContentLength: 70
 ContentType: binary/octet-stream
@@ -613,13 +616,13 @@ nameserver 127.0.0.1</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[root@bastion ~]# aws --endpoint=http://cepha:8080 s3api copy-object --copy-source test-bucket/hosts?versionId='QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ' --key hosts --bucket test-bucket
+<pre>[root@bastion ~]# aws --endpoint=http://ceph-mon01:8080 s3api copy-object --copy-source test-bucket/hosts?versionId='QypYmB.tqhvCh8qlErBGH1QA.9QHaNQ' --key hosts --bucket test-bucket
 CopyObjectResult:
   ETag: 3ca32d1a15752be2026a7171a8853f18
   LastModified: '2021-02-17T07:26:37.391000+00:00'
 We can now list the objects in the bucket and we will have the object recovered and available again:
 
-# aws --endpoint=http://cepha:8080 s3api list-objects  --bucket test-bucket
+# aws --endpoint=http://ceph-mon01:8080 s3api list-objects  --bucket test-bucket
 Contents:
 - ETag: '"3ca32d1a15752be2026a7171a8853f18"'
   Key: hosts
@@ -636,7 +639,7 @@ Contents:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[root@bastion ~]# aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+<pre>[root@bastion ~]# aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 DeleteMarkers:
 - IsLatest: false
   Key: hosts
@@ -681,7 +684,7 @@ Versions:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 Versions:
 - ETag: '"3ca32d1a15752be2026a7171a8853f18"'
   IsLatest: true
@@ -693,10 +696,10 @@ Versions:
   Size: 70
   StorageClass: STANDARD
   VersionId: 9MsTtcyiJn3uOC5Y1IMm7Y6IDQg7WXR
-# aws --endpoint=http://cepha:8080 s3api delete-object --bucket test-bucket --key hosts
+# aws --endpoint=http://ceph-mon01:8080 s3api delete-object --bucket test-bucket --key hosts
 DeleteMarker: true
 VersionId: QAzliCOeiVykU1V4xD5.NCIiE4J0lO-
-# aws --endpoint=http://cepha:8080 s3api list-objects  --bucket test-bucket
+# aws --endpoint=http://ceph-mon01:8080 s3api list-objects  --bucket test-bucket
 #</pre>
 </div>
 </div>
@@ -705,7 +708,7 @@ VersionId: QAzliCOeiVykU1V4xD5.NCIiE4J0lO-
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api delete-object --bucket test-bucket --key hosts --version-id QAzliCOeiVykU1V4xD5.NCIiE4J0lO-
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api delete-object --bucket test-bucket --key hosts --version-id QAzliCOeiVykU1V4xD5.NCIiE4J0lO-
 DeleteMarker: true
 VersionId: QAzliCOeiVykU1V4xD5.NCIiE4J0lO-</pre>
 </div>
@@ -715,7 +718,7 @@ VersionId: QAzliCOeiVykU1V4xD5.NCIiE4J0lO-</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[root@bastion ~]# aws --endpoint=http://cepha:8080 s3api list-objects  --bucket test-bucket
+<pre>[root@bastion ~]# aws --endpoint=http://ceph-mon01:8080 s3api list-objects  --bucket test-bucket
 Contents:
 - ETag: '"3ca32d1a15752be2026a7171a8853f18"'
   Key: hosts
@@ -738,7 +741,7 @@ Contents:
 [root@bastion s3cmd]# s3cmd -c s3cfg-versioning rm s3://test-bucket/folder/ --recursive
 delete: 's3://test-bucket/folder/hosts'
 delete: 's3://test-bucket/folder/sshd'
-[root@bastion s3cmd]# aws --endpoint=http://cepha:8080 s3api list-object-versions  --bucket test-bucket
+[root@bastion s3cmd]# aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions  --bucket test-bucket
 DeleteMarkers:
 - IsLatest: true
   Key: folder/hosts
@@ -772,7 +775,7 @@ DeleteMarkers:
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-object-versions --prefix folder --bucket test-bucket --query 'DeleteMarkers[?IsLatest==`true`].[Key]' --output text
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions --prefix folder --bucket test-bucket --query 'DeleteMarkers[?IsLatest==`true`].[Key]' --output text
 folder/hosts
 folder/sshd</pre>
 </div>
@@ -782,7 +785,7 @@ folder/sshd</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint=http://cepha:8080 s3api list-object-versions --prefix folder --bucket test-bucket --query 'DeleteMarkers[?IsLatest==`true`].[Key, VersionId]' --output text
+<pre># aws --endpoint=http://ceph-mon01:8080 s3api list-object-versions --prefix folder --bucket test-bucket --query 'DeleteMarkers[?IsLatest==`true`].[Key, VersionId]' --output text
 folder/hosts    1BnfWO9HrxsyDU1L6yG9M66tafNCCeX
 folder/sshd     HgRgUA6YFYZ1dZC7U5fxR34jkRqtB5Z</pre>
 </div>

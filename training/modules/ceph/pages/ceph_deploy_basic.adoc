@@ -176,6 +176,18 @@ the ceph-mon0X clusters, if we want to access the dashboard for the ceph-node0X
 cluster we have to use SSH tunneling.
 ====
 
+[WARNING]
+====
+Currently the OpenTLC ENV only has the 8443 port open to the external world, if
+we want to access ceph metrics provided by grafana standalone or in the
+dashboard we will need to use ssh tunneling and also forward DNS resolution to
+the remote/opentlc dns server, in linux we can use `sshuttle` for example:
+
+----
+# sshuttle --dns -r USER@workstation.dynamic.opentlc.com 192.168.56.0/24
+----
+====
+
 Get the Public IP address of `ceph-node01` to access the dashboard from your browser:
 
 [source,sh]

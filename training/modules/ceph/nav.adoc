@@ -10,6 +10,7 @@
 * xref:ceph_cephadm_intro.adoc[Cephadm Orchestrator]
 * xref:ceph_deploy_basic.adoc[Deploy Ceph with Cephadm]
 * xref:ceph_deploy_ui.adoc[Deploy Ceph from the UI]
+* xref:ceph_dashboard_metrics.adoc[Ceph Dashboard Management & Metrics]
 * xref:ceph_cli_intro.adoc[Ceph CLI basic commands]
 * xref:ceph_configuration.adoc[Ceph Configuration]
 * xref:ceph_pools.adoc[Ceph storage pools config]

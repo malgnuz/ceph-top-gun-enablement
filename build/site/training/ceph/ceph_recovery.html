@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -738,23 +741,50 @@ placement group switches OSDs</p></td>
 </tr>
 </tbody>
 </table>
-<div class="paragraph">
-<p><strong>WARNING:</strong> Modifying the parameters described above can help to minimise
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Modifying the parameters described above can help to minimise
 the I/O pause upon unexpected failure in one of the OSD nodes but not
 completely resolve it. Also, setting these parameters with less than
 default values will generate false alarms for Ceph clusters if there is
 a situation like a high load on nodes, network congestion is high, or the
 network quality is bad. Therefore these parameter changes should be
-tested in a lab environment before production.</p>
+tested in a lab environment before production.
+</td>
+</tr>
+</table>
 </div>
-<div class="paragraph">
-<p><strong>NOTE:</strong> Tuning the parameters described above might increase Ceph
-resource consumption and Ceph network traffic.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Tuning the parameters described above might increase Ceph
+resource consumption and Ceph network traffic.
+</td>
+</tr>
+</table>
 </div>
-<div class="paragraph">
-<p><strong>WARNING:</strong> Changing default OSD heartbeat parameters is not supported. A
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Changing default OSD heartbeat parameters is not supported. A
 Support Exception (through a support case) is needed to change
-these parameters in Ceph.</p>
+these parameters in Ceph.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
 <h3 id="_how_to_prevent_flapping_osds_from_coming_back_to_the_cluster"><a class="anchor" href="#_how_to_prevent_flapping_osds_from_coming_back_to_the_cluster"></a>6.1. How to prevent flapping OSDs from coming back to the cluster</h3>
