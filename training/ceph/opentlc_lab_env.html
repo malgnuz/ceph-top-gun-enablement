@@ -95,6 +95,9 @@
     <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -670,6 +673,8 @@ cephadm-ansible-run.sh   &lt;--- runs Cephadm-ansible preflight playbook
 cluster-install.sh       &lt;--- Deploys the cephcluster with cephadm
 cluster-postinstall.sh   &lt;--- Configures Ceph post deploy, ceph rbd pool and cephfs deployment
 cluster-wait-until-installed.sh  &lt;--- waits until ceph is healthy
+one_step_cluster_deploy.sh &lt;--- Deploy full cluster in one go
+purge_ceph_cluster.sh  &lt;--- Purge/Delete current cluster
 zap-disks.sh &lt;--- Zaps Disks</pre>
 </div>
 </div>
@@ -688,14 +693,21 @@ this file to your needs:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># bash cephadm-ansible-run.sh &amp;&amp; bash zap-disks.sh &amp;&amp; bash cluster-install.sh &amp;&amp;
-bash cluster-postinstall.sh</pre>
+<pre># bash one_step_cluster_deploy.sh</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>This will provide a ceph cluster with 1 OSD per node, and with the RGW and MDS
 services running, also the observability stack will be moved to a specific node
 tagged in ansible inside the mgr group</p>
+</div>
+<div class="paragraph">
+<p>To purge the cluster you can use the script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># bash purge_ceph_cluster.sh</pre>
+</div>
 </div>
 </div>
 </div>
