@@ -100,6 +100,44 @@ We push these updates from the primary (rather than having the replicas pull the
 
 * We could not dismiss the strays prior to this because it was possible that one of those strays might hold the sole surviving copy of an old object (all of whose copies disappeared before they could be replicated on members of the current acting set).
 
+== Increasing the number of PGs
+
+[WARNING]
+====
+This is the most intensive process that can be performed on a Ceph cluster, and can have drastic performance impact if not done in a slow and methodical fashion.
+Once the data starts moving for a chunk of Placement Groups (PGs) ( in the increasing pgp_num section ), it cannot be stopped or reversed and must be allowed to complete.
+It is advised that this process be performed off-hours, and all clients alerted to the potential performance impact well ahead of time.
+====
+
+Having proper Placement Group (PG) count is a critical part of ensuring top performance and best data distribution in your Ceph cluster.
+
+* The Ceph PG calc tool should be referenced for optimal values.
+* Care should be taken to maintain between 50 and 150 PGs per OSD ratio as detailed in the Ceph PG calc tool.
+* The current PG count per OSD can be viewed in the PGS column of the `ceph osd df tree` command.
+----
+# ceph osd df tree
+ID  CLASS  WEIGHT   REWEIGHT  SIZE    RAW USE  DATA     OMAP  META    AVAIL   %USE  VAR   PGS  STATUS  TYPE NAME
+-1         0.02939         -  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25  1.00    -          root default
+-3         0.02939         -  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25  1.00    -              datacenter DC1
+-2         0.00980         -  10 GiB   26 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  1.01    -                  host ceph-node01
+ 0    hdd  0.00980   1.00000  10 GiB   26 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  1.01  225      up              osd.0
+-4         0.00980         -  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99    -                  host ceph-node02
+ 1    hdd  0.00980   1.00000  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99  225      up              osd.1
+-5         0.00980         -  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99    -                  host ceph-node03
+ 2    hdd  0.00980   1.00000  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99  225      up              osd.2
+                       TOTAL  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25
+----
+
+* The only time increasing the PG count is required is if you expand your cluster with more OSDs, such that the ratio drops to or below 100 PGs per OSD ratio in your cluster, or if the initial PG count was not properly planned.
+
+* The PG count settings ( pg_num and pgp_num ) are configured per-pool.`pgp_num` is automatic in recent versions
+* Each pool which has a low PG count must be adjusted separately.
+* Due to the amount of data movementt, it is recommended to throttle the cluster's backfill and recovery values to minimize client IO impact.
+* Disable scrub and deep scrub operations during the process to limit the potentially compounding IO load.
+* Due to the need to re-evaluate the contents of every PG in the pool, even with the backfill and recovery throttles in place, client IO can experience performance degradation.
+
+
+
 
 == Troubleshooting PGs
 
