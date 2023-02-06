@@ -36,7 +36,7 @@ When Ceph stores an object, it assigns the object to one and only one `PG` withi
 to a set of OSDs according to the `CRUSH` rule assigned to the pool. The cluster administrator can assign
 one and only one `CRUSH` rule to a pool.
 
-The number of PGs assigned to a pool has an impoact on the performance that can be delivered by a pool. The
+The number of PGs assigned to a pool has an impact on the performance that can be delivered by a pool. The
 best practice is to assign each OSD in the cluster between 100 and 200 `PGs`. If all the pools in the cluster
 share the same OSDs it means that the total number of `PGs` in the cluster that will result in each OSD
 managing the correct numebr of `PGs` will have to be split across all the pools configured in the cluster.
