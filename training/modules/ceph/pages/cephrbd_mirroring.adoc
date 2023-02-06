@@ -82,6 +82,15 @@ This is the oldest RBD Mirroring technology that was implemented for OpenStack.
 It is compatible only with `librbd` based clients in environments such as
 OpenStack and Proxmox.
 
+One-Way Journal Mirroring:
+
+image::rbd-mirror-journal-arch.png[Journal RBD mirror]
+
+Two-Way Journal Mirroring.
+
+image:rbd_journal_multiway1.png[Two-way]
+image:rbd_journal_multiway2.png[Two-way]
+
 IMPORTANT: This mode is not compatible with `krbd` hence not compatible
 with Red Hat OpenShift Data Foundation as of today.
 
@@ -95,9 +104,14 @@ The journal based mirroring follows the following steps:
 As the journal gets written, the `rbd-mirror` daemon picks up the IO
 from the RBD journal and mirrors the IO onto the remote RBD Image.
 
+
+
 WARNING: As the RBD Images are identical between the 2 clusters, writing to the
 remote RBD Image will also cause 2 writes; One to the RBD Image, one to the RBD
 Image journal.
+
+image::rbd-mirror-journal-perf-write.png[Bad write performance]
+
 
 == Snapshot based mirroring
 

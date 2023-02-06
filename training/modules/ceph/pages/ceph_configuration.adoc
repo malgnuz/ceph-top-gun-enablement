@@ -52,8 +52,7 @@ Use ceph config commands to query the database and view configuration informatio
 * `ceph config ls` to list all possible configuration settings.
 * `ceph config help` setting, for help with a particular configuration setting.
 * `ceph config dump`, to show the cluster configuration database settings.
-* `ceph config show $type.$id`, to show the database settings for a specific
-* daemon. Use `show-with-defaults` to include default settings.
+* `ceph config show $type.$id`, to show the database settings for a specific daemon. Use `show-with-defaults` to include default settings.
 * `ceph config get $type.$id`, to get a specific configuration setting.
 * `ceph config set $type.$id`, to set a specific configuration setting.
 

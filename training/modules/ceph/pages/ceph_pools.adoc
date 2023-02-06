@@ -121,6 +121,12 @@ device_health_metrics   1    1     0 B        0   0 B      0    543 GiB
 testpool                2   16     0 B        0   0 B      0    543 GiB_
 ----
 
+[TIP]
+====
+How Ceph calculates data usage
+https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/5/html/administration_guide/monitoring-a-ceph-storage-cluster[Link].
+====
+
 .Pool access statistics
 [source, shell, subs="quotes"]
 ----
