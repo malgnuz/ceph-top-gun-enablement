@@ -68,7 +68,7 @@ You can assign the application label using the following command: +
 
 == Exercise - Replicated pools
 
-.Create a repluicated pool
+.Create a replicated pool
 [source, shell, subs="quotes"]
 ----
 [root@ceph00 ]# ceph osd pool create testpool 16
