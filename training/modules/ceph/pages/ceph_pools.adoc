@@ -36,7 +36,7 @@ When Ceph stores an object, it assigns the object to one and only one `PG` withi
 to a set of OSDs according to the `CRUSH` rule assigned to the pool. The cluster administrator can assign
 one and only one `CRUSH` rule to a pool.
 
-The number of PGs assigned to a pool has an impoact on the performance that can be delivered by a pool. The
+The number of PGs assigned to a pool has an impact on the performance that can be delivered by a pool. The
 best practice is to assign each OSD in the cluster between 100 and 200 `PGs`. If all the pools in the cluster
 share the same OSDs it means that the total number of `PGs` in the cluster that will result in each OSD
 managing the correct numebr of `PGs` will have to be split across all the pools configured in the cluster.
@@ -68,7 +68,7 @@ You can assign the application label using the following command: +
 
 == Exercise - Replicated pools
 
-.Create a repluicated pool
+.Create a replicated pool
 [source, shell, subs="quotes"]
 ----
 [root@ceph00 ]# ceph osd pool create testpool 16
@@ -190,6 +190,13 @@ _size: 3_
 ----
 [root@ceph00 ]# *ceph osd pool delete newpool*
 _Error EPERM: WARNING: this will *PERMANENTLY DESTROY* all data stored in pool newpool.  If you are *ABSOLUTELY CERTAIN* that is what you want, pass the pool name *twice*, followed by --yes-i-really-really-mean-it._
+[root@ceph00 ]# *ceph osd pool delete newpool newpool --yes-i-really-really-mean-it*
+_Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool_
+[root@ceph00 ]# *ceph config get mon mon_allow_pool_delete*
+_false_
+[root@ceph00 ]# *ceph config set mon mon_allow_pool_delete true*
+[root@ceph00 ]# *ceph config get mon mon_allow_pool_delete*
+_true_
 [root@ceph00 ]# *ceph osd pool delete newpool newpool --yes-i-really-really-mean-it*
 _pool 'newpool' removed_
 ----
