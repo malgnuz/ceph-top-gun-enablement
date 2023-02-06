@@ -32,6 +32,7 @@ RocksDB is an embedded high-performance key-value store that excels with flash s
 RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one where data is written directly to the block device and the other where we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.
 
 New Bluestore features:
+
 * it enables compression of data at the lowest level.
 ** if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.
 * An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.
