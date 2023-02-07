@@ -17,6 +17,7 @@
 * xref:ceph_pgs.adoc[Ceph Health and PGs]
 * xref:ceph_bluestore.adoc[Ceph OSD Bluestore]
 * xref:ceph_recovery.adoc[Ceph OSD Failure/Recovery]
+* xref:ceph_cephx.adoc[Rados CephX Auth/AuthZ]
 * xref:ceph-upgrades_cephadm.adoc[Upgrade Ceph with Cephadm]
 * xref:ceph_deployment_challenge.adoc[Challenge Ceph Deployment]
 
