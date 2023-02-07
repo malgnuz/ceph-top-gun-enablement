@@ -20,6 +20,8 @@
 One of the most important features of Ceph is Self Healing and Automatic
 rebalancing, by design Ceph has a Peer-to-peer architecture that seamlessly handles failures and ensures data distribution throughout the cluster.
 
+The Ceph Monitor reports on the current state of the Ceph Storage Cluster. The Ceph Monitor knows about the Ceph Storage Cluster by requiring reports from each Ceph OSD Daemon, and by receiving reports from Ceph OSD Daemons about the status of their neighboring Ceph OSD Daemons. If the Ceph Monitor doesn’t receive reports, or if it receives reports of changes in the Ceph Storage Cluster, the Ceph Monitor updates the status of the Ceph Cluster Map.
+
 == Detecting OSD Failures
 
 Each Ceph OSD Daemon checks the heartbeat of other Ceph OSD Daemons at random
@@ -39,6 +41,8 @@ image:::ceph_2osds_out.png[OSD reporter]
 
 If a Ceph OSD Daemon doesn’t report to a Ceph Monitor, the Ceph Monitor will
 consider the Ceph OSD Daemon down after the mon osd report timeout elapses(`mon_osd_report_timeout`).
+
+image:::mon_failure.png[Mon detect]
 
 == When OSD failure happens
 
@@ -96,6 +100,11 @@ We have to find a balance between the recovery time and how much we can affect c
 * *osd_max_backfills:* The maximum number of backfills allowed to or from a single OSD
 * *osd_backfill_scan_min:* The minimum number of objects per backfill scan
 * *osd_backfill_scan_max:* The maximum number of objects per backfill scan
+
+[NOTE]
+====
+The osd_max_backfills tunable limits the number of outgoing or incoming backfills that are active on a given OSD. Note that this limit is applied separately to incoming and to outgoing backfill operations. Thus there can be as many as osd_max_backfills * 2 backfill operations in flight on each OSD. This subtlety is often missed, and Ceph operators can be puzzled as to why more ops are observed than expected
+====
 
 === Delaying the recovery/backfill Operations.
 
