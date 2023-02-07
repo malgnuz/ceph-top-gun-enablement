@@ -340,11 +340,31 @@ Filestore has been Deprecated.
 <p>RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one where data is written directly to the block device and the other where we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.</p>
 </div>
 <div class="paragraph">
-<p>New Bluestore features:
-* it enables compression of data at the lowest level.
-<strong> if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.
-* An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.
-</strong> Whenever data is read from persistent storage its checksum is verified</p>
+<p>New Bluestore features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it enables compression of data at the lowest level.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Whenever data is read from persistent storage its checksum is verified</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>

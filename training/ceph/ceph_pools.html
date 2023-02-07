@@ -340,7 +340,7 @@ to a set of OSDs according to the <code>CRUSH</code> rule assigned to the pool. 
 one and only one <code>CRUSH</code> rule to a pool.</p>
 </div>
 <div class="paragraph">
-<p>The number of PGs assigned to a pool has an impoact on the performance that can be delivered by a pool. The
+<p>The number of PGs assigned to a pool has an impact on the performance that can be delivered by a pool. The
 best practice is to assign each OSD in the cluster between 100 and 200 <code>PGs</code>. If all the pools in the cluster
 share the same OSDs it means that the total number of <code>PGs</code> in the cluster that will result in each OSD
 managing the correct numebr of <code>PGs</code> will have to be split across all the pools configured in the cluster.</p>
@@ -418,7 +418,7 @@ for the most common use cases of a Ceph cluster:</p>
 <h2 id="_exercise_replicated_pools"><a class="anchor" href="#_exercise_replicated_pools"></a>4. Exercise - Replicated pools</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="title">Create a repluicated pool</div>
+<div class="title">Create a replicated pool</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph00 ]# ceph osd pool create testpool 16
 <em>pool 'testpool' created</em></code></pre>
@@ -469,6 +469,21 @@ POOL                   ID  PGS  STORED  OBJECTS  USED  %USED  MAX AVAIL
 device_health_metrics   1    1     0 B        0   0 B      0    543 GiB
 testpool                2   16     0 B        0   0 B      0    543 GiB</em></code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>How Ceph calculates data usage
+<a href="https://access.redhat.com/documentation/en-us/red_hat_ceph_storage/5/html/administration_guide/monitoring-a-ceph-storage-cluster">Link</a>.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="title">Pool access statistics</div>
@@ -543,6 +558,13 @@ all parameters use <code>ceph osd pool ls detail</code>.
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph00 ]# <strong>ceph osd pool delete newpool</strong>
 <em>Error EPERM: WARNING: this will <strong>PERMANENTLY DESTROY</strong> all data stored in pool newpool.  If you are <strong>ABSOLUTELY CERTAIN</strong> that is what you want, pass the pool name <strong>twice</strong>, followed by --yes-i-really-really-mean-it.</em>
+[root@ceph00 ]# <strong>ceph osd pool delete newpool newpool --yes-i-really-really-mean-it</strong>
+<em>Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool</em>
+[root@ceph00 ]# <strong>ceph config get mon mon_allow_pool_delete</strong>
+<em>false</em>
+[root@ceph00 ]# <strong>ceph config set mon mon_allow_pool_delete true</strong>
+[root@ceph00 ]# <strong>ceph config get mon mon_allow_pool_delete</strong>
+<em>true</em>
 [root@ceph00 ]# <strong>ceph osd pool delete newpool newpool --yes-i-really-really-mean-it</strong>
 <em>pool 'newpool' removed</em></code></pre>
 </div>
