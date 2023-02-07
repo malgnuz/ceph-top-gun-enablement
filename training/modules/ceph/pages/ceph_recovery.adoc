@@ -133,6 +133,8 @@ If you want to re-enable backfill and recovery, you can unset the flags.
 Once an OSD is up again, it will peer with other OSDs to get up to date on the
 state of the PGs.
 
+image::peering.png[peering]
+
 * peering is the process by which OSDs compare PG states to determine the proper current state of a PG.
 * peering also makes note of which OSDs have the most recent data and metadata for various objects within the PG.
 * peering occurs when an OSD is brought up (either a new OSD or a previously down OSD) or down.
