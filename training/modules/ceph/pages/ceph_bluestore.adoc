@@ -460,7 +460,8 @@ We can check with lvm and `ceph-volume lvm list` that we are actually using diff
 devices for each new OSD that we just deployed
 
 ----
-# podman exec -it ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-8 ceph-volume lvm list
+# cephadm shell 
+#/ ceph-volume lvm list
 ====== osd.4 =======
 
   [block]       /dev/ceph-45cf10cf-2149-4517-bb8d-25809fb29bbd/osd-block-319ded07-60bd-4715-9f1a-50cdf1872cb6
