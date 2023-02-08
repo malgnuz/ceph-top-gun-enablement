@@ -406,7 +406,7 @@ The actions that will take place are looking good, so we can go ahead and apply
 the new OSD spec file.
 
 ----
-# ceph orch apply -i osd-path-spec.yaml --dry-run
+# ceph orch apply -i osd-path-spec.yaml
 Scheduled osd.osd_using_paths update...
 ----
 
