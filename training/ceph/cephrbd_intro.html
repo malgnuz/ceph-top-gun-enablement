@@ -377,6 +377,102 @@ major update to <code>librbd</code> aimed at reducing the performance gap with <
 </ul>
 </div>
 <div class="paragraph">
+<p>Explanation of the Image features you can enable:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Layering: Layering enables you to use cloning</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Config numeric value: 1</p>
+</li>
+<li>
+<p>CLI value: layering</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Striping v2: Striping spreads data across multiple objects. Striping helps with parallelism for sequential read/write workloads.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Config numeric value: 2</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>CLI value: striping</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Exclusive locking: When enabled, it requires a client to get a lock on an object before making a write. Exclusive lock should only be enabled when a single client is accessing an image at the same time.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Config numeric value: 4</p>
+<div class="ulist">
+<ul>
+<li>
+<p>CLI value: exclusive-lock</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Object map: Object map support depends on exclusive lock support. Block devices are thin provisioned—​meaning, they only store data that actually exists. Object map support helps track which objects actually exist (have data stored on a drive). Enabling object map support speeds up I/O operations for cloning; importing and exporting a sparsely populated image; and deleting.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Config numeric value: 8</p>
+</li>
+<li>
+<p>CLI value: object-map</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Fast-diff: Fast-diff support depends on object map support and exclusive lock support. It adds another property to the object map, which makes it much faster to generate diffs between snapshots of an image, and the actual data usage of a snapshot much faster.</p>
+</li>
+<li>
+<p>Config numeric value: 16</p>
+</li>
+<li>
+<p>CLI value: fast-diff</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Deep-flatten: Deep-flatten makes rbd flatten work on all the snapshots of an image, in addition to the image itself. Without it, snapshots of an image will still rely on the parent, so the parent will not be delete-able until the snapshots are deleted. Deep-flatten makes a parent independent of its clones, even if they have snapshots.
+Config numeric value: 32</p>
+</li>
+<li>
+<p>CLI value: deep-flatten</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Journaling: Journaling support depends on exclusive lock support. Journaling records all modifications to an image in the order they occur. RBD mirroring utilizes the journal to replicate a crash consistent image to a remote cluster.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Config numeric value: 64</p>
+</li>
+<li>
+<p>CLI value: journaling</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
 <p>In order to provide the best performance and avoid bottlenecks Ceph Block Devices
 are broken down into smaller pieces. Therefor, a single 32MiB RBD Image will be broken
 down in as many object as possible, each object conforming to the size configured
