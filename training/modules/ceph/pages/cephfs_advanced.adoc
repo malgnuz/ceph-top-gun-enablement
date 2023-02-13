@@ -750,7 +750,6 @@ snapshot contains a copy of all the current files in the CephFS file system.
 # umount /mnt
 # mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/ /mnt -o name=admin,secret="AQDQBLxjayHzNRAAfyt3lqvdAK6kQLN4QgQTSg=="
 # mkdir /mnt/.snap/snapshot1
-# mkdir /mnt/.snap/snapshot1
 # ls /mnt
 clientec  dir4  test-quota  volumes
 # ls /mnt/.snap/snapshot1
