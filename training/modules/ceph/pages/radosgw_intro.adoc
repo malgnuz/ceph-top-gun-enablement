@@ -587,6 +587,8 @@ And use the name of the RGW instance adding the client.  configure our DNS bucke
 rgw_dns_name
 
 # ceph config set client.rgw.multi.zone1.proxy01.yrtaci rgw_dns_name bucket.example.com
+# ceph orch daemon restart rgw.multi.zone1.proxy01.yrtaci
+Scheduled to restart rgw.multi.zone1.proxy01.yrtaci on host 'proxy01'
 ----
 
 Just so it's evident that we are successfully using the hosted-style access, I'm
