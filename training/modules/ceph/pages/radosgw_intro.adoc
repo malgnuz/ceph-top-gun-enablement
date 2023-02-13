@@ -88,7 +88,7 @@ image::single-ms.png[Lab RGW layout]
 +
 [source,sh]
 ----
-#  ceph config set mon mon_max_pg_per_osd 512
+#  ceph config set global mon_max_pg_per_osd 512
 ----
 
 . Create a realm:
