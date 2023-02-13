@@ -177,7 +177,7 @@ ceph-node02 & ceph-node03
 ----
  cat << EOF >  rgw-ingress.yaml
 service_type: ingress
-service_id: rgw.default
+service_id: rgw.objectgw
 placement:
   hosts:
     - ceph-node02
