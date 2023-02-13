@@ -9,6 +9,17 @@
 
 :numbered:
 
+== Pre-Req
+
+To complete this section you need a full Ceph cluster Deployed. If you have
+deployed using the available automation in the lab and you have radosGW running
+you can delete the services with the following steps.
+
+----
+# ceph orch rm rgw.objectgw
+# ceph config set mon mon_allow_pool_delete true
+# for i in $(ceph osd lspools | grep -E  'default.rgw' | awk '{print $NF}') ; do ceph osd pool rm $i $i --yes-i-really-really-mean-it ; done
+----
 
 == Introducing Object Storage
 

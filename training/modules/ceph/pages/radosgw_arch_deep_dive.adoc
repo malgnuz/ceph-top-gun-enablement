@@ -104,6 +104,36 @@ Contains object data
 .rgw.root
 Stores the region and zone definition for the RGW
 
+[cols="1,1"]
+|===
+| *Pool* | *Description* 
+| .rgw.root 
+| Domain Root Pool
+| rgw.control
+| Control Pool
+| rgw.gc
+| The garbage Collection pool, contains hash buckets containing the IDs of the objects to be deleted
+| log
+| Will log bucket and object actions by the RGW
+| intent-log
+| Store a copy of the object update request so that it can be used for undo/redo in case the object request fails
+| usage
+| Contains a log of usage per user
+| users
+| Contains access and secret keys, mapped to user id
+| users.email
+| Contains emails associated with a user
+| users.swift
+| Contains swift sub-user information
+| users.uid
+| Contains a mapping of a user's unique uid
+| rgw.buckets.index
+| Contains the bucket index
+| rgw.buckets
+| Contains object data
+| rgw.root
+| Stores the region and zone definition for the RGW
+|===
 
 
 The zone definitions list several more pools than that, but many of those are consolidated through the use of rados namespaces.
@@ -165,7 +195,7 @@ users.uid
 
 Rados Gateway maintains an index per bucket that holds the list and the
 metadata of all the objects it contains, the Index holds a key-value map in
-rados objects, The value holds basic metadata for each object like header, number of objects, total size,
+rados objects(omap), The value holds basic metadata for each object like header, number of objects, total size,
 
 The bucket index is also used for multiple tasks:
 
@@ -179,7 +209,10 @@ The bucket index is also used for multiple tasks:
 Each Bucket Index is an Omap entry in RocksDB, Omap is a key-value store associated with an object in a way similar to how Extended Attributes associate with a POSIX file. An object’s omap is not physically located in the object’s storage, Omaps are stored in RocksDB.
 
 We can also create Indexless buckets:
-Provides a mechanism in which RadosGW does not track objects in specific buckets. This removes resource contention and reduces the number of round trips RadosGW needs to make to the RADOS backend. Not supported on multi-site configurations
+Provides a mechanism in which RadosGW does not track objects in specific
+buckets. This removes resource contention and reduces the number of round trips
+RadosGW needs to make to the RADOS backend. *Not supported on multi-site
+configurations*
 
 
 Bucket Index pool for the default zone:
@@ -380,8 +413,11 @@ At bucket creation time, the number of shards is defined by the parameter bucket
 
 If a different number of shards is required for a specific bucket, it is possible to change it.
 
+[IMPORTANT]
+====
 - Red Hat recommends a maximum of 102,400 objects per bucket index shard
 - The current maximum supported number of bucket index shards is 65521
+====
 
 
 
@@ -533,9 +569,8 @@ rados, if the upload data size is greater than `rgw_obj_stripe_size` by default
 set to 4MB: 
 
 ----
-# ceph config get mon rgw_max_chunk_size
+# ceph config get mon rgw_obj_stripe_size
 4194304
-The chunk size is the size of RADOS I/O requests that RGW sends when accessing data objects. RGW read and write operations will never request more than this amount in a single request. This also defines the RGW head object size, as head operations need to be atomic, and anything larger than this would require more than a single operation. When RGW objects are written to the default storage class, up to this amount of payload data will be stored alongside metadata in the head object.
 ----
 
 multiple objects are saved, respectively, one header object and one or more tails Object
