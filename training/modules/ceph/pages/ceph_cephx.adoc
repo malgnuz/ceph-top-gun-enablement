@@ -1,0 +1,211 @@
+= Ceph Rados Auth with CephX
+
+
+== Introduction 
+
+* A Ceph client, using a pool name, username and a keyring can contact a Ceph monitor
+* Each monitor can authenticate users, so there is no SPoF or bottleneck when using cephx
+* The monitor returns an authentication data structure similar to a Kerberos ticket that contains a session key for use in obtaining Ceph services
+* The client then uses the session key to request its desired services from the monitor, and the monitor provides the client with a ticket that will authenticate the client to the OSDs that actually handle data
+* Cephx tickets expire, so an attacker cannot use an expired ticket or session key obtained surreptitiously
+
+* Limitations:
+
+** It is not intended to handle authentication of human users
+** The keys used to authenticate Ceph clients are typically stored in a plain text file with appropriate permissions in a trusted host
+** CephX Auth/AuthZ does not include options to encrypt user data in the object store
+
+
+Detailed upstream docs on cephx user management https://docs.ceph.com/en/latest/rados/operations/user-management/[link]
+
+== Caps
+
+* Ceph client.admin is the equivalent to a root user in Linux
+* We Set a user’s capabilities when creating the user
+* *Allow:* Precedes access settings for a daemon
+** r: Gives the user read access. Required with monitors to retrieve the CRUSH map
+** w: Gives the user write access to objects
+** x: Gives the user the capability to call class methods (i.e., both read and write)
+*** class-read: Gives the user the capability to call class read methods. Subset of x
+*** class-write: Gives the user the capability to call class write methods. Subset of x
+* '*': Gives the user read, write and execute permissions for a particular daemon/pool, and the ability to execute admin commands
+
+== Profiles
+
+* profile osd (Monitor only)
+Gives a user permissions to connect as an OSD to other OSDs or monitors. Conferred on OSDs to enable OSDs to handle replication heartbeat traffic and status reporting.
+
+* profile mds (Monitor only)
+Gives a user permissions to connect as a MDS to other MDSs or monitors.
+
+* profile bootstrap-osd (Monitor only)
+Gives a user permissions to bootstrap an OSD. Conferred on deployment tools such as ceph-volume, cephadm, etc. so that they have permissions to add keys, etc. when bootstrapping an OSD.
+
+* profile bootstrap-mds (Monitor only)
+Gives a user permissions to bootstrap a metadata server. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping a metadata server.
+
+* profile bootstrap-rbd (Monitor only)
+Gives a user permissions to bootstrap an RBD user. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping an RBD user.
+
+* profile bootstrap-rbd-mirror (Monitor only)
+Gives a user permissions to bootstrap an rbd-mirror daemon user. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping an rbd-mirror daemon.
+
+* profile rbd (Manager, Monitor, and OSD)
+Gives a user permissions to manipulate RBD images. When used as a Monitor cap, it provides the minimal privileges required by an RBD client application; this includes the ability to blocklist other client users. When used as an OSD cap, it provides read-write access to the specified pool to an RBD client application. The Manager cap supports optional pool and namespace keyword arguments.
+
+* profile rbd-mirror (Monitor only)
+Gives a user permissions to manipulate RBD images and retrieve RBD mirroring config-key secrets. It provides the minimal privileges required for the rbd-mirror daemon.
+
+* profile rbd-read-only (Manager and OSD)
+Gives a user read-only permissions to RBD images. The Manager cap supports optional pool and namespace keyword arguments.
+
+* profile simple-rados-client (Monitor only)
+Gives a user read-only permissions for monitor, OSD, and PG data. Intended for use by direct librados client applications.
+
+* profile simple-rados-client-with-blocklist (Monitor only)
+Gives a user read-only permissions for monitor, OSD, and PG data. Intended for use by direct librados client applications. Also includes permission to add blocklist entries to build HA applications.
+
+* profile fs-client (Monitor only)
+Gives a user read-only permissions for monitor, OSD, PG, and MDS data. Intended for CephFS clients.
+
+* profile role-definer (Monitor and Auth)
+Gives a user all permissions for the auth subsystem, read-only access to monitors, and nothing else. Useful for automation tools. Do not assign this unless you really, really know what you’re doing as the security ramifications are substantial and pervasive.
+
+* profile crash (Monitor and MGR)
+Gives a user read-only access to monitors, used in conjunction with the manager crash module to upload daemon crash dumps into monitor storage for later analysis.
+
+== Lab
+
+As the root user, create a test pool with 16 PGs:
+
+----
+# ceph osd pool create test 16
+----
+
+Verify we, as admin user can access the test pool and insert a new RBD image:
+
+----
+# rbd -p test create admin-image --size 100
+# rbd -p test ls
+			admin-image
+----
+
+Create a new user with access only to this pool. Give only read and execute capabilities:
+
+[NOTE]
+====
+There are a few ways to add a user:
+
+* ceph auth add: This command is the canonical way to add a user. It will create the user, generate a key and add any specified capabilities.
+
+* ceph auth get-or-create: This command is often the most convenient way to create a user, because it returns a keyfile format with the user name (in brackets) and the key. If the user already exists, this command simply returns the user name and key in the keyfile format. You may use the -o {filename} option to save the output to a file.
+
+* ceph auth get-or-create-key: This command is a convenient way to create a user and return the user’s key (only). This is useful for clients that need the key only (e.g., libvirt). If the user already exists, this command simply returns the key. You may use the -o {filename} option to save the output to a file.
+====
+
+----
+# ceph auth get-or-create client.george mon 'allow r' osd 'profile rbd-read-only pool=test' -o /etc/ceph/rbd.client.test.key
+----
+
+Check the status of the Ceph cluster using the new keyring:
+
+----
+# ceph -s --name client.test -i /etc/ceph/rbd.client.test.key
+----
+
+Check that we can list the objects in the test pool:
+
+----
+# ceph auth print-key client.test > /etc/ceph/rbd.client.test.keyring
+# rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p test ls
+----
+
+Verify we cannot list any objects in any other pool of the Ceph cluster:
+
+----
+# rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p .rgw.root ls
+
+			rbd: list: (1) Operation not permitted
+----
+
+Try to create a new RBD image in the test pool:
+
+----
+# rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p test create test-image --size 100
+
+			rbd: create error: (1) Operation not permitted
+----
+
+Try to map an image:
+
+----
+# rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring map test/admin-image
+
+			rbd: map failed: (1) Operation not permitted
+----
+
+Try to remove an OSD from the Ceph cluster:
+
+----
+# ceph --name client.test -i /etc/ceph/rhcs-1.client.test.keyring osd out 0
+
+			Error EACCES: access denied
+----
+
+
+Create a new user with the EBD profile that will get RW  capabilities to allow write access to the test pool:
+
+----
+# ceph auth get-or-create client.testrw mon 'allow r' osd 'profile rbd # pool=test' -o /etc/ceph/rbd.client.test.rw.key
+# ceph auth print-key client.testrw > /etc/ceph/rbd.client.testrw.keyring
+----
+
+Try to create again a new RBD image in the test pool:
+
+----
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring -p test create test-image --size 100
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring -p test ls
+			admin-image
+			test-image
+----
+
+Try to map an image:
+
+----
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring map test/test-image
+			/dev/rbd0
+----
+
+Format a new XFS filesystem on the mapped image, and mount it:
+----
+# mkfs.xfs /dev/rbd0
+# mkdir /mnt/ceph-volume
+# mount /dev/rbd0 /mnt/ceph-volume
+Verify we can use the mapped image:
+# echo "Hello" > /mnt/ceph-volume/hello
+# cat /mnt/ceph-volume/hello
+			Hello
+----
+
+Verify we cannot still remove an OSD from the Ceph cluster:
+
+----
+# ceph --name client.test -i /etc/ceph/rhcs-1.client.test.keyring osd out 0
+			Error EACCES: access denied
+----
+
+Clean up the environment:
+
+----
+# umount /mnt/ceph-volume/
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring unmap test/test-image
+# rbd -p testrw rm test-image
+# rbd -p testrw rm admin-image
+# ceph tell mon.* injectargs '--mon_allow_pool_delete=true'
+# ceph osd pool delete test test --yes-i-really-really-mean-it
+# ceph tell mon.* injectargs '--mon_allow_pool_delete=false'
+# ceph auth del client.test
+# ceph auth del client.testrw
+----
+
+

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ceph Rados Auth with CephX :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_cephx.html">
+    <meta name="generator" content="Antora 3.0.1">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <script>var uiRootPath = '../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">
+          <img src="../../_/img/header_logo_reverse.svg" height="48px" alt="Ceph">
+      </a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Get Help</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://access.redhat.com/documentation/zh-cn/red_hat_ceph_storage/5" target="_blank">Ceph Documentation</a>
+            <a class="navbar-item" href="https://bugzilla.redhat.com/describecomponents.cgi?product=Red%20Hat%20OpenShift%20Container%20Storage" target="_blank">Browse Bugs</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">Improve Guides</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://github.com/likid0/ceph-top-gun-enablement/issues/new/choose" target="_blank">Open Issue</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="#">More Infos</a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://www.redhat.com/en/blog/channel/red-hat-storage" target="_blank">Our Blog</a>
+            <a class="navbar-item" href="https://www.youtube.com/channel/UCoyG8VyvB-XUxQl1mD3T3Gw" target="_blank">Youtube</a>
+            <a class="navbar-item" href="https://docs.ceph.com/en/latest/" target="_blank">Ceph Storage Technology</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="training" data-version="master">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Ceph Top-Gun Enablement</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Lab Setup</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="opentlc_lab_env.html">Opentlc Lab Env</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Core Ceph</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_introduction.html">Ceph Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_architecture.html">Ceph Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cluster_partitioning.html">Ceph Cluster Partitioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_hardware.html">Ceph Hardware Recommendations</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_intro.html">Ceph Install Methods </a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephadm_intro.html">Cephadm Orchestrator</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_basic.html">Deploy Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deploy_ui.html">Deploy Ceph from the UI</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_dashboard_metrics.html">Ceph Dashboard Management &amp; Metrics</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cli_intro.html">Ceph CLI basic commands</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_configuration.html">Ceph Configuration</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pools.html">Ceph storage pools config</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_pgs.html">Ceph Health and PGs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_bluestore.html">Ceph OSD Bluestore</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge.html">Challenge Ceph Deployment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RADOS Block Device</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_mirroring.html">RBD Mirroring</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge.html">Challenge RBD</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">CephFS Shared FileSystem</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_intro.html">CephFS introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph RadosGW</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_intro.html">RGW Introduction &amp; Deployment</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_arch_deep_dive.html">RGW Deep Dive</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ha.html">RGW High Availability</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_ssl.html">RGW &amp; Ingress with SSL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_users_quotas.html">RGW Users &amp; Quotas</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_auth.html">RGW Auth &amp; Authz</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_object_versioning.html">RGW S3 Object Versioning</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_placement_and_storage_classes.html">RGW Placement &amp; Storage Classes</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_life_cycle_management.html">RGW Life Cycle Management</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_sts_bucket_role_policy.html">RGW Bucket vs Role Policy</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_multisite.html">RGW Multisite Replication</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_opslog.html">RGW Opslog</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_bucket_notification.html">RGW bucket Notification</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_rgw_challenge.html">Challenge RGW</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Troubleshooting</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_logging.html">Troubleshooting Logs Debug Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-nearfull-osds.html">Troubleshooting nearfull OSDs</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_bluestore.html">Troubleshooting Bluestore issues</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Benchmarking</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_example.html">Setting the Inital Baseline</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_fio.html">Benchmarking Ceph block and File</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_performance_object.html">Benchmarking Ceph Object(RGW)</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Stretched</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="rhcs-stretched-deploy.html">Ceph Stretch Mode</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Ceph Top-Gun Enablement</span>
+    <span class="version">master</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Ceph Top-Gun Enablement</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_cephx.html">Rados CephX Auth/AuthZ</a></li>
+  </ul>
+</nav>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_cephx.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Ceph Rados Auth with CephX</h1>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>Introduction</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>A Ceph client, using a pool name, username and a keyring can contact a Ceph monitor</p>
+</li>
+<li>
+<p>Each monitor can authenticate users, so there is no SPoF or bottleneck when using cephx</p>
+</li>
+<li>
+<p>The monitor returns an authentication data structure similar to a Kerberos ticket that contains a session key for use in obtaining Ceph services</p>
+</li>
+<li>
+<p>The client then uses the session key to request its desired services from the monitor, and the monitor provides the client with a ticket that will authenticate the client to the OSDs that actually handle data</p>
+</li>
+<li>
+<p>Cephx tickets expire, so an attacker cannot use an expired ticket or session key obtained surreptitiously</p>
+</li>
+<li>
+<p>Limitations:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>It is not intended to handle authentication of human users</p>
+</li>
+<li>
+<p>The keys used to authenticate Ceph clients are typically stored in a plain text file with appropriate permissions in a trusted host</p>
+</li>
+<li>
+<p>CephX Auth/AuthZ does not include options to encrypt user data in the object store</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Detailed upstream docs on cephx user management <a href="https://docs.ceph.com/en/latest/rados/operations/user-management/">link</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_caps"><a class="anchor" href="#_caps"></a>Caps</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Ceph client.admin is the equivalent to a root user in Linux</p>
+</li>
+<li>
+<p>We Set a user’s capabilities when creating the user</p>
+</li>
+<li>
+<p><strong>Allow:</strong> Precedes access settings for a daemon</p>
+<div class="ulist">
+<ul>
+<li>
+<p>r: Gives the user read access. Required with monitors to retrieve the CRUSH map</p>
+</li>
+<li>
+<p>w: Gives the user write access to objects</p>
+</li>
+<li>
+<p>x: Gives the user the capability to call class methods (i.e., both read and write)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>class-read: Gives the user the capability to call class read methods. Subset of x</p>
+</li>
+<li>
+<p>class-write: Gives the user the capability to call class write methods. Subset of x</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>'*': Gives the user read, write and execute permissions for a particular daemon/pool, and the ability to execute admin commands</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_profiles"><a class="anchor" href="#_profiles"></a>Profiles</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>profile osd (Monitor only)
+Gives a user permissions to connect as an OSD to other OSDs or monitors. Conferred on OSDs to enable OSDs to handle replication heartbeat traffic and status reporting.</p>
+</li>
+<li>
+<p>profile mds (Monitor only)
+Gives a user permissions to connect as a MDS to other MDSs or monitors.</p>
+</li>
+<li>
+<p>profile bootstrap-osd (Monitor only)
+Gives a user permissions to bootstrap an OSD. Conferred on deployment tools such as ceph-volume, cephadm, etc. so that they have permissions to add keys, etc. when bootstrapping an OSD.</p>
+</li>
+<li>
+<p>profile bootstrap-mds (Monitor only)
+Gives a user permissions to bootstrap a metadata server. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping a metadata server.</p>
+</li>
+<li>
+<p>profile bootstrap-rbd (Monitor only)
+Gives a user permissions to bootstrap an RBD user. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping an RBD user.</p>
+</li>
+<li>
+<p>profile bootstrap-rbd-mirror (Monitor only)
+Gives a user permissions to bootstrap an rbd-mirror daemon user. Conferred on deployment tools such as cephadm, etc. so they have permissions to add keys, etc. when bootstrapping an rbd-mirror daemon.</p>
+</li>
+<li>
+<p>profile rbd (Manager, Monitor, and OSD)
+Gives a user permissions to manipulate RBD images. When used as a Monitor cap, it provides the minimal privileges required by an RBD client application; this includes the ability to blocklist other client users. When used as an OSD cap, it provides read-write access to the specified pool to an RBD client application. The Manager cap supports optional pool and namespace keyword arguments.</p>
+</li>
+<li>
+<p>profile rbd-mirror (Monitor only)
+Gives a user permissions to manipulate RBD images and retrieve RBD mirroring config-key secrets. It provides the minimal privileges required for the rbd-mirror daemon.</p>
+</li>
+<li>
+<p>profile rbd-read-only (Manager and OSD)
+Gives a user read-only permissions to RBD images. The Manager cap supports optional pool and namespace keyword arguments.</p>
+</li>
+<li>
+<p>profile simple-rados-client (Monitor only)
+Gives a user read-only permissions for monitor, OSD, and PG data. Intended for use by direct librados client applications.</p>
+</li>
+<li>
+<p>profile simple-rados-client-with-blocklist (Monitor only)
+Gives a user read-only permissions for monitor, OSD, and PG data. Intended for use by direct librados client applications. Also includes permission to add blocklist entries to build HA applications.</p>
+</li>
+<li>
+<p>profile fs-client (Monitor only)
+Gives a user read-only permissions for monitor, OSD, PG, and MDS data. Intended for CephFS clients.</p>
+</li>
+<li>
+<p>profile role-definer (Monitor and Auth)
+Gives a user all permissions for the auth subsystem, read-only access to monitors, and nothing else. Useful for automation tools. Do not assign this unless you really, really know what you’re doing as the security ramifications are substantial and pervasive.</p>
+</li>
+<li>
+<p>profile crash (Monitor and MGR)
+Gives a user read-only access to monitors, used in conjunction with the manager crash module to upload daemon crash dumps into monitor storage for later analysis.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lab"><a class="anchor" href="#_lab"></a>Lab</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As the root user, create a test pool with 16 PGs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph osd pool create test 16</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify we, as admin user can access the test pool and insert a new RBD image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd -p test create admin-image --size 100
+# rbd -p test ls
+			admin-image</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a new user with access only to this pool. Give only read and execute capabilities:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There are a few ways to add a user:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ceph auth add: This command is the canonical way to add a user. It will create the user, generate a key and add any specified capabilities.</p>
+</li>
+<li>
+<p>ceph auth get-or-create: This command is often the most convenient way to create a user, because it returns a keyfile format with the user name (in brackets) and the key. If the user already exists, this command simply returns the user name and key in the keyfile format. You may use the -o {filename} option to save the output to a file.</p>
+</li>
+<li>
+<p>ceph auth get-or-create-key: This command is a convenient way to create a user and return the user’s key (only). This is useful for clients that need the key only (e.g., libvirt). If the user already exists, this command simply returns the key. You may use the -o {filename} option to save the output to a file.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph auth get-or-create client.george mon 'allow r' osd 'profile rbd-read-only pool=test' -o /etc/ceph/rbd.client.test.key</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check the status of the Ceph cluster using the new keyring:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph -s --name client.test -i /etc/ceph/rbd.client.test.key</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check that we can list the objects in the test pool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph auth print-key client.test &gt; /etc/ceph/rbd.client.test.keyring
+# rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p test ls</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify we cannot list any objects in any other pool of the Ceph cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p .rgw.root ls
+
+			rbd: list: (1) Operation not permitted</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Try to create a new RBD image in the test pool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring -p test create test-image --size 100
+
+			rbd: create error: (1) Operation not permitted</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Try to map an image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd --id test --keyfile /etc/ceph/rbd.client.test.keyring map test/admin-image
+
+			rbd: map failed: (1) Operation not permitted</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Try to remove an OSD from the Ceph cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph --name client.test -i /etc/ceph/rhcs-1.client.test.keyring osd out 0
+
+			Error EACCES: access denied</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a new user with the EBD profile that will get RW  capabilities to allow write access to the test pool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph auth get-or-create client.testrw mon 'allow r' osd 'profile rbd # pool=test' -o /etc/ceph/rbd.client.test.rw.key
+# ceph auth print-key client.testrw &gt; /etc/ceph/rbd.client.testrw.keyring</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Try to create again a new RBD image in the test pool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring -p test create test-image --size 100
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring -p test ls
+			admin-image
+			test-image</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Try to map an image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring map test/test-image
+			/dev/rbd0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Format a new XFS filesystem on the mapped image, and mount it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># mkfs.xfs /dev/rbd0
+# mkdir /mnt/ceph-volume
+# mount /dev/rbd0 /mnt/ceph-volume
+Verify we can use the mapped image:
+# echo "Hello" &gt; /mnt/ceph-volume/hello
+# cat /mnt/ceph-volume/hello
+			Hello</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify we cannot still remove an OSD from the Ceph cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ceph --name client.test -i /etc/ceph/rhcs-1.client.test.keyring osd out 0
+			Error EACCES: access denied</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Clean up the environment:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># umount /mnt/ceph-volume/
+# rbd --id testrw --keyfile /etc/ceph/rbd.client.testrw.keyring unmap test/test-image
+# rbd -p testrw rm test-image
+# rbd -p testrw rm admin-image
+# ceph tell mon.* injectargs '--mon_allow_pool_delete=true'
+# ceph osd pool delete test test --yes-i-really-really-mean-it
+# ceph tell mon.* injectargs '--mon_allow_pool_delete=false'
+# ceph auth del client.test
+# ceph auth del client.testrw</pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <a class="navbar-item" href="https://www.redhat.com/en/technologies/cloud-computing/openshift-container-storage" target="_blank">
+      <img src="../../_/img/header_logo.svg" alt="Ceph">
+  </a>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

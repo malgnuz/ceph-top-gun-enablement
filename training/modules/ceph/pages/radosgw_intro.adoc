@@ -9,6 +9,17 @@
 
 :numbered:
 
+== Pre-Req
+
+* To complete this section you need a full Ceph cluster Deployed. 
+
+* [OPTIONAL] If you have deployed using the available automation in the lab and you have radosGW running you can delete the services with the following steps.
+
+----
+# ceph orch rm rgw.objectgw
+# ceph config set mon mon_allow_pool_delete true
+# for i in $(ceph osd lspools | grep -E  'default.rgw' | awk '{print $NF}') ; do ceph osd pool rm $i $i --yes-i-really-really-mean-it ; done
+----
 
 == Introducing Object Storage
 
@@ -39,7 +50,9 @@ the RADOS Gateway uses librados module calls to communicate with the Ceph cluste
 
 The RGW is a separate service that externally connects to a Ceph cluster and provides object storage
 access to its clients. In a production environment, it's recommended that you run more than
-one instance of the RGW masked by a Load Balancer,
+one instance of the RGW masked by a Load Balancer.
+
+Upstream general RGW documentation https://docs.ceph.com/en/quincy/radosgw/index.html[Link]
 
 image::rgw-lb.webp[RGW LoadBalancer]
 
@@ -47,8 +60,8 @@ image::rgw-lb.webp[RGW LoadBalancer]
 
 Ceph Object Gateway supports two interfaces:
 
-* _S3-compatibility_provides object storage functionality with an interface compatible with a large subset of the Amazon S3 RESTful API.
-* _Swift-compatibility_, which provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.
+* *S3-compatibility* provides object storage functionality with an interface compatible with a large subset of the Amazon S3 RESTful API.
+* *Swift-compatibility* , which provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.
 
 `cephadm` deploys RGW as a collection of daemons that manage a single-cluster deployment or a particular realm and zone in a multisite deployment.
 Note that with `cephadm`, the RGW daemons are configured via the monitor configuration database instead of via a `ceph.conf` file or the command line. If that configuration is not already in place (usually in the client.rgw.<something> section), then the RGW daemons start up with default settings (for example, binding to port 80).
@@ -62,7 +75,10 @@ First we will create a realm, a zone group, and a zone, and then specify a place
 
 image::gateway-realm.png[RGW Realm,740,580]
 
+[IMPORTANT]
+====
 Due to the limited number of OSDs in the lab environment, the `mon_max_pg_per_osd` configuration setting is lower than required. When you create more than seven pools each of PGs and PGPs, with the pool size being 32, you must increase the value of `mon_max_pg_per_osd` from `256` to `512` to create the additional pools.
+====
 
 The Realm/Zonegroup/Zone Layout in our Lab:
 
@@ -475,7 +491,8 @@ API.
 * s3cmd
 * https://github.com/bloomreach/s4cmd[s4cmd]
 * https://github.com/peak/s5cmd[s5cmd]
-* AWS CLI
+* https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html[AWS
+* CLI]
 
 We will be using the AWS CLI during the lab; the nodes have the AWS CLI binary
 available, you will just need to configure it; using the configure option, you
@@ -486,14 +503,14 @@ Access and Secret key.
 # aws configure
 AWS Access Key ID [****************07DO]:
 AWS Secret Access Key [****************QUH0]:
-Default region name [Default]:
+Default region name [Default]: multizg
 ----
 
 Once configured, you need to use the --endpoint option and point it to your
 configure RGW HTTP endpoint, for example: 
 
 ----
-[ceph: root@node /]# aws --endpoint http://ceph-node01:8080 s3 mb s3://demobucket
+# aws --endpoint http://proxy01:8000 s3 mb s3://demobucket --region multizg
 ----
 
 == S3 bucket access types
@@ -511,7 +528,9 @@ If you notice that the S3 bucket name and object keys are always in the same sub
 
 *In hosted-style URLs*, the bucket name will be included on the subdomain so we can have distinct DNS subdomains for the buckets, examples:
 
+----
 https://bucket-name.s3.example.com/object_key
+----
 
 Hosted-style URL's can help with DNS resolution, scaling, security, traffic management, and DDoS protection more challenging with this old centralised model than unique, virtual-hosted-style subdomains.
 

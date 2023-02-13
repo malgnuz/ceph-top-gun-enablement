@@ -35,7 +35,7 @@ If you choose to log to files, we recommend disabling logging to journald or els
 # ceph config set global log_to_stderr false
 # ceph config set global mon_cluster_log_to_stderr false
 # ceph config set global log_to_journald false
-# ceph config set global mon_cluster_log_to_journald false
+# ceph config set global mon_cluster_log_to_syslog false
 ----
 
 
@@ -79,20 +79,6 @@ ceph orch ls --service_name=alertmanager --format yaml
   - 2022-02-01T12:09:25.264584 service:alertmanager [ERROR] "Failed to apply: \
    Cannot place <AlertManagerSpec for service_name=alertmanager> on \
    unknown_host: Unknown hosts"'
-----
-
-As opposed to a specific service, to view the list of events for a specific daemon, for example, run the following command:
-
-----
-ceph orch ceph --service-type mds \
- --daemon-id=hostname.ppdhsz --format yaml
-  daemon_type: mds
-  daemon_id: cephfs.hostname.ppdhsz
-  hostname: hostname
-[...]
-  events:
-  - 2022-02-01T08:59:43.845866 daemon:mds.cephfs.hostname.ppdhsz [INFO] \
-   "Reconfigured mds.cephfs.hostname.ppdhsz on host 'hostname'"
 ----
 
 === Cephadm Image versions being used

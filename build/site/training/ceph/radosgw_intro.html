@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -374,7 +377,10 @@ the RADOS Gateway uses librados module calls to communicate with the Ceph cluste
 <div class="paragraph">
 <p>The RGW is a separate service that externally connects to a Ceph cluster and provides object storage
 access to its clients. In a production environment, it&#8217;s recommended that you run more than
-one instance of the RGW masked by a Load Balancer,</p>
+one instance of the RGW masked by a Load Balancer.</p>
+</div>
+<div class="paragraph">
+<p>Upstream general RGW documentation <a href="https://docs.ceph.com/en/quincy/radosgw/index.html">Link</a></p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -392,10 +398,10 @@ one instance of the RGW masked by a Load Balancer,</p>
 <div class="ulist">
 <ul>
 <li>
-<p>_S3-compatibility_provides object storage functionality with an interface compatible with a large subset of the Amazon S3 RESTful API.</p>
+<p><strong>S3-compatibility</strong> provides object storage functionality with an interface compatible with a large subset of the Amazon S3 RESTful API.</p>
 </li>
 <li>
-<p><em>Swift-compatibility</em>, which provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.</p>
+<p><strong>Swift-compatibility</strong> , which provides object storage functionality with an interface that is compatible with a large subset of the OpenStack Swift API.</p>
 </li>
 </ul>
 </div>
@@ -418,9 +424,18 @@ a single cephadm command that creates an object gateway across two random server
 <img src="_images/gateway-realm.png" alt="RGW Realm" width="740" height="580">
 </div>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="paragraph">
 <p>Due to the limited number of OSDs in the lab environment, the <code>mon_max_pg_per_osd</code> configuration setting is lower than required. When you create more than seven pools each of PGs and PGPs, with the pool size being 32, you must increase the value of <code>mon_max_pg_per_osd</code> from <code>256</code> to <code>512</code> to create the additional pools.</p>
 </div>
+<div class="exampleblock">
+<div class="content">
 <div class="paragraph">
 <p>The Realm/Zonegroup/Zone Layout in our Lab:</p>
 </div>
@@ -646,20 +661,17 @@ a single cephadm command that creates an object gateway across two random server
 </li>
 </ol>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Use the client.rgw.* section in the centralised configuration database to define parameters and characteristics for new RADOS Gateway daemons.</p>
+</div>
 </div>
 </td>
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>Use the client.rgw.* section in the centralised configuration database to define parameters and characteristics for new RADOS Gateway daemons.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -748,11 +760,9 @@ The Ceph orchestrator service names the daemons by using the format rgw.&lt;real
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>== Verify Connectivity to RADOS Gateway</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_verify_connectivity_to_rados_gateway"><a class="anchor" href="#_verify_connectivity_to_rados_gateway"></a>4. Verify Connectivity to RADOS Gateway</h2>
-<div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -790,11 +800,9 @@ tcp6       0      0 :::80                   :::*                    LISTEN      
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>== Create RADOS Gateway User Accounts</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_create_rados_gateway_user_accounts"><a class="anchor" href="#_create_rados_gateway_user_accounts"></a>5. Create RADOS Gateway User Accounts</h2>
-<div class="sectionbody">
 <div class="paragraph">
 <p>To access Red Hat Ceph Storage over object storage interfaces via Swift or S3, you must configure a Ceph RADOS Gateway component. In this section, you configure <code>proxy01</code> as a Ceph RADOS Gateway and then test S3 and Swift from <code>ceph-mon01</code>.</p>
 </div>
@@ -876,11 +884,9 @@ tcp6       0      0 :::80                   :::*                    LISTEN      
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>== Accessing S3 Objects Using RADOS Gateway</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_accessing_s3_objects_using_rados_gateway"><a class="anchor" href="#_accessing_s3_objects_using_rados_gateway"></a>6. Accessing S3 Objects Using RADOS Gateway</h2>
-<div class="sectionbody">
 <div class="paragraph">
 <p>The Amazon S3 API enables developers to manage object storage resources using an Amazon
 S3 compatible interface. Applications implemented with the S3 API can inter-operate with other
@@ -898,11 +904,9 @@ There are object and metadata size limits to consider when using the Amazon S3 A
 • Upload objects larger than 100MB by using the multipart upload capability.
 • The maximum metadata size is 16,000 bytes in a single HTTP request.</p>
 </div>
+<div class="paragraph">
+<p>== Using Amazon S3 API Clients</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_using_amazon_s3_api_clients"><a class="anchor" href="#_using_amazon_s3_api_clients"></a>7. Using Amazon S3 API Clients</h2>
-<div class="sectionbody">
 <div class="imageblock">
 <div class="content">
 <img src="_images/S3.png" alt="AWS S3">
@@ -924,7 +928,10 @@ API.</p>
 <p><a href="https://github.com/peak/s5cmd">s5cmd</a></p>
 </li>
 <li>
-<p>AWS CLI</p>
+<p><a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" class="bare">https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html</a>[AWS</p>
+</li>
+<li>
+<p>CLI]</p>
 </li>
 </ul>
 </div>
@@ -939,7 +946,7 @@ Access and Secret key.</p>
 <pre># aws configure
 AWS Access Key ID [****************07DO]:
 AWS Secret Access Key [****************QUH0]:
-Default region name [Default]:</pre>
+Default region name [Default]: multizg</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -948,19 +955,18 @@ configure RGW HTTP endpoint, for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[ceph: root@node /]# aws --endpoint http://ceph-node01:8080 s3 mb s3://demobucket</pre>
+<pre># aws --endpoint http://ceph-node01:8080 s3 mb s3://demobucket --region multizg</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>== S3 bucket access types</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_s3_bucket_access_types"><a class="anchor" href="#_s3_bucket_access_types"></a>8. S3 bucket access types</h2>
-<div class="sectionbody">
 <div class="paragraph">
 <p>The S3 API currently supports two different bucket addressing models: path-style (old) and virtual-hosted style (new).</p>
 </div>
-<div class="sect2">
-<h3 id="_whats_the_difference"><a class="anchor" href="#_whats_the_difference"></a>8.1. What’s the difference?</h3>
+<div class="paragraph">
+<p>=== What’s the difference?</p>
+</div>
 <div class="paragraph">
 <p><strong>In path-style URLs</strong>, the s3 bucket name will be in the URL path, examples:</p>
 </div>
@@ -979,9 +985,9 @@ configure RGW HTTP endpoint, for example:</p>
 <div class="paragraph">
 <p>Hosted-style URL&#8217;s can help with DNS resolution, scaling, security, traffic management, and DDoS protection more challenging with this old centralised model than unique, virtual-hosted-style subdomains.</p>
 </div>
+<div class="paragraph">
+<p>=== How to enable hosted-style URLs in RadosGW</p>
 </div>
-<div class="sect2">
-<h3 id="_how_to_enable_hosted_style_urls_in_radosgw"><a class="anchor" href="#_how_to_enable_hosted_style_urls_in_radosgw"></a>8.2. How to enable hosted-style URLs in RadosGW</h3>
 <div class="paragraph">
 <p>By default, RGW will work in the path-style URL format; if we want to access a bucket using the hosted-style URLs, some minimal configuration is needed.</p>
 </div>
@@ -992,35 +998,22 @@ Our Load Balancer or RGW instance, in our lab, we are using dnsmasq for DNS reso
 going to add a new line to the dnsmasq config to get the DNS bucket resolution
 working.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
+</div>
+</div>
 <div class="paragraph">
 <p>Certain applications only work with hosted-style bucket access</p>
 </div>
-</td>
-</tr>
-</table>
+<div class="exampleblock">
+<div class="content">
+
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
+</div>
 <div class="paragraph">
 <p>RGW prefers the first method(Path Style), because the second
 method(hosted-style) requires added operations like domain certification and DNS wild cards.</p>
 </div>
-</td>
-</tr>
-</table>
-</div>
+<div class="exampleblock">
+<div class="content">
 <div class="paragraph">
 <p>In this example, IP 172.16.7.24 is for proxy01 where we have our RGW instance
 running, we add it at the end of the <code>/etc/dnsmasq.conf</code> of the <code>workstation</code>
@@ -1201,6 +1194,7 @@ hosted-style access</p>
 <pre># curl http://bucket2.bucket.example.com:8000/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</pre>
+</div>
 </div>
 </div>
 </div>

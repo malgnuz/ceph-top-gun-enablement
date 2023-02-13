@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -340,11 +343,31 @@ Filestore has been Deprecated.
 <p>RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one where data is written directly to the block device and the other where we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.</p>
 </div>
 <div class="paragraph">
-<p>New Bluestore features:
-* it enables compression of data at the lowest level.
-<strong> if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.
-* An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.
-</strong> Whenever data is read from persistent storage its checksum is verified</p>
+<p>New Bluestore features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it enables compression of data at the lowest level.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Whenever data is read from persistent storage its checksum is verified</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -882,7 +905,7 @@ the new OSD spec file.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i osd-path-spec.yaml --dry-run
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i osd-path-spec.yaml
 Scheduled osd.osd_using_paths update...</code></pre>
 </div>
 </div>
@@ -944,7 +967,8 @@ devices for each new OSD that we just deployed</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># podman exec -it ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-8 ceph-volume lvm list
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cephadm shell
+#/ ceph-volume lvm list
 ====== osd.4 =======
 
   [block]       /dev/ceph-45cf10cf-2149-4517-bb8d-25809fb29bbd/osd-block-319ded07-60bd-4715-9f1a-50cdf1872cb6

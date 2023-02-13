@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -477,7 +480,81 @@ We push these updates from the primary (rather than having the replicas pull the
 </div>
 </div>
 <div class="sect1">
-<h2 id="_troubleshooting_pgs"><a class="anchor" href="#_troubleshooting_pgs"></a>5. Troubleshooting PGs</h2>
+<h2 id="_increasing_the_number_of_pgs"><a class="anchor" href="#_increasing_the_number_of_pgs"></a>5. Increasing the number of PGs</h2>
+<div class="sectionbody">
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This is the most intensive process that can be performed on a Ceph cluster, and can have drastic performance impact if not done in a slow and methodical fashion.
+Once the data starts moving for a chunk of Placement Groups (PGs) ( in the increasing pgp_num section ), it cannot be stopped or reversed and must be allowed to complete.
+It is advised that this process be performed off-hours, and all clients alerted to the potential performance impact well ahead of time.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Having proper Placement Group (PG) count is a critical part of ensuring top performance and best data distribution in your Ceph cluster.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The Ceph PG calc tool should be referenced for optimal values.</p>
+</li>
+<li>
+<p>Care should be taken to maintain between 50 and 150 PGs per OSD ratio as detailed in the Ceph PG calc tool.</p>
+</li>
+<li>
+<p>The current PG count per OSD can be viewed in the PGS column of the <code>ceph osd df tree</code> command.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd df tree
+ID  CLASS  WEIGHT   REWEIGHT  SIZE    RAW USE  DATA     OMAP  META    AVAIL   %USE  VAR   PGS  STATUS  TYPE NAME
+-1         0.02939         -  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25  1.00    -          root default
+-3         0.02939         -  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25  1.00    -              datacenter DC1
+-2         0.00980         -  10 GiB   26 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  1.01    -                  host ceph-node01
+ 0    hdd  0.00980   1.00000  10 GiB   26 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  1.01  225      up              osd.0
+-4         0.00980         -  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99    -                  host ceph-node02
+ 1    hdd  0.00980   1.00000  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99  225      up              osd.1
+-5         0.00980         -  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99    -                  host ceph-node03
+ 2    hdd  0.00980   1.00000  10 GiB   25 MiB  616 KiB   0 B  25 MiB  10 GiB  0.25  0.99  225      up              osd.2
+                       TOTAL  30 GiB   76 MiB  1.8 MiB   0 B  74 MiB  30 GiB  0.25</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The only time increasing the PG count is required is if you expand your cluster with more OSDs, such that the ratio drops to or below 100 PGs per OSD ratio in your cluster, or if the initial PG count was not properly planned.</p>
+</li>
+<li>
+<p>The PG count settings ( pg_num and pgp_num ) are configured per-pool.<code>pgp_num</code> is automatic in recent versions</p>
+</li>
+<li>
+<p>Each pool which has a low PG count must be adjusted separately.</p>
+</li>
+<li>
+<p>Due to the amount of data movementt, it is recommended to throttle the cluster&#8217;s backfill and recovery values to minimize client IO impact.</p>
+</li>
+<li>
+<p>Disable scrub and deep scrub operations during the process to limit the potentially compounding IO load.</p>
+</li>
+<li>
+<p>Due to the need to re-evaluate the contents of every PG in the pool, even with the backfill and recovery throttles in place, client IO can experience performance degradation.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting_pgs"><a class="anchor" href="#_troubleshooting_pgs"></a>6. Troubleshooting PGs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Troubleshooting placement group (PG) issues in a Ceph cluster can be a complex process, but there are several tools and techniques that can help.</p>
@@ -556,7 +633,7 @@ information about the cause of a problem. The <code>ceph -s</code> command can b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_cluster_health_status"><a class="anchor" href="#_cluster_health_status"></a>6. Cluster Health Status</h2>
+<h2 id="_cluster_health_status"><a class="anchor" href="#_cluster_health_status"></a>7. Cluster Health Status</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>

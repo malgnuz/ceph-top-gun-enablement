@@ -20,25 +20,23 @@
 Perform the following operations:
 
 * Create a pool `newrbd`  to host some RBDs. The pool will use a replication factor of 2.
-* Change the default RBD pool to be the pool you just created
 * Change the default RBD Image order to be 20
-* Change the default features for all new RBD Images to be `layering+striping`
 * Verify pool `rbd` exists. If not create it
 
 == Create RBD Image
 
-Perform the following operations:
+Perform the following operations in pool `newrbd`:
 
 * Create a 256MiB RBD image `testimage`
 * Format the RBD Image with `ext4`
 * Copy the content of `/var/log` into the RBD Image in a directory called `batch1`
 * Create a snapshot `snap1` for the RBD Image
-* Copy the content of `/var/lib/dict/words` into the RBD Image in a directory called `batch2`
+* Copy the content of `/var/lib/alternatives/` into the RBD Image in a directory called `batch2`
 * Create a snapshot `snap2` for the RBD Image
 
 == Export and Import
 
-Perform the following operations:
+Perform the following operations in pool `newrbd`:
 
 * Export as a flat file the differences between the formatted RBD Image and `snap1`
 * Export as a flat file the differences between `snap1` and `snap2`
@@ -50,22 +48,17 @@ Perform the following operations:
 
 * Create a clone of `newrbd/batch1` in pool `rbd` and name it `clone1`
 * Make the clone an independent RBD Image
-* Create a clone of `newrbd/clone2` in pool `newrbd` and name it `clone2`
+* Create a clone of `newrbd/clone1` in pool `newrbd` and name it `clone2`
 * Add a file `batch3/testfile` containing 10 times the string "This is a test\n" to `clone2`
 
 == Proof of success
 
-Provide the following to the instructor:
-
 * Proof that `batch1` and `target1` have the same content using the `rbd` command combined with Linux commands
-* Proof that `batch1` and `clone1` have the same content using the `rbd` command combined with Linux commands
 * Proof that `clone1` and `clone2` have a different content using the `rbd` command combined with Linux commands
 * Proof that `clone1` is no longer linked to `batch1`
 * How much used capacity is consumed in `batch1`, `target1`, `clone1` and `clone2`
 
 == Cleanup
-
-When your instructor has validated the proof of work, perform the following operations:
 
 * Delete all RBD Images
 * Delete all pools you have created

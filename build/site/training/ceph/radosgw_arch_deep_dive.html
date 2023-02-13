@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -444,6 +447,70 @@ Contains object data
 .rgw.root
 Stores the region and zone definition for the RGW</p>
 </div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Pool</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Description</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">.rgw.root</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Domain Root Pool</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rgw.control</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Pool</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rgw.gc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The garbage Collection pool, contains hash buckets containing the IDs of the objects to be deleted</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">log</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Will log bucket and object actions by the RGW</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">intent-log</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Store a copy of the object update request so that it can be used for undo/redo in case the object request fails</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">usage</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains a log of usage per user</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">users</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains access and secret keys, mapped to user id</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">users.email</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains emails associated with a user</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">users.swift</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains swift sub-user information</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">users.uid</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains a mapping of a user&#8217;s unique uid</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rgw.buckets.index</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains the bucket index</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rgw.buckets</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contains object data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">rgw.root</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Stores the region and zone definition for the RGW</p></td>
+</tr>
+</tbody>
+</table>
 <div class="paragraph">
 <p>The zone definitions list several more pools than that, but many of those are consolidated through the use of rados namespaces.</p>
 </div>

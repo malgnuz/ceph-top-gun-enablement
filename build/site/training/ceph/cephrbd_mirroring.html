@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -332,9 +335,9 @@ Both existing RBD mirroring implementation are asynchronous
 <p>The RBD asynchronous mirroring are performed by adding a new daemon to the
 Ceph cluster. This daemon is known as the <code>rbd-mirror</code> daemon.</p>
 </div>
-<div class="imageblock text-center unresolved">
+<div class="imageblock text-center">
 <div class="content">
-<img src="RBDMirroringArchitecture.png" alt="RBD Mirroring Architecture">
+<img src="_images/RBDMirroringArchitecture.png" alt="RBD Mirroring Architecture">
 </div>
 <div class="title">Figure 1. kRBD Diagram</div>
 </div>
@@ -478,6 +481,21 @@ must be applied to each cluster.
 It is compatible only with <code>librbd</code> based clients in environments such as
 OpenStack and Proxmox.</p>
 </div>
+<div class="paragraph">
+<p>One-Way Journal Mirroring:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/rbd-mirror-journal-arch.png" alt="Journal RBD mirror">
+</div>
+</div>
+<div class="paragraph">
+<p>Two-Way Journal Mirroring.</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="_images/rbd_journal_multiway1.png" alt="Two-way"></span>
+<span class="image"><img src="_images/rbd_journal_multiway2.png" alt="Two-way"></span></p>
+</div>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -527,6 +545,11 @@ Image journal.
 </td>
 </tr>
 </table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/rbd-mirror-journal-perf-write.png" alt="Bad write performance">
+</div>
 </div>
 </div>
 </div>

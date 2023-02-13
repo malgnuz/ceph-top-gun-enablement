@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -314,13 +317,7 @@
 <p>Create a pool <code>newrbd</code>  to host some RBDs. The pool will use a replication factor of 2.</p>
 </li>
 <li>
-<p>Change the default RBD pool to be the pool you just created</p>
-</li>
-<li>
 <p>Change the default RBD Image order to be 20</p>
-</li>
-<li>
-<p>Change the default features for all new RBD Images to be <code>layering+striping</code></p>
 </li>
 <li>
 <p>Verify pool <code>rbd</code> exists. If not create it</p>
@@ -333,7 +330,7 @@
 <h2 id="_create_rbd_image"><a class="anchor" href="#_create_rbd_image"></a>2. Create RBD Image</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Perform the following operations:</p>
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -350,7 +347,7 @@
 <p>Create a snapshot <code>snap1</code> for the RBD Image</p>
 </li>
 <li>
-<p>Copy the content of <code>/var/lib/dict/words</code> into the RBD Image in a directory called <code>batch2</code></p>
+<p>Copy the content of <code>/var/lib/alternatives/</code> into the RBD Image in a directory called <code>batch2</code></p>
 </li>
 <li>
 <p>Create a snapshot <code>snap2</code> for the RBD Image</p>
@@ -363,7 +360,7 @@
 <h2 id="_export_and_import"><a class="anchor" href="#_export_and_import"></a>3. Export and Import</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Perform the following operations:</p>
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -395,7 +392,7 @@
 <p>Make the clone an independent RBD Image</p>
 </li>
 <li>
-<p>Create a clone of <code>newrbd/clone2</code> in pool <code>newrbd</code> and name it <code>clone2</code></p>
+<p>Create a clone of <code>newrbd/clone1</code> in pool <code>newrbd</code> and name it <code>clone2</code></p>
 </li>
 <li>
 <p>Add a file <code>batch3/testfile</code> containing 10 times the string "This is a test\n" to <code>clone2</code></p>
@@ -407,16 +404,10 @@
 <div class="sect1">
 <h2 id="_proof_of_success"><a class="anchor" href="#_proof_of_success"></a>5. Proof of success</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Provide the following to the instructor:</p>
-</div>
 <div class="ulist">
 <ul>
 <li>
 <p>Proof that <code>batch1</code> and <code>target1</code> have the same content using the <code>rbd</code> command combined with Linux commands</p>
-</li>
-<li>
-<p>Proof that <code>batch1</code> and <code>clone1</code> have the same content using the <code>rbd</code> command combined with Linux commands</p>
 </li>
 <li>
 <p>Proof that <code>clone1</code> and <code>clone2</code> have a different content using the <code>rbd</code> command combined with Linux commands</p>
@@ -434,9 +425,6 @@
 <div class="sect1">
 <h2 id="_cleanup"><a class="anchor" href="#_cleanup"></a>6. Cleanup</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>When your instructor has validated the proof of work, perform the following operations:</p>
-</div>
 <div class="ulist">
 <ul>
 <li>

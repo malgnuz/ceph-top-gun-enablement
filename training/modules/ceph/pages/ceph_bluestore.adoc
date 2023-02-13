@@ -32,6 +32,7 @@ RocksDB is an embedded high-performance key-value store that excels with flash s
 RocksDB uses WAL as a transaction log on persistent storage, unlike Filestore where all the writes went first to the journal, in bluestore we have two different datapaths for writes, one where data is written directly to the block device and the other where we use deferred writes, with deferred writes data gets written to the WAL device and later asynchronously flushed to disk.
 
 New Bluestore features:
+
 * it enables compression of data at the lowest level.
 ** if compression is enabled data blobs allocated on the raw device will be compressed. This means that any data written into RH Ceph Storage, no matter the client used(rbd,rados, etc), can benefit from this feature.
 * An additional benefit of BlueStore is that it stores data and meta-data in the cluster with checksums for increased integrity.
@@ -405,7 +406,7 @@ The actions that will take place are looking good, so we can go ahead and apply
 the new OSD spec file.
 
 ----
-# ceph orch apply -i osd-path-spec.yaml --dry-run
+# ceph orch apply -i osd-path-spec.yaml
 Scheduled osd.osd_using_paths update...
 ----
 
@@ -459,7 +460,8 @@ We can check with lvm and `ceph-volume lvm list` that we are actually using diff
 devices for each new OSD that we just deployed
 
 ----
-# podman exec -it ceph-910c8bb8-95bc-11ed-b7d6-2cc26078e4ef-osd-8 ceph-volume lvm list
+# cephadm shell 
+#/ ceph-volume lvm list
 ====== osd.4 =======
 
   [block]       /dev/ceph-45cf10cf-2149-4517-bb8d-25809fb29bbd/osd-block-319ded07-60bd-4715-9f1a-50cdf1872cb6

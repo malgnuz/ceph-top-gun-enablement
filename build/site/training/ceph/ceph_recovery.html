@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -309,6 +312,9 @@
 <p>One of the most important features of Ceph is Self Healing and Automatic
 rebalancing, by design Ceph has a Peer-to-peer architecture that seamlessly handles failures and ensures data distribution throughout the cluster.</p>
 </div>
+<div class="paragraph">
+<p>The Ceph Monitor reports on the current state of the Ceph Storage Cluster. The Ceph Monitor knows about the Ceph Storage Cluster by requiring reports from each Ceph OSD Daemon, and by receiving reports from Ceph OSD Daemons about the status of their neighboring Ceph OSD Daemons. If the Ceph Monitor doesn’t receive reports, or if it receives reports of changes in the Ceph Storage Cluster, the Ceph Monitor updates the status of the Ceph Cluster Map.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -349,6 +355,11 @@ Ceph OSD Daemon doesn’t show a heartbeat within a 20 second grace period(<code
 <div class="paragraph">
 <p>If a Ceph OSD Daemon doesn’t report to a Ceph Monitor, the Ceph Monitor will
 consider the Ceph OSD Daemon down after the mon osd report timeout elapses(<code>mon_osd_report_timeout</code>).</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/mon_failure.png" alt="Mon detect">
+</div>
 </div>
 </div>
 </div>
@@ -477,6 +488,20 @@ have occurred to a given PG on that OSD then recovery is used for that PG, Else 
 </li>
 </ul>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The osd_max_backfills tunable limits the number of outgoing or incoming backfills that are active on a given OSD. Note that this limit is applied separately to incoming and to outgoing backfill operations. Thus there can be as many as osd_max_backfills * 2 backfill operations in flight on each OSD. This subtlety is often missed, and Ceph operators can be puzzled as to why more ops are observed than expected</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_delaying_the_recoverybackfill_operations"><a class="anchor" href="#_delaying_the_recoverybackfill_operations"></a>4.5. Delaying the recovery/backfill Operations.</h3>
@@ -520,6 +545,11 @@ have occurred to a given PG on that OSD then recovery is used for that PG, Else 
 <div class="paragraph">
 <p>Once an OSD is up again, it will peer with other OSDs to get up to date on the
 state of the PGs.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/peering.png" alt="peering">
+</div>
 </div>
 <div class="ulist">
 <ul>

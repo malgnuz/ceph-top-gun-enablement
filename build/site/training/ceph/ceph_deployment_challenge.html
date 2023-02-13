@@ -116,6 +116,9 @@
     <a class="nav-link" href="ceph_recovery.html">Ceph OSD Failure/Recovery</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item is-current-page" data-depth="1">
@@ -379,9 +382,6 @@ nodes during the initial bootstrap</p>
 </li>
 <li>
 <p>Limit the amount of memory an osd can consume to 2GB</p>
-</li>
-<li>
-<p>Limit the number of resources the MGR can use: 1cpu/1GB of Ram</p>
 <div class="ulist">
 <ul>
 <li>
@@ -435,7 +435,7 @@ nodes during the initial bootstrap</p>
 <p>Nodes <code>ceph-node01,ceph-node02,ceph-node03</code> will configure one OSD per node</p>
 </li>
 <li>
-<p>Move the MGR services so we have one MGR on each DC.</p>
+<p>Move the MGR services so we have one MGR on each RACK: RACK1 and RACK2.</p>
 </li>
 </ul>
 </div>
@@ -462,7 +462,10 @@ nodes during the initial bootstrap</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new pool for cephfs called <code>cephfsreplica2</code> with PG count 16, replica 2, and the failure domain set to Datacenter</p>
+<p>Create a new pool for cephfs called <code>cephfsreplica2</code> with PG count 16,</p>
+</li>
+<li>
+<p>replica 2, and the failure domain set to Rack</p>
 </li>
 </ul>
 </div>
