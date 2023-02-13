@@ -637,7 +637,7 @@ Scheduled to restart rgw.multi.zone1.proxy01.fybord on host 'proxy01'
 
 It will only work with path style:
 ----
-# curl http://bucket2.bucket.example.com:8000/bucket2/hosts
+# curl http://bucket.example.com:8000/bucket2/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 ----
