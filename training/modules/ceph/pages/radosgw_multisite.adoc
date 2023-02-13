@@ -70,11 +70,19 @@ image::multi_multi.jpeg[RGW multisite Lab Layout]
 
 === Configure the Master Realm, Zonegroup and Zone.
 
-[TIP]
+[IMPORTANT]
 ====
 If you have already completed the RadosGW introduction module, you will have
 the realm,zonegroup and zone(zone1) created, but with no endpoints configured,
 you will need to add valid rgw endpoints to the zonegroup and zone.
+
+For example:
+
+----
+# radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
+# radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zonegroup=zone1
+#radosgw-admin period update --rgw-realm=multisite --commit
+----
 ====
 
 [WARNING]
