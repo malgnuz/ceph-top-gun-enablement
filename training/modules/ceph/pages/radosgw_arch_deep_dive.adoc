@@ -136,6 +136,13 @@ Stores the region and zone definition for the RGW
 |===
 
 
+[IMPORTANT]
+====
+The Following examples and steps are using the default zone called `default`,
+if you are using a zone with a different name like `zone1` you should replace
+it.
+====
+
 The zone definitions list several more pools than that, but many of those are consolidated through the use of rados namespaces.
 
 ----
@@ -224,6 +231,12 @@ Bucket Index pool for the default zone:
 
 We can list the Bucket Index for a specific bucket using the `radosgw-admin bi
 list command`, where we can see the metadata it stores.
+
+[NOTE]
+====
+You need to upload at least one file for the bucket index to output
+information.
+====
 
 ----
 # radosgw-admin bi list --bucket bucket1
