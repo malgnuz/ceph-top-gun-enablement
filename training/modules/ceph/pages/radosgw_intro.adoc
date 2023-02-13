@@ -510,7 +510,7 @@ Once configured, you need to use the --endpoint option and point it to your
 configure RGW HTTP endpoint, for example: 
 
 ----
-# aws --endpoint http://ceph-node01:8080 s3 mb s3://demobucket --region multizg
+# aws --endpoint http://proxy01:8000 s3 mb s3://demobucket --region multizg
 ----
 
 == S3 bucket access types
@@ -528,7 +528,9 @@ If you notice that the S3 bucket name and object keys are always in the same sub
 
 *In hosted-style URLs*, the bucket name will be included on the subdomain so we can have distinct DNS subdomains for the buckets, examples:
 
+----
 https://bucket-name.s3.example.com/object_key
+----
 
 Hosted-style URL's can help with DNS resolution, scaling, security, traffic management, and DDoS protection more challenging with this old centralised model than unique, virtual-hosted-style subdomains.
 
