@@ -1113,7 +1113,9 @@ rgw.multi.zone1.proxy01.yrtaci  proxy01      *:8000       running (63m)      2m 
 <pre># ceph config ls | grep rgw_dns_name
 rgw_dns_name
 
-# ceph config set client.rgw.multi.zone1.proxy01.yrtaci rgw_dns_name bucket.example.com</pre>
+# ceph config set client.rgw.multi.zone1.proxy01.yrtaci rgw_dns_name bucket.example.com
+# ceph orch daemon restart rgw.multi.zone1.proxy01.yrtaci
+Scheduled to restart rgw.multi.zone1.proxy01.yrtaci on host 'proxy01'</pre>
 </div>
 </div>
 <div class="paragraph">
