@@ -452,7 +452,7 @@ service_id: multi.zone1
 placement:
   hosts:
     - ceph-node02
-    - ceph-node03
+    - proxy01
 spec:
   backend_service: rgw.multi.zone1
   virtual_ip: 192.168.56.100/24
@@ -467,7 +467,7 @@ SERVICESPEC PREVIEWS
 +---------+-----------------------------+-------------------------+-------------+
 |SERVICE  |NAME                         |ADD_TO                   |REMOVE_FROM  |
 +---------+-----------------------------+-------------------------+-------------+
-|ingress  |ingress.ingress.multi.zone1  |ceph-node02 ceph-node03  |             |
+|ingress  |ingress.ingress.multi.zone1  |ceph-node02 proxy01      |             |
 +---------+-----------------------------+-------------------------+-------------+
 # ceph orch apply -i rgw-ingress.yaml
 Scheduled ingress.ingress.multi.zone1 update...</code></pre>
@@ -479,11 +479,13 @@ the ceph orch ps command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch ps | grep ingress.multi
-haproxy.ingress.multi.zone1.ceph-node02.vyqujm     ceph-node02  *:80,1967    running (23s)    14s ago   7m    6098k        -  2.2.19-7ea3822   6b6ff8a83cd7  f93e7a3ff94d
-haproxy.ingress.multi.zone1.ceph-node03.omzjut     ceph-node03  *:80,1967    running (13s)     8s ago   7m    9537k        -  2.2.19-7ea3822   6b6ff8a83cd7  ce91e7ffc737
-keepalived.ingress.multi.zone1.ceph-node02.yyelgh  ceph-node02               running (6m)     14s ago   6m    11.2M        -  2.1.5            f68c62a66d49  ab0d236e81eb
-keepalived.ingress.multi.zone1.ceph-node03.btvglg  ceph-node03               running (6m)      8s ago   6m    16.7M        -  2.1.5            f68c62a66d49  5abb03a5f2bc</code></pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch ps | grep multi\.zone1
+haproxy.multi.zone1.ceph-node02.pmohrw     ceph-node02  *:80,1967    running (3m)      2m ago   3m    4080k        -  2.2.19-7ea3822    2e4cc4bf0734  c42086355034
+haproxy.multi.zone1.proxy01.yrkhjo         proxy01      *:80,1967    running (2m)    103s ago   3m    3968k        -  2.2.19-7ea3822    2e4cc4bf0734  68a291f47547
+keepalived.multi.zone1.ceph-node02.jiylee  ceph-node02               running (3m)      2m ago   3m    12.9M        -  2.1.5             a57b3797e25b  c008d1bdb07c
+keepalived.multi.zone1.proxy01.aaitou      proxy01                   running (2m)    103s ago   2m    11.6M        -  2.1.5             a57b3797e25b  f9edc0155908
+rgw.multi.zone1.ceph-node02.miiqve         ceph-node02  *:8000       running (7m)      2m ago   7m    56.1M        -  16.2.10-94.el8cp  34880245f74a  e08857213424
+rgw.multi.zone1.proxy01.iqthgc             proxy01      *:8000       running (18m)   103s ago  81m    61.1M        -  16.2.10-94.el8cp  34880245f74a  3b54fc09986a</code></pre>
 </div>
 </div>
 <div class="paragraph">
