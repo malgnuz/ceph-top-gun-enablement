@@ -315,6 +315,14 @@ $ aws --endpoint=http://ceph-node02:8080 s3 cp /etc/hosts s3://bucket1/file1 --r
 upload: ../etc/hosts to s3://bucket1/file1
 ----
 
+[TIP]
+====
+To increase the number of objects in your bucket you could use something like
+----
+for i in {1..1000} ; do aws --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://demobucket/file$i ; done
+----
+====
+
 let's investigate the bucket index for this bucket at the rados level, by
 listing the omapkeys on the bucket index object, we can see we have a key
 called file1, the same as the uploaded object name in S3.
