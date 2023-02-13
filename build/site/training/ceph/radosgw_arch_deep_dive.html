@@ -511,6 +511,22 @@ Stores the region and zone definition for the RGW</p>
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Following examples and steps are using the default zone called <code>default</code>,
+if you are using a zone with a different name like <code>zone1</code> you should replace
+it.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>The zone definitions list several more pools than that, but many of those are consolidated through the use of rados namespaces.</p>
 </div>
@@ -576,7 +592,7 @@ users.uid</pre>
 <div class="paragraph">
 <p>Rados Gateway maintains an index per bucket that holds the list and the
 metadata of all the objects it contains, the Index holds a key-value map in
-rados objects, The value holds basic metadata for each object like header, number of objects, total size,</p>
+rados objects(omap), The value holds basic metadata for each object like header, number of objects, total size,</p>
 </div>
 <div class="paragraph">
 <p>The bucket index is also used for multiple tasks:</p>
@@ -605,7 +621,10 @@ rados objects, The value holds basic metadata for each object like header, numbe
 </div>
 <div class="paragraph">
 <p>We can also create Indexless buckets:
-Provides a mechanism in which RadosGW does not track objects in specific buckets. This removes resource contention and reduces the number of round trips RadosGW needs to make to the RADOS backend. Not supported on multi-site configurations</p>
+Provides a mechanism in which RadosGW does not track objects in specific
+buckets. This removes resource contention and reduces the number of round trips
+RadosGW needs to make to the RADOS backend. <strong>Not supported on multi-site
+configurations</strong></p>
 </div>
 <div class="paragraph">
 <p>Bucket Index pool for the default zone:</p>
@@ -619,6 +638,21 @@ Provides a mechanism in which RadosGW does not track objects in specific buckets
 <div class="paragraph">
 <p>We can list the Bucket Index for a specific bucket using the <code>radosgw-admin bi
 list command</code>, where we can see the metadata it stores.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You need to upload at least one file for the bucket index to output
+information.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -703,6 +737,25 @@ bucket1 called file1:</p>
 <pre>$ aws --endpoint=http://ceph-node02:8080 s3 cp /etc/hosts s3://bucket1/file1 --region default
 upload: ../etc/hosts to s3://bucket1/file1</pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To increase the number of objects in your bucket you could use something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>for i in {1..1000} ; do aws --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://demobucket/file$i ; done</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>let&#8217;s investigate the bucket index for this bucket at the rados level, by
@@ -839,6 +892,13 @@ this tunable is set to 11.</p>
 <div class="paragraph">
 <p>If a different number of shards is required for a specific bucket, it is possible to change it.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="ulist">
 <ul>
 <li>
@@ -848,6 +908,10 @@ this tunable is set to 11.</p>
 <p>The current maximum supported number of bucket index shards is 65521</p>
 </li>
 </ul>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -1059,9 +1123,8 @@ set to 4MB:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># ceph config get mon rgw_max_chunk_size
-4194304
-The chunk size is the size of RADOS I/O requests that RGW sends when accessing data objects. RGW read and write operations will never request more than this amount in a single request. This also defines the RGW head object size, as head operations need to be atomic, and anything larger than this would require more than a single operation. When RGW objects are written to the default storage class, up to this amount of payload data will be stored alongside metadata in the head object.</pre>
+<pre># ceph config get mon rgw_obj_stripe_size
+4194304</pre>
 </div>
 </div>
 <div class="paragraph">
