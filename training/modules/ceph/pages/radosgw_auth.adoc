@@ -13,14 +13,13 @@ In order to access Object Storage using the s3 protocol you need to provide an s
 
 The following options are available to authenticate against RGW.
 
-- RGW local database authentication.
-- LDAP authentication.
-- Keystone authentication .
-- Secure Token Service (STS) 
-- with LDAP(STS-lite).
-- with keystone(STS-lite).
-- with OpenID connect authentication
-
+* RGW local database authentication.
+* LDAP authentication.
+* Keystone authentication .
+* Secure Token Service (STS)
+  ** with LDAP(STS-lite).
+  ** with keystone(STS-lite).
+  ** with OpenID connect authentication
 
 == RadosGW authentication methods.
 
