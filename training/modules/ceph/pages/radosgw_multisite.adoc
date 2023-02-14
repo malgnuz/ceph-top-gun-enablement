@@ -80,10 +80,13 @@ For example:
 
 ----
 # radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
-# radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zonegroup=zone1
+# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000
+# --rgw-zonegroup=multizg
 # radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
 # radosgw-admin period update --rgw-realm=multisite --commit
 ----
+
+And then skip to section 3.2
 ====
 
 [WARNING]
