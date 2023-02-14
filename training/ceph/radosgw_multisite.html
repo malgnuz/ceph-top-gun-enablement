@@ -457,10 +457,14 @@ you will need to add valid rgw endpoints to the zonegroup and zone.</p>
 <div class="listingblock">
 <div class="content">
 <pre># radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
-# radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zonegroup=zone1
+# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000
+# --rgw-zonegroup=multizg
 # radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
 # radosgw-admin period update --rgw-realm=multisite --commit</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>And then skip to section 3.2</p>
 </div>
 </td>
 </tr>
