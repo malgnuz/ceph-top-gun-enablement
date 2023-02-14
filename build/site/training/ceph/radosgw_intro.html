@@ -474,7 +474,7 @@ a single cephadm command that creates an object gateway across two random server
 <p>Update the value of the <code>mon_max_pg_per_osd</code> configuration variable to <code>512</code>:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">#  ceph config set mon mon_max_pg_per_osd 512</code></pre>
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh">#  ceph config set global mon_max_pg_per_osd 512</code></pre>
 </div>
 </div>
 </li>
@@ -1178,7 +1178,7 @@ Scheduled to restart rgw.multi.zone1.proxy01.fybord on host 'proxy01'
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># curl http://bucket2.bucket.example.com:8000/bucket2/hosts
+<pre># curl http://bucket.example.com:8000/bucket2/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</pre>
 </div>

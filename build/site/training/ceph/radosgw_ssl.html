@@ -529,7 +529,7 @@ ceph-node02 &amp; ceph-node03</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"> cat &lt;&lt; EOF &gt;  rgw-ingress.yaml
 service_type: ingress
-service_id: rgw.default
+service_id: rgw.objectgw
 placement:
   hosts:
     - ceph-node02
