@@ -439,17 +439,28 @@ operations.</p>
 </div>
 <div class="sect2">
 <h3 id="_configure_the_master_realm_zonegroup_and_zone"><a class="anchor" href="#_configure_the_master_realm_zonegroup_and_zone"></a>3.1. Configure the Master Realm, Zonegroup and Zone.</h3>
-<div class="admonitionblock tip">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 <div class="paragraph">
 <p>If you have already completed the RadosGW introduction module, you will have
 the realm,zonegroup and zone(zone1) created, but with no endpoints configured,
 you will need to add valid rgw endpoints to the zonegroup and zone.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
+# radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zonegroup=zone1
+# radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
+# radosgw-admin period update --rgw-realm=multisite --commit</pre>
+</div>
 </div>
 </td>
 </tr>
@@ -489,11 +500,11 @@ you will need to add valid rgw endpoints to the zonegroup and zone.</p>
 <p>Create a zone group:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zonegroup create --rgw-zonegroup=multisite_zonegroup --endpoints=http://proxy01:8000 --master --default
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zonegroup create --rgw-zonegroup=multizg --endpoints=http://proxy01:8000 --master --default
 {
     "id": "2e41dde9-80f4-4ec8-a099-ec0e8a60938d",
-    "name": "multisite_zonegroup",
-    "api_name": "multisite_zonegroup",
+    "name": "multizg",
+    "api_name": "multizg",
     "is_master": "true",
     "endpoints": [],
     "hostnames": [],
@@ -536,7 +547,7 @@ of the Hostnames.</p>
 <p>Create a zone:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zone create --rgw-zonegroup=multisite_zonegroup --rgw-zone=zone1 --access-key=sync --secret=sync --master --default --endpoints=http://proxy01:8000
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># radosgw-admin zone create --rgw-zonegroup=multizg --rgw-zone=zone1 --access-key=sync --secret=sync --master --default --endpoints=http://proxy01:8000
 {
     "id": "0e06b95f-3b6e-4a1c-95e8-b857f699e9e3",
     "name": "zone1",
@@ -686,8 +697,8 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
         "zonegroups": [
             {
                 "id": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
-                "name": "multisite_zonegroup",
-                "api_name": "multisite_zonegroup",
+                "name": "multizg",
+                "api_name": "multizg",
                 "is_master": "true",
                 "endpoints": [],
                 "hostnames": [],
@@ -770,7 +781,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin zone create --rgw-zone=zone2 --rgw-zonegroup=multisite_zonegroup --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default
+<pre># radosgw-admin zone create --rgw-zone=zone2 --rgw-zonegroup=multizg --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default
 2022-12-23T09:28:04.140-0500 7f905d907500  0 failed reading obj info from .rgw.root:zone_info.c5dc9503-6c11-4851-91bd-f1d5ca61473c: (2) No such file or directory
 2022-12-23T09:28:04.140-0500 7f905d907500  0 WARNING: could not read zone params for zone id=c5dc9503-6c11-4851-91bd-f1d5ca61473c name=zone1
 {
@@ -831,8 +842,8 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
         "zonegroups": [
             {
                 "id": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
-                "name": "multisite_zonegroup",
-                "api_name": "multisite_zonegroup",
+                "name": "multizg",
+                "api_name": "multizg",
                 "is_master": "true",
                 "endpoints": [
                     "http://proxy01:8000"
@@ -949,7 +960,7 @@ full copy of the master zone is being synced with the secondary zone</p>
 <div class="content">
 <pre># radosgw-admin sync status
           realm e72107cb-4b3f-49b9-abb0-83c68a9967f9 (multisite)
-      zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 (multisite_zonegroup)
+      zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 (multizg)
            zone ec5a7187-95e1-4bf2-8519-208175c81487 (zone2)
    current time 2022-12-23T14:41:08Z
   metadata sync syncing
@@ -1009,7 +1020,7 @@ verbosity you can follow the steps of this
 <div class="content">
 <pre># radosgw-admin sync status
           realm 4818713d-4bdf-4ef7-ab7b-c9ceb8009bdb (multisite)
-      zonegroup ce0533e9-ebe7-45f4-8126-91e9f9253599 (multisite_zonegroup)
+      zonegroup ce0533e9-ebe7-45f4-8126-91e9f9253599 (multizg)
            zone d0492b20-abca-463a-8972-9eae824537fd (zone2)
    current time 2022-12-24T10:52:29Z
   metadata sync syncing
