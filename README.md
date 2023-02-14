@@ -5,6 +5,8 @@ Ceph Top-Gun Enablement.
 
 At Github, the HTML pages are rendered automatically using Github Actions.
 
+Access the rendered content at [https://likid0.github.io/ceph-top-gun-enablement/training/index.html](https://likid0.github.io/ceph-top-gun-enablement/training/index.html)
+
 To render the HTML pages on a local clone, use
 
 ```
