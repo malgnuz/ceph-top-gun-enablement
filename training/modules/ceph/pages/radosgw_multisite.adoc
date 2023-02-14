@@ -191,7 +191,7 @@ of the Hostnames.
 ====
 We can have one or mode REALMS,ZONEGROUPS or ZONES, if we don't specifiy
 them on the radosgw-admin command with --rgw-realm , --rgw-zonegroup= ,
---rgw-zone= , the radosgw-admin command will use the ones set as the defaul
+--rgw-zone= , the radosgw-admin command will use the ones set as the default
 using the --default flag like we did in the previous commands.
 ====
 
@@ -572,7 +572,7 @@ After a while if we run the same command we will probably see metadata and data 
 With this current configuration every data object will be synced
 bi-directionally on both sites, so we can upload objects to site1 or
 site2(Active/Active) and they 
-we will get replicated in async mode between sites, using the terme eventually
+we will get replicated in async mode between sites, using the term eventually
 consistent.
 
 [WARNING]
@@ -702,7 +702,7 @@ The sync policy supersedes the old zonegroup coarse configuration (sync_from*). 
 In the sync policy multiple groups that can contain lists of data-flow configurations can be defined, as well as lists of pipe configurations. The data-flow defines the flow of data between the different zones. It can define symmetrical data flow, in which multiple zones sync data from each other, and it can define directional data flow, in which the data moves in one way from one zone to another.
 
 This new feature opens up many configuration options for our multisite
-replication, in this lab we are just going to show one example, were we
+replication, in this lab we are just going to show one example, where we
 configure bucket replication granularity, and only configure replication
 between sites for bucket1. you can check more examples in the upstream https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples[DOC]
 
