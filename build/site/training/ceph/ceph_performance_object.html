@@ -324,13 +324,14 @@ the most popular benchmarking tools:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Cosbench</strong></p>
-</li>
-<li>
-<p><strong>Warp</strong></p>
+<p><strong>Cosbench</strong>
+*https://github.com/minio/warp[Warp]</p>
 </li>
 <li>
 <p><a href="https://sibench.io/index.html">Sibench</a>(New)</p>
+</li>
+<li>
+<p><a href="https://github.com/IBM/og">OG COS team</a></p>
 </li>
 </ul>
 </div>
@@ -443,6 +444,20 @@ Once we finish this testing we need to have a clear understanding of the maximum
 # cd 0.4.2.c4
 # chmod 755 *.sh</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Harald&#8217;s opinionated COSBench Container installation <a href="https://github.ibm.com/SEIPP/cosbench-podman" class="bare">https://github.ibm.com/SEIPP/cosbench-podman</a></p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -632,13 +647,102 @@ Instead, tell S3 client to use path style URLs, by suffixing bucket and object n
 <p>This doc is intended to provide a quick how-to when deploying warp for ODF or RGW deployments.</p>
 </div>
 <div class="sect3">
-<h4 id="_installing_warp"><a class="anchor" href="#_installing_warp"></a>3.2.1. Installing warp</h4>
+<h4 id="_installing_warp_in_rpm_for_rhel"><a class="anchor" href="#_installing_warp_in_rpm_for_rhel"></a>3.2.1. Installing warp in RPM for RHEL</h4>
+<div class="paragraph">
+<p>Install the RPM:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rpm -ivh https://github.com/minio/warp/releases/download/v0.6.6/warp_0.6.6_Linux_x86_64.rpm
+Retrieving https://github.com/minio/warp/releases/download/v0.6.6/warp_0.6.6_Linux_x86_64.rpm
+Verifying...                          ################################# [100%]
+Preparing...                          ################################# [100%]
+Updating / installing...
+   1:warp-0:0.6.6-1                   ################################# [100%]</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_basic_warp_example_from_cli"><a class="anchor" href="#_basic_warp_example_from_cli"></a>3.2.2. Basic Warp example from CLI</h4>
+<div class="paragraph">
+<p>Create a RGW/S3 user for Warp to use</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user create --uid='warp' --display-name='Warp User' --access-key='warp' --secret-key='warp'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Get the node were our RGW is running, or ideally our loadbalancer/Ingress VIP</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch ps | grep rgw
+rgw.objectgw.ceph-node02.jevgmm  ceph-node02  *:8080       running (10m)    10m ago  10m    54.7M        -  16.2.10-94.el8cp  34880245f74a  8dd1b3e0965a</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run from a single node a  mixed Object workload for 5 minutes, it will upload 2500 objects, and do
+concurrent get,put,stat and delete operations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">warp mixed --host=ceph-node02.example.com:8080 --access-key=warp --secret-key=warp --autoterm</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can use different parameters with the mixed workload command:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>--objects  Number of Objects</p>
+</li>
+<li>
+<p>--obj.size Size of the Objects</p>
+</li>
+<li>
+<p>--get-distrib</p>
+</li>
+<li>
+<p>--stat-distrib</p>
+</li>
+<li>
+<p>--put-distrib</p>
+</li>
+<li>
+<p>--delete-distrib parameters.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Check <a href="https://github.com/minio/warp">WARP</a> git for all configurable options</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Adding --autoterm parameter will enable automatic termination when results are considered stable. To detect a stable setup, warp continuously downsample the current data to 25 data points stretched over the current timeframe.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_installing_warp_in_odf"><a class="anchor" href="#_installing_warp_in_odf"></a>3.2.3. Installing warp in ODF</h4>
 <div class="paragraph">
 <p>Warp has two main modes of execution, as a client and a server. The client is effectively the workload generator, and is told the attributes of the workload to execute by the server. The server component may also run in multiple modes;
 workload orchestration with the client
 results analysis
-Results comparisons
-You need to install warp on a server that has the ‘oc’ binary and access to the target k8s/OCP cluster.</p>
+Results comparisons</p>
+</div>
+<div class="paragraph">
+<p>You need to install warp on a server that has the ‘oc’ binary and access to the target k8s/OCP cluster.</p>
 </div>
 <div class="paragraph">
 <p>Download warp using git or wget/unzip.</p>
@@ -661,7 +765,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_using_warp"><a class="anchor" href="#_using_warp"></a>3.2.2. Using Warp</h4>
+<h4 id="_using_warp"><a class="anchor" href="#_using_warp"></a>3.2.4. Using Warp</h4>
 <div class="paragraph">
 <p>Unlike tools like the benchmark operator, the warp clients are designed to persist. By default, each worker removes the objects it used from the target S3 instance as the final stage of the benchmark job (this can be changed with a --keep-data flag). Therefore when testing different workloads, you only need to deploy the clients once, and then submit different jobs to exercise different workload profiles.</p>
 </div>
@@ -670,7 +774,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_configuring_warp_for_odfnoobaa"><a class="anchor" href="#_configuring_warp_for_odfnoobaa"></a>3.2.3. Configuring warp for ODF/Noobaa</h4>
+<h4 id="_configuring_warp_for_odfnoobaa"><a class="anchor" href="#_configuring_warp_for_odfnoobaa"></a>3.2.5. Configuring warp for ODF/Noobaa</h4>
 <div class="paragraph">
 <p>The project folder provides sample yaml files for the client and server in the projects k8s directory.</p>
 </div>
@@ -771,7 +875,7 @@ You need to install warp on a server that has the ‘oc’ binary and access to 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_configuring_warp_for_odfrgw"><a class="anchor" href="#_configuring_warp_for_odfrgw"></a>3.2.4. Configuring warp for ODF/RGW</h4>
+<h4 id="_configuring_warp_for_odfrgw"><a class="anchor" href="#_configuring_warp_for_odfrgw"></a>3.2.6. Configuring warp for ODF/RGW</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -822,7 +926,7 @@ spec:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_analysis_file_handling"><a class="anchor" href="#_analysis_file_handling"></a>3.2.5. Analysis File Handling</h4>
+<h4 id="_analysis_file_handling"><a class="anchor" href="#_analysis_file_handling"></a>3.2.7. Analysis File Handling</h4>
 <div class="paragraph">
 <p>The most important component of any test run is the results file, and warp is no different. There are several ways to expose the detailed results.</p>
 </div>
@@ -867,7 +971,7 @@ e.g. curl localhost:7762/v1/operations -o my-testrun.zst</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_analysis"><a class="anchor" href="#_analysis"></a>3.2.6. Analysis</h4>
+<h4 id="_analysis"><a class="anchor" href="#_analysis"></a>3.2.8. Analysis</h4>
 <div class="paragraph">
 <p>The warp binary has an analyze mode, which takes as input the zst file from a test run and produces a summary of the run’s performance, and may optionally be used to generate a CSV file that covers each op request.</p>
 </div>
@@ -918,7 +1022,7 @@ Throughput, split into 56 x 1s:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_evaluation_of_warp"><a class="anchor" href="#_evaluation_of_warp"></a>3.2.7. Evaluation of Warp</h4>
+<h4 id="_evaluation_of_warp"><a class="anchor" href="#_evaluation_of_warp"></a>3.2.9. Evaluation of Warp</h4>
 <div class="paragraph">
 <p>The warp project should not be considered feature complete, and has gaps relating to our current workflows and expectations.</p>
 </div>

@@ -110,11 +110,16 @@ For example:
 
 ----
 # radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
-# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000
-# --rgw-zonegroup=multizg
+# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000  --rgw-zonegroup=multizg
 # radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
 # radosgw-admin period update --rgw-realm=multisite --commit
 ----
+
+[IMPORTANT]
+====
+If you have done the virtual host configuration from the RadosGW introduction
+module it needs to be removed, before you continue with this lab
+====
 
 And then skip to section 3.2
 ====
@@ -732,6 +737,14 @@ or secondary cluster, proxy01 is zone1, and proxy02 is zone2.
 We have now confirmed that metadata and data sync replication is working fine
 in our deployment.
 
+== RGW Multisite Sync Flows(Bucket Granularity) GA in 6.1
+
+With this current configuration every data object will be synced
+bi-directionally on both sites, so we can upload objects to site1 or
+site2(Active/Active) and they
+we will get replicated in async mode between sites, using the terme eventually
+consistent.
+
 There is a new feature in RGW multisite called Sync policies that gives greater
 flexibility on how we sync our data.
 
@@ -762,8 +775,7 @@ replication, in this lab we are just going to show one example, where we
 configure bucket replication granularity, and only configure replication
 between sites for bucket1. you can check more examples in the upstream https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples[DOC]
 
-We configure the zonegroup sync policy group that needs to be in place(flow +
-pipe) to be able to configure bucket sync policy
+We configure the zonegroup sync policy group that needs to be in place(flow + pipe) to be able to configure bucket sync policy
 
 [NOTE]
 ====

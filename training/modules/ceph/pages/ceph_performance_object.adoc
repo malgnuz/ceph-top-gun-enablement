@@ -28,8 +28,9 @@ In this section we will provide some guiadence of setting up and using two of
 the most popular benchmarking tools:
 
 * *Cosbench*
-* *Warp*
+*https://github.com/minio/warp[Warp]
 * https://sibench.io/index.html[Sibench](New)
+* https://github.com/IBM/og[OG COS team]
 
 Using an Object performance benchmarking tool like cosbench or warp to run
 different load tests that will help us get very valuable baseline data so we
@@ -91,6 +92,11 @@ https://github.com/intel-cloud/cosbench/blob/master/COSBenchUserGuide.pdf[Cosben
 # cd 0.4.2.c4
 # chmod 755 *.sh
 ----
+
+[TIP]
+====
+Harald's opinionated COSBench Container installation https://github.ibm.com/SEIPP/cosbench-podman
+====
 
 
 ==== Architecture:
@@ -219,11 +225,65 @@ The warp benchmarking tool is a cloud ready S3 benchmarking tool that can be use
 
 This doc is intended to provide a quick how-to when deploying warp for ODF or RGW deployments.
 
-==== Installing warp
+==== Installing warp in RPM for RHEL
+
+Install the RPM:
+
+----
+# rpm -ivh https://github.com/minio/warp/releases/download/v0.6.6/warp_0.6.6_Linux_x86_64.rpm
+Retrieving https://github.com/minio/warp/releases/download/v0.6.6/warp_0.6.6_Linux_x86_64.rpm
+Verifying...                          ################################# [100%]
+Preparing...                          ################################# [100%]
+Updating / installing...
+   1:warp-0:0.6.6-1                   ################################# [100%]
+----
+
+==== Basic Warp example from CLI
+
+Create a RGW/S3 user for Warp to use
+
+----
+# radosgw-admin user create --uid='warp' --display-name='Warp User' --access-key='warp' --secret-key='warp'
+----
+
+Get the node were our RGW is running, or ideally our loadbalancer/Ingress VIP
+
+----
+# ceph orch ps | grep rgw
+rgw.objectgw.ceph-node02.jevgmm  ceph-node02  *:8080       running (10m)    10m ago  10m    54.7M        -  16.2.10-94.el8cp  34880245f74a  8dd1b3e0965a
+----
+
+Run from a single node a  mixed Object workload for 5 minutes, it will upload 2500 objects, and do
+concurrent get,put,stat and delete operations.
+
+----
+warp mixed --host=ceph-node02.example.com:8080 --access-key=warp --secret-key=warp --autoterm
+----
+
+You can use different parameters with the mixed workload command:
+
+* --objects  Number of Objects
+* --obj.size Size of the Objects
+* --get-distrib
+* --stat-distrib
+* --put-distrib 
+* --delete-distrib parameters.
+
+Check https://github.com/minio/warp[WARP] git for all configurable options
+
+[NOTE]
+====
+Adding --autoterm parameter will enable automatic termination when results are considered stable. To detect a stable setup, warp continuously downsample the current data to 25 data points stretched over the current timeframe.
+====
+
+
+
+==== Installing warp in ODF
 Warp has two main modes of execution, as a client and a server. The client is effectively the workload generator, and is told the attributes of the workload to execute by the server. The server component may also run in multiple modes;
 workload orchestration with the client
 results analysis
 Results comparisons
+
 You need to install warp on a server that has the ‘oc’ binary and access to the target k8s/OCP cluster.
 
 Download warp using git or wget/unzip.
@@ -396,10 +456,6 @@ Throughput, split into 56 x 1s:
  * 50% Median: 385.5MiB/s, 12.05 obj/s (1s, starting 00:34:30 UTC)
  * Slowest: 39.7MiB/s, 1.24 obj/s (1s, starting 00:34:04 UTC)
 ----
-
-
-
-
 
 ==== Evaluation of Warp
 

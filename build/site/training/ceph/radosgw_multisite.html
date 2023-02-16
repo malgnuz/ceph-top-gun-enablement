@@ -457,18 +457,25 @@ you will need to add valid rgw endpoints to the zonegroup and zone.</p>
 <div class="listingblock">
 <div class="content">
 <pre># radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
-# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000
-# --rgw-zonegroup=multizg
+# radosgw-admin zonegroup modify --endpoints=http://proxy01:8000  --rgw-zonegroup=multizg
 # radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
 # radosgw-admin period update --rgw-realm=multisite --commit</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>And then skip to section 3.2</p>
-</div>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>If you have done the virtual host configuration from the RadosGW introduction
+module it needs to be removed, before you continue with this lab</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>And then skip to section 3.2</p>
+</div>
+</div>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1038,13 +1045,6 @@ verbosity you can follow the steps of this
                         data is caught up with source</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>With this current configuration every data object will be synced
-bi-directionally on both sites, so we can upload objects to site1 or
-site2(Active/Active) and they
-we will get replicated in async mode between sites, using the terme eventually
-consistent.</p>
-</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -1203,6 +1203,19 @@ or secondary cluster, proxy01 is zone1, and proxy02 is zone2.</p>
 <p>We have now confirmed that metadata and data sync replication is working fine
 in our deployment.</p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rgw_multisite_sync_flowsbucket_granularity_ga_in_6_1"><a class="anchor" href="#_rgw_multisite_sync_flowsbucket_granularity_ga_in_6_1"></a>4. RGW Multisite Sync Flows(Bucket Granularity) GA in 6.1</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With this current configuration every data object will be synced
+bi-directionally on both sites, so we can upload objects to site1 or
+site2(Active/Active) and they
+we will get replicated in async mode between sites, using the terme eventually
+consistent.</p>
+</div>
 <div class="paragraph">
 <p>There is a new feature in RGW multisite called Sync policies that gives greater
 flexibility on how we sync our data.</p>
@@ -1223,8 +1236,7 @@ configure bucket replication granularity, and only configure replication
 between sites for bucket1. you can check more examples in the upstream <a href="https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples">DOC</a></p>
 </div>
 <div class="paragraph">
-<p>We configure the zonegroup sync policy group that needs to be in place(flow<br>
-pipe) to be able to configure bucket sync policy</p>
+<p>We configure the zonegroup sync policy group that needs to be in place(flow + pipe) to be able to configure bucket sync policy</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1575,7 +1587,6 @@ upload: ../etc/hosts to s3://bucket2/file1
 upload: ../etc/hosts to s3://bucket2/file2
 # aws --endpoint  http://proxy02:8000 s3 ls s3://bucket2/
 2022-12-29 05:10:03       1330 file2</pre>
-</div>
 </div>
 </div>
 </div>
