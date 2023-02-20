@@ -309,7 +309,10 @@
 <h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A single zone configuration typically consists of one zone group containing one zone and one or more ceph-radosgw instances where you may load-balance gateway client requests between the instances. In a single zone configuration, typically multiple gateway instances point to a single Ceph storage cluster.</p>
+<p>A single zone configuration typically consists of one zone group containing one
+zone and one or more ceph-radosgw instances where you may load-balance gateway
+client requests between the instances. In a single zone configuration, typically
+multiple gateway instances point to a single Ceph storage cluster.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -317,13 +320,28 @@
 </div>
 </div>
 <div class="paragraph">
-<p>Ceph by its own design is synchronous. And so that means from a client&#8217;s level, write is not acknowledged until all replication copies are written into the cluster. So, for example, if you have a two-way replication cluster with your failure domain at the host level, and your client writes into the cluster, that client does not receive acknowledgment until that second copy has been written to any other node than where the primary write happened. So, you can very quickly see where this would become unusable at the multisite level, especially when the cluster spanned vast geographic distances to one another.</p>
+<p>Ceph by its own design is synchronous. And so that means from a client&#8217;s level,
+write is not acknowledged until all replication copies are written into the
+cluster. So, for example, if you have a two-way replication cluster with your
+failure domain at the host level, and your client writes into the cluster, that
+client does not receive acknowledgment until that second copy has been written
+to any other node than where the primary write happened. So, you can very
+quickly see where this would become unusable at the multisite level, especially
+when the cluster spanned vast geographic distances to one another.</p>
 </div>
 <div class="paragraph">
-<p>This is where asynchronous replication is used. This allows each cluster in the multisite to become eventually consistent with each other.</p>
+<p>This is where asynchronous replication is used. This allows each cluster in the
+multisite to become eventually consistent with each other.</p>
 </div>
 <div class="paragraph">
-<p>So, from the top down, we have realm, Zone Group and zones and I&#8217;m going to explain all those right now. So, a realm represents a globally unique namespace and represents the highest level of the Ceph multisite cluster. Each realm can then contain either one or multiple zone groups and multiple zones. So next we have zone groups. These used to be called regions and they&#8217;re essentially made to define one or more multiple geographic areas. So next we have zones. These are the lowest level of the Ceph multisite configuration and they&#8217;re represented by one or more object gateways underneath one single Ceph cluster.</p>
+<p>So, from the top down, we have realm, Zone Group and zones and I&#8217;m going to
+explain all those right now. So, a realm represents a globally unique namespace
+and represents the highest level of the Ceph multisite cluster. Each realm can
+then contain either one or multiple zone groups and multiple zones. So next we
+have zone groups. These used to be called regions and they&#8217;re essentially made
+to define one or more multiple geographic areas. So next we have zones. These
+are the lowest level of the Ceph multisite configuration and they&#8217;re represented
+by one or more object gateways underneath one single Ceph cluster.</p>
 </div>
 </div>
 </div>
@@ -394,7 +412,13 @@ as creating users must occur in the master zone.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>A more advanced configuration consists of one zone group and multiple zones, each zone with one or more ceph-radosgw instances. Each zone is backed by its own Ceph Storage Cluster. Multiple zones in a zone group provides disaster recovery for the zone group should one of the zones experience a significant failure. In Kraken, each zone is active and may receive write operations. In addition to disaster recovery, multiple active zones may also serve as a foundation for content delivery networks.</p>
+<p>A more advanced configuration consists of one zone group and multiple zones,
+each zone with one or more ceph-radosgw instances. Each zone is backed by its
+own Ceph Storage Cluster. Multiple zones in a zone group provides disaster
+recovery for the zone group should one of the zones experience a significant
+failure. In Kraken, each zone is active and may receive write operations. In
+addition to disaster recovery, multiple active zones may also serve as a
+foundation for content delivery networks.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -404,7 +428,10 @@ as creating users must occur in the master zone.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Formerly called ‘regions’, Ceph Object Gateway can also support multiple zone groups, each zone group with one or more zones. Objects stored to zones in one zone group within the same realm as another zone group will share a global object namespace, ensuring unique object IDs across zone groups and zones.</p>
+<p>Formerly called ‘regions’, Ceph Object Gateway can also support multiple zone
+groups, each zone group with one or more zones. Objects stored to zones in one
+zone group within the same realm as another zone group will share a global
+object namespace, ensuring unique object IDs across zone groups and zones.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -414,7 +441,10 @@ as creating users must occur in the master zone.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>In Kraken, the Ceph Object Gateway supports the notion of realms, which can be a single zone group or multiple zone groups and a globally unique namespace for the realm. Multiple realms provide the ability to support numerous configurations and namespaces.</p>
+<p>In Kraken, the Ceph Object Gateway supports the notion of realms, which can be a
+single zone group or multiple zone groups and a globally unique namespace for
+the realm. Multiple realms provide the ability to support numerous
+configurations and namespaces.</p>
 </div>
 </div>
 </div>
@@ -422,12 +452,12 @@ as creating users must occur in the master zone.</p>
 <h2 id="_multisite_lab"><a class="anchor" href="#_multisite_lab"></a>3. Multisite Lab.</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this lab we are going to deploy an advanced configuration that consists
-of a single realm with one zone group and two zones, each zone with two Ceph RGW instances. Each
-zone is backed by its own Ceph Storage Cluster. Multiple zones in a zone group
-provides disaster recovery for the zone group should one of the zones
-experience a significant failure. Each zone is active and may receive write
-operations.</p>
+<p>In this lab we are going to deploy an advanced configuration that consists of a
+single realm with one zone group and two zones, each zone with two Ceph RGW
+instances. Each zone is backed by its own Ceph Storage Cluster. Multiple zones
+in a zone group provides disaster recovery for the zone group should one of the
+zones experience a significant failure. Each zone is active and may receive
+write operations.</p>
 </div>
 <div class="paragraph">
 <p>The next diagram has a layout of RGW multisite in our Lab.</p>
@@ -611,9 +641,9 @@ of the Hostnames.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>We can have one or mode REALMS,ZONEGROUPS or ZONES, if we don&#8217;t specifiy
+<p>We can have one or mode REALMS,ZONEGROUPS or ZONES, if we don&#8217;t specify
 them on the radosgw-admin command with --rgw-realm , --rgw-zonegroup= ,
---rgw-zone= , the radosgw-admin command will use the ones set as the defaul
+--rgw-zone= , the radosgw-admin command will use the ones set as the default
 using the --default flag like we did in the previous commands.</p>
 </div>
 </td>
@@ -1045,6 +1075,13 @@ verbosity you can follow the steps of this
                         data is caught up with source</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>With this current configuration every data object will be synced
+bi-directionally on both sites, so we can upload objects to site1 or
+site2(Active/Active) and they
+we will get replicated in async mode between sites, using the term eventually
+consistent.</p>
+</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -1069,7 +1106,13 @@ of the zones in the zonegroup</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>By default, the objects are not verified again after the synchronization of an object was successful. To enable that, you can set rgw_sync_obj_etag_verify to true. After enabling the optional objects that will be synchronized going forward, an additional MD5 checksum will verify that it is computed on the source and the destination. This is to ensure the integrity of the objects fetched from a remote server over HTTP including multisite sync. This option can decrease the performance of your RGW as more computation is needed.</p>
+<p>By default, the objects are not verified again after the synchronization of an
+object was successful. To enable that, you can set rgw_sync_obj_etag_verify to
+true. After enabling the optional objects that will be synchronized going
+forward, an additional MD5 checksum will verify that it is computed on the
+source and the destination. This is to ensure the integrity of the objects
+fetched from a remote server over HTTP including multisite sync. This option can
+decrease the performance of your RGW as more computation is needed.</p>
 </div>
 </td>
 </tr>
@@ -1142,7 +1185,11 @@ buckets and their data between sites.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>For multi-site only, you can check out the metadata log (mdlog), the bucket index log (bilog) and the data log (datalog). You can list them and also trim them which is not needed in most cases as rgw_sync_log_trim_interval is set to 20 minutes as default. You shouldn’t have to trim it at any time as it could cause side effects otherwise.</p>
+<p>For multi-site only, you can check out the metadata log (mdlog), the bucket
+index log (bilog) and the data log (datalog). You can list them and also trim
+them which is not needed in most cases as rgw_sync_log_trim_interval is set to
+20 minutes as default. You shouldn’t have to trim it at any time as it could
+cause side effects otherwise.</p>
 </div>
 </td>
 </tr>
@@ -1221,17 +1268,33 @@ consistent.</p>
 flexibility on how we sync our data.</p>
 </div>
 <div class="paragraph">
-<p>Multisite bucket-granularity sync policy provides fine grained control of data movement between buckets in different zones. It extends the zone sync mechanism. Previously buckets were being treated symmetrically, that is – each (data) zone holds a mirror of that bucket that should be the same as all the other zones. Whereas leveraging the bucket-granularity sync policy is possible for buckets to diverge, and a bucket can pull data from other buckets (ones that don’t share its name or its ID) in different zone. The sync process was assuming therefore that the bucket sync source and the bucket sync destination were always referring to the same bucket, now that is not the case anymore.</p>
+<p>Multisite bucket-granularity sync policy provides fine grained control of data
+movement between buckets in different zones. It extends the zone sync
+mechanism. Previously buckets were being treated symmetrically, that is – each
+(data) zone holds a mirror of that bucket that should be the same as all the
+other zones. Whereas leveraging the bucket-granularity sync policy is possible
+for buckets to diverge, and a bucket can pull data from other buckets (ones that
+don’t share its name or its ID) in different zone. The sync process was assuming
+therefore that the bucket sync source and the bucket sync destination were
+always referring to the same bucket, now that is not the case anymore.</p>
 </div>
 <div class="paragraph">
-<p>The sync policy supersedes the old zonegroup coarse configuration (sync_from*). The sync policy can be configured at the zonegroup level (and if it is configured it replaces the old style config), but it can also be configured at the bucket level.</p>
+<p>The sync policy supersedes the old zonegroup coarse configuration
+(sync_from*). The sync policy can be configured at the zonegroup level (and if
+it is configured it replaces the old style config), but it can also be
+configured at the bucket level.</p>
 </div>
 <div class="paragraph">
-<p>In the sync policy multiple groups that can contain lists of data-flow configurations can be defined, as well as lists of pipe configurations. The data-flow defines the flow of data between the different zones. It can define symmetrical data flow, in which multiple zones sync data from each other, and it can define directional data flow, in which the data moves in one way from one zone to another.</p>
+<p>In the sync policy multiple groups that can contain lists of data-flow
+configurations can be defined, as well as lists of pipe configurations. The
+data-flow defines the flow of data between the different zones. It can define
+symmetrical data flow, in which multiple zones sync data from each other, and it
+can define directional data flow, in which the data moves in one way from one
+zone to another.</p>
 </div>
 <div class="paragraph">
 <p>This new feature opens up many configuration options for our multisite
-replication, in this lab we are just going to show one example, were we
+replication, in this lab we are just going to show one example, where we
 configure bucket replication granularity, and only configure replication
 between sites for bucket1. you can check more examples in the upstream <a href="https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples">DOC</a></p>
 </div>
@@ -1246,7 +1309,8 @@ between sites for bucket1. you can check more examples in the upstream <a href="
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Any changes to the zonegroup policy needs to be applied on the zonegroup master zone, and require period update and commit.</p>
+<p>Any changes to the zonegroup policy needs to be applied on the zonegroup master
+zone, and require period update and commit.</p>
 </div>
 </td>
 </tr>
@@ -1314,7 +1378,7 @@ for zones: zone1,zone2</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Finally we set on the zonegroup sync policy a pipe were we allow replication of
+<p>Finally we set on the zonegroup sync policy a pipe where we allow replication of
 all buckets from all zones in the group</p>
 </div>
 <div class="listingblock">
@@ -1531,7 +1595,7 @@ is configured as source and destination</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Bucket policy modifications don&#8217;t need a period update, they are automaticly
+<p>Bucket policy modifications don&#8217;t need a period update, they are automatically
 detected, so let&#8217;s go ahead and test if bucket replication is working for
 bucket1:</p>
 </div>
