@@ -106,6 +106,14 @@ bench  type write io_size 4096 io_threads 4 bytes 1073741824 pattern random
 elapsed: 56   ops: 262144   ops/sec: 4667.5   bytes/sec: 18 MiB/s
 ----
 
+[TIP]
+====
+Don't forget about the iotop rbd feature:
+----
+# rbd perf image iotop -p testbench
+----
+====
+
 == When Bechmarking in OCP, Avoiding OCP range limits, limits and quotas
 
 IMPORTANT: Before running any performance test, If using OCP as a client, make sure the namespace where your fio workloads are running does not have limits or quotas.
