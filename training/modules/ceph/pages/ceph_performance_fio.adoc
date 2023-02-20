@@ -20,12 +20,15 @@ In this section we will be providing very high level guidelines on how to conduc
 
 == Tools
 
-* If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the https://github.com/cloud-bulldozer/benchmark-operator[BenchMark-Operator]
-** It has all the tools you will need to baseline and benchmark your Ceph Cluster: `Iperf3, FIO, Smallfile`
-* If you don't have OCP at your disposal:
-** https://github.com/ceph/cbt[CBT] is a great framework for benchmarking Ceph.
-*** Nice Repo from Karan helping out setting up https://github.com/ksingh7/ceph-cbt[CBT]
-** Another tool that works fine and that can aggregate FIO data results is
+* *OCP/ODF*
+** If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the https://github.com/cloud-bulldozer/benchmark-operator[BenchMark-Operator]
+*** It has all the tools you will need to baseline and benchmark your Ceph Cluster: `Iperf3, FIO, Smallfile`
+** There is also a nice tool for K8s/OCP cluster benchmarking that is very easy to get started with: https://github.com/manojtpillai/kubuculum
+* *Ceph StandAlone*
+** If you don't have OCP at your disposal:
+*** https://github.com/ceph/cbt[CBT] is a great framework for benchmarking Ceph.
+**** Nice Repo from Karan helping out setting up https://github.com/ksingh7/ceph-cbt[CBT]
+*** Another tool that works fine and that can aggregate FIO data results is
 https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md[pbench-fio]
 
 == Use RadosBench only for Smoketests.
@@ -37,7 +40,73 @@ https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scri
 * But it’s great to verify whether your cluster is operating at more-or-less expected performance, or what
 performance expectations you should have
 
-== Avoiding OCP range limits, limits and quotas
+*Radosbench* Example:
+
+Ceph includes the rados bench command to do performance benchmarking on a RADOS storage cluster. The command will execute a write test and two types of read tests. The --no-cleanup option is important to use when testing both read and write performance. By default the rados bench command will delete the objects it has written to the storage pool. Leaving behind these objects allows the two read tests to measure sequential and random read performance.
+
+----
+# ceph osd pool create testbench 64 64
+# rados bench -p testbench 180 write --no-cleanup
+Maintaining 16 concurrent writes of 4194304 bytes to objects of size 4194304 for up to 180 seconds or 0 objects
+Object prefix: benchmark_data_ceph-node01_28934
+  sec Cur ops   started  finished  avg MB/s  cur MB/s last lat(s)  avg lat(s)
+    0      16        16         0         0         0           -           0
+    1      16        62        46   183.773       184    0.155345     0.29248
+    2      16       118       102   203.836       224    0.300808    0.290263
+    3      16       176       160   213.209       232    0.153399    0.281029
+    4      16       238       222   221.897       248    0.458016    0.278409
+    5      16       301       285    227.91       252    0.365664     0.27384
+    6      16       362       346   230.586       244    0.168794    0.271074
+    7      16       422       406   231.918       240    0.278761    0.268571
+    8      16       491       475   237.421       276    0.503654    0.263729
+    9      16       555       539   239.481       256    0.160842    0.260208
+   10      16       622       606   242.328       268     0.22003     0.25984
+   11      16       688       672   244.242       264    0.194828    0.258116
+   12      16       747       731   243.552       236    0.288289    0.259725
+   13      16       811       795   244.507       256    0.201756    0.258559
+   14      16       874       858    245.04       252    0.227478    0.258762
+   15      16       935       919   244.968       244    0.130362       0.259
+   16      16       994       978   244.406       236    0.341293    0.259149
+   17      16      1053      1037   243.895       236    0.101433    0.259835
+   18      16      1107      1091   242.344       216    0.246856    0.261484
+   19      16      1157      1141   240.114       200    0.272116    0.264294
+2023-02-20T11:48:57.112118-0500 min lat: 0.0697342 max lat: 0.90435 avg lat: 0.265594
+
+# rados bench -p testbench 180 seq
+# rados bench -p testbench 180 rand
+# rados -p testbench cleanup
+----
+
+== rbd bench
+
+You can also do simple `block/RBD` benchmarking with the help of the `rbd
+bench` command
+
+----
+rbd bench rbd {{ pool_name }}/{{ rbd_image_name }} --io-type {{ io_type }} --io-size {{ io_size }} --io-threads {{ io_threads }} --io-total {{ io_total }} --io-pattern {{ io_pattern }} --rw-mix-read {{ rw_mix_read }}'
+----
+
+
+Example:
+
+----
+
+# rbd create image1 --size 5G -p testbench
+# rbd bench testbench/image1 --io-type write  --io-size 4096 --io-threads 4  --io-pattern rand
+bench  type write io_size 4096 io_threads 4 bytes 1073741824 pattern random
+  SEC       OPS   OPS/SEC   BYTES/SEC
+    1      3040   3001.94    12 MiB/s
+    2      3088   1490.82   5.8 MiB/s
+    3      3132   1045.32   4.1 MiB/s
+    4      3448   861.482   3.4 MiB/s
+    5      7048   1309.79   5.1 MiB/s
+...
+   54    252212   4801.87    19 MiB/s
+   55    257208   4873.89    19 MiB/s
+elapsed: 56   ops: 262144   ops/sec: 4667.5   bytes/sec: 18 MiB/s
+----
+
+== When Bechmarking in OCP, Avoiding OCP range limits, limits and quotas
 
 IMPORTANT: Before running any performance test, If using OCP as a client, make sure the namespace where your fio workloads are running does not have limits or quotas.
 

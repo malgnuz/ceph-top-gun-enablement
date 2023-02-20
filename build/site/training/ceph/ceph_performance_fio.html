@@ -319,6 +319,10 @@
 <div class="ulist">
 <ul>
 <li>
+<p><strong>OCP/ODF</strong></p>
+<div class="ulist">
+<ul>
+<li>
 <p>If you have a K8s/OCP cluster at your disposal for any kind of Block or File IO testing, we would recommend using the <a href="https://github.com/cloud-bulldozer/benchmark-operator">BenchMark-Operator</a></p>
 <div class="ulist">
 <ul>
@@ -328,6 +332,16 @@
 </ul>
 </div>
 </li>
+<li>
+<p>There is also a nice tool for K8s/OCP cluster benchmarking that is very easy to get started with: <a href="https://github.com/manojtpillai/kubuculum" class="bare">https://github.com/manojtpillai/kubuculum</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Ceph StandAlone</strong></p>
+<div class="ulist">
+<ul>
 <li>
 <p>If you don&#8217;t have OCP at your disposal:</p>
 <div class="ulist">
@@ -345,6 +359,9 @@
 <li>
 <p>Another tool that works fine and that can aggregate FIO data results is
 <a href="https://github.com/distributed-system-analysis/pbench/blob/main/agent/bench-scripts/pbench-fio.md">pbench-fio</a></p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -376,10 +393,84 @@ performance expectations you should have</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p><strong>Radosbench</strong> Example:</p>
+</div>
+<div class="paragraph">
+<p>Ceph includes the rados bench command to do performance benchmarking on a RADOS storage cluster. The command will execute a write test and two types of read tests. The --no-cleanup option is important to use when testing both read and write performance. By default the rados bench command will delete the objects it has written to the storage pool. Leaving behind these objects allows the two read tests to measure sequential and random read performance.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create testbench 64 64
+# rados bench -p testbench 180 write --no-cleanup
+Maintaining 16 concurrent writes of 4194304 bytes to objects of size 4194304 for up to 180 seconds or 0 objects
+Object prefix: benchmark_data_ceph-node01_28934
+  sec Cur ops   started  finished  avg MB/s  cur MB/s last lat(s)  avg lat(s)
+    0      16        16         0         0         0           -           0
+    1      16        62        46   183.773       184    0.155345     0.29248
+    2      16       118       102   203.836       224    0.300808    0.290263
+    3      16       176       160   213.209       232    0.153399    0.281029
+    4      16       238       222   221.897       248    0.458016    0.278409
+    5      16       301       285    227.91       252    0.365664     0.27384
+    6      16       362       346   230.586       244    0.168794    0.271074
+    7      16       422       406   231.918       240    0.278761    0.268571
+    8      16       491       475   237.421       276    0.503654    0.263729
+    9      16       555       539   239.481       256    0.160842    0.260208
+   10      16       622       606   242.328       268     0.22003     0.25984
+   11      16       688       672   244.242       264    0.194828    0.258116
+   12      16       747       731   243.552       236    0.288289    0.259725
+   13      16       811       795   244.507       256    0.201756    0.258559
+   14      16       874       858    245.04       252    0.227478    0.258762
+   15      16       935       919   244.968       244    0.130362       0.259
+   16      16       994       978   244.406       236    0.341293    0.259149
+   17      16      1053      1037   243.895       236    0.101433    0.259835
+   18      16      1107      1091   242.344       216    0.246856    0.261484
+   19      16      1157      1141   240.114       200    0.272116    0.264294
+2023-02-20T11:48:57.112118-0500 min lat: 0.0697342 max lat: 0.90435 avg lat: 0.265594
+
+# rados bench -p testbench 180 seq
+# rados bench -p testbench 180 rand
+# rados -p testbench cleanup</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_avoiding_ocp_range_limits_limits_and_quotas"></a>4. Avoiding OCP range limits, limits and quotas</h2>
+<h2 id="_rbd_bench"><a class="anchor" href="#_rbd_bench"></a>4. rbd bench</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can also do simple <code>block/RBD</code> benchmarking with the help of the <code>rbd
+bench</code> command</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">rbd bench rbd {{ pool_name }}/{{ rbd_image_name }} --io-type {{ io_type }} --io-size {{ io_size }} --io-threads {{ io_threads }} --io-total {{ io_total }} --io-pattern {{ io_pattern }} --rw-mix-read {{ rw_mix_read }}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd create image1 --size 5G -p testbench
+# rbd bench testbench/image1 --io-type write  --io-size 4096 --io-threads 4  --io-pattern rand
+bench  type write io_size 4096 io_threads 4 bytes 1073741824 pattern random
+  SEC       OPS   OPS/SEC   BYTES/SEC
+    1      3040   3001.94    12 MiB/s
+    2      3088   1490.82   5.8 MiB/s
+    3      3132   1045.32   4.1 MiB/s
+    4      3448   861.482   3.4 MiB/s
+    5      7048   1309.79   5.1 MiB/s
+...
+   54    252212   4801.87    19 MiB/s
+   55    257208   4873.89    19 MiB/s
+elapsed: 56   ops: 262144   ops/sec: 4667.5   bytes/sec: 18 MiB/s</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_when_bechmarking_in_ocp_avoiding_ocp_range_limits_limits_and_quotas"><a class="anchor" href="#_when_bechmarking_in_ocp_avoiding_ocp_range_limits_limits_and_quotas"></a>5. When Bechmarking in OCP, Avoiding OCP range limits, limits and quotas</h2>
 <div class="sectionbody">
 <div class="admonitionblock important">
 <table>
@@ -412,7 +503,7 @@ Before running any performance test, If using OCP as a client, make sure the nam
 </div>
 </div>
 <div class="sect1">
-<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>5. Client/Load Generators resources</h2>
+<h2 id="_clientload_generators_resources"><a class="anchor" href="#_clientload_generators_resources"></a>6. Client/Load Generators resources</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Having Enough client resources to saturate the Ceph cluster is pivotal to
@@ -423,7 +514,7 @@ to know the limits of your ceph cluster.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>6. Always Drop Caches between tests</h2>
+<h2 id="_always_drop_caches_between_tests"><a class="anchor" href="#_always_drop_caches_between_tests"></a>7. Always Drop Caches between tests</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Almost all of the benchmarking suites have a hook that you can execute before
@@ -433,7 +524,7 @@ every test.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>7. Run the tests with a considerable dataset size</h2>
+<h2 id="_run_the_tests_with_a_considerable_dataset_size"><a class="anchor" href="#_run_the_tests_with_a_considerable_dataset_size"></a>8. Run the tests with a considerable dataset size</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When running tests, consider creating a dataset that is bigger than the RAM
@@ -447,7 +538,7 @@ skewing our results and ending up with a false report of higher performance.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>8. Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
+<h2 id="_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"><a class="anchor" href="#_consider_running_the_test_with_an_almost_empty_cluster_but_also_with_5060_used_capacity"></a>9. Consider running the test with an almost empty cluster but also with 50%/60% used capacity</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It&#8217;s great to have the numbers IOPS for an empty cluster, but it&#8217;s
@@ -458,7 +549,7 @@ life scenario.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>9. Run the same test several times</h2>
+<h2 id="_run_the_same_test_several_times"><a class="anchor" href="#_run_the_same_test_several_times"></a>10. Run the same test several times</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Each test run needs to be run a minimum of three times, using
@@ -494,7 +585,7 @@ outliers in testing.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>10. Configure a ramp-up time</h2>
+<h2 id="_configure_a_ramp_up_time"><a class="anchor" href="#_configure_a_ramp_up_time"></a>11. Configure a ramp-up time</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Before each run, it&#8217;s recommended to have a ramp-up time so every test finds
@@ -503,7 +594,7 @@ the caches at the same point, providing fair results in all the test runs.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>11. Use the same ceph configuration that you will have in production</h2>
+<h2 id="_use_the_same_ceph_configuration_that_you_will_have_in_production"><a class="anchor" href="#_use_the_same_ceph_configuration_that_you_will_have_in_production"></a>12. Use the same ceph configuration that you will have in production</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When running benchmarks, we are always on a quest to achieve more IOPS, and more Throughput in that ques we can be tempted to modify the ceph configuration in certain ways that will allow increasing the performance, IOPS count, total throughput, but if the configuration we are using during the benchmark is not production friendly we won’t have valuable data in our hands, and example:</p>
@@ -524,7 +615,7 @@ the caches at the same point, providing fair results in all the test runs.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>12. Looking for the best fio workload</h2>
+<h2 id="_looking_for_the_best_fio_workload"><a class="anchor" href="#_looking_for_the_best_fio_workload"></a>13. Looking for the best fio workload</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>First, we must find the best fio workload and ensure all performance tests are executed with the same workload to compare apples with apples.</p>

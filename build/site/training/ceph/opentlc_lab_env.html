@@ -521,12 +521,40 @@ run a playbook to get the prereqs for the labs in place.</p>
 </div>
 <div class="paragraph">
 <p>Clone the cephadm automation repo. You will need to authenticate with your key to get access,
-in this example, we use a private key to authenticate against GitHub.</p>
+in this example, we use a private key in the root of the workstation called
+<code>key.rsa</code> to authenticate against IBMs GitHub.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre>GIT_SSH_COMMAND="ssh -i key.rsa" git clone git@github.ibm.com:dparkes/cephadmdeploy.git</pre>
 </div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You will need to authenticate against github.ibm.com to be able to download the
+git repo, you could for example re-create a ssh keypair for the root user in the workstation node
+and add it to your github account for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ssh-keygen -t rsa -f /root/key.rsa -N ''
+Generating public/private rsa key pair.
+Your identification has been saved in gitkey.
+Your public key has been saved in key.rsa</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add the public <code>/root/key.rsa.pub</code> to your github account &#8594; settings &#8594; ssh and GPG keys</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>We then run the client/workstation playbook.</p>
@@ -629,16 +657,15 @@ DNS name resolution, etc</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>cat &lt;&lt; EOF &gt; cephadmdeploy/ansible-cephadm-deploy/group_vars/all.yaml
+<pre># vi cephadmdeploy/ansible-cephadm-deploy/group_vars/all.yaml
 update_cluster_os: true
 dedicated_observability: true
-reg_password: 'REG_PASS'
-reg_username: email@email.com
-rhcs_subscription_username: email@redhat.com
-rhcs_subscription_password: 'SUB_PASS'
+reg_password: 'REG_PASS'    &lt;--------- MODIFY
+reg_username: email@email.com    &lt;--------- MODIFY
+rhcs_subscription_username: email@redhat.com  &lt;--------- MODIFY
+rhcs_subscription_password: 'SUB_PASS'        &lt;--------- MODIFY
 hosts_add_ansible_managed_hosts: false
-dnsmasq_upstream_servers_ip: 150.239.16.12
-EOF</pre>
+dnsmasq_upstream_servers_ip: 150.239.16.12</pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -663,6 +690,25 @@ to the latest RHEL 8 minor version.</p>
 <div class="content">
 <pre># ansible-playbook -i /root/cluster1 cephadmdeploy/ansible-cephadm-deploy/deploy-cephadm.yaml</pre>
 </div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Once the playbook for cluster 1 finishes, you need to run the same command but the inventory of cluster 2</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># ansible-playbook -i /root/cluster2 cephadmdeploy/ansible-cephadm-deploy/deploy-cephadm.yaml</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Once the playbook finishes, you are ready to start the ceph deployment. If

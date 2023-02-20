@@ -91,11 +91,29 @@ root,  we are going to
 run a playbook to get the prereqs for the labs in place.
 
 Clone the cephadm automation repo. You will need to authenticate with your key to get access,
-in this example, we use a private key to authenticate against GitHub.
+in this example, we use a private key in the root of the workstation called
+`key.rsa` to authenticate against IBMs GitHub.
 
 ----
 GIT_SSH_COMMAND="ssh -i key.rsa" git clone git@github.ibm.com:dparkes/cephadmdeploy.git
 ----
+
+[IMPORTANT]
+====
+You will need to authenticate against github.ibm.com to be able to download the
+git repo, you could for example re-create a ssh keypair for the root user in the workstation node
+and add it to your github account for example:
+
+----
+ssh-keygen -t rsa -f /root/key.rsa -N ''
+Generating public/private rsa key pair.
+Your identification has been saved in gitkey.
+Your public key has been saved in key.rsa
+----
+
+Add the public `/root/key.rsa.pub` to your github account -> settings -> ssh and GPG keys
+====
+
 
 We then run the client/workstation playbook.
 
@@ -175,16 +193,15 @@ DNS name resolution, etc
 For that first, we need to configure a group_vars file
 
 ----
-cat << EOF > cephadmdeploy/ansible-cephadm-deploy/group_vars/all.yaml
+# vi cephadmdeploy/ansible-cephadm-deploy/group_vars/all.yaml
 update_cluster_os: true
 dedicated_observability: true
-reg_password: 'REG_PASS'
-reg_username: email@email.com
-rhcs_subscription_username: email@redhat.com
-rhcs_subscription_password: 'SUB_PASS'
+reg_password: 'REG_PASS'    <--------- MODIFY
+reg_username: email@email.com    <--------- MODIFY 
+rhcs_subscription_username: email@redhat.com  <--------- MODIFY
+rhcs_subscription_password: 'SUB_PASS'        <--------- MODIFY
 hosts_add_ansible_managed_hosts: false
 dnsmasq_upstream_servers_ip: 150.239.16.12
-EOF
 ----
 
 [NOTE]
@@ -198,6 +215,17 @@ For each cluster, we run the following:
 ----
 # ansible-playbook -i /root/cluster1 cephadmdeploy/ansible-cephadm-deploy/deploy-cephadm.yaml
 ----
+
+[IMPORTANT]
+====
+
+Once the playbook for cluster 1 finishes, you need to run the same command but the inventory of cluster 2
+
+----
+# ansible-playbook -i /root/cluster2 cephadmdeploy/ansible-cephadm-deploy/deploy-cephadm.yaml
+----
+
+====
 
 Once the playbook finishes, you are ready to start the ceph deployment. If
 needed several scripts have been created in the `/root` filesystem of our admin host
