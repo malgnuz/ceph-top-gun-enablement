@@ -15,10 +15,21 @@
 :toclevels: 4
 
 
-[WARN]
+[IMPORTANT]
 ====
 Before performing this hands-on lab you need to go through the LAB env
 preparation steps described in then xref:opentlc_lab_env.adoc[OpenTLC LAB] section 
+
+The automation we run in the previous section takes care of
+registring/subscribing the
+Ceph nodes to RH CDN and enabling the following repos:
+
+----
+subscription-manager repos --disable=*
+subscription-manager repos --enable=rhel-8-for-x86_64-baseos-rpms
+subscription-manager repos --enable=rhel-8-for-x86_64-appstream-rpms
+subscription-manager repos --enable=rhceph-5-tools-for-rhel-8-x86_64-rpms
+----
 ====
 
 
@@ -39,7 +50,9 @@ Prerequisites
 * Root-level access to all nodes in the storage cluster
 
 [IMPORTANT]
+====
 Run the `cephadm-preflight` playbook before you bootstrap the initial host.
+====
 
 If needed edit the inventory file at `/usr/share/cephadm-ansible/inventory`
 leaving: 
@@ -56,11 +69,12 @@ proxy01.example.com
 ceph-node01.example.com
 -----
 
-NOTE: In this inventory file we are using additional groups that are not needed
+[IMPORTANT]
+====
+In this inventory file we are using additional groups that are not needed
 by the preflight cephadm playbook like `[mgmt]` and `[client]` so you can
 remove them.
-
-
+====
 
 [source,sh]
 -----
@@ -108,12 +122,12 @@ The `cephadm` utility performs the following tasks during the bootstrap process:
 
 * Running the bootstrapping process establishes the default user name and password for the initial login to the dashboard. Be sure to change the password after you log in.
 
-Prerequisites
-* An IP address for the first Ceph Monitor container, usually the IP address for the first node in the storage
+* *Prerequisites*
+** An IP address for the first Ceph Monitor container, usually the IP address for the first node in the storage
 cluster
-* Root access to all nodes
-* Login access to `registry.redhat.io`
-* A minimum of 10 GB of free space for `/var/lib/containers/`
+** Root access to all nodes
+** Login access to `registry.redhat.io`
+** A minimum of 10 GB of free space for `/var/lib/containers/`
 
 [NOTE]
 ====
@@ -439,12 +453,6 @@ Scheduled mon update...
 [root@ceph-node01 ~]# ceph -s | grep mon
     mon: 3 daemons, quorum ceph-node01,ceph-node02,ceph-node03 (age 15s)
 ----
-
-[TIP]
-====
-If you get the warning `` run the command `# podman rmi --all` on the
-`ceph-node01` to remove unused podman container images
-====
 
 == Add OSDs
 
