@@ -28,6 +28,7 @@ Perform the following operations:
 Perform the following operations in pool `newrbd`:
 
 * Create a 256MiB RBD image `testimage`
+* Check used space( # rbd -p rbdpool du newrbd/testimage )
 * Format the RBD Image with `ext4`
 * Copy the content of `/var/log` into the RBD Image in a directory called `batch1`
 * Create a snapshot `snap1` for the RBD Image
@@ -44,19 +45,10 @@ Perform the following operations in pool `newrbd`:
 
 == Clone
 
-Perform the following operations:
+Perform the following operations, check space consuption on every step you take:
 
-* Create a clone of `newrbd/batch1` in pool `rbd` and name it `clone1`
-* Make the clone an independent RBD Image
-* Create a clone of `newrbd/clone1` in pool `newrbd` and name it `clone2`
-* Add a file `batch3/testfile` containing 10 times the string "This is a test\n" to `clone2`
-
-== Proof of success
-
-* Proof that `batch1` and `target1` have the same content using the `rbd` command combined with Linux commands
-* Proof that `clone1` and `clone2` have a different content using the `rbd` command combined with Linux commands
-* Proof that `clone1` is no longer linked to `batch1`
-* How much used capacity is consumed in `batch1`, `target1`, `clone1` and `clone2`
+* Create a clone of `newrbd/testimage@snap2` in pool `rbdpool` and name it `clone1`
+* Make the clone rbdpool/clone1 an independent RBD Image
 
 == Cleanup
 
