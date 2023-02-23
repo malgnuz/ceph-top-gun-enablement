@@ -26,7 +26,6 @@ Access to data is coordinated through the cluster of MDS, which serve as authori
 image::cephfs-architecture.svg[cephfs,740,580]
 
 
-
 == MDS the metadata server
 
 The Metadata Server (MDS) manages metadata for CephFS clients. This daemon provides
@@ -276,7 +275,7 @@ Now we have the fulfilled the pre-reqs we are ready to mount the CephFS Filesyst
 [IMPORTANT]
 ====
 If you have more than one FS configured in your ceph cluster you will need to
-add an extra parameter to all your mount commands, examples:
+add an extra parameter with the FS you want to mount to all your mount commands, examples:
 
 Fuse client
 

@@ -17,6 +17,18 @@
 * Work with and schedule snapshots
 * Work with Quotas
 
+[TIP]
+====
+If you already have a previous FS it's a good idea to delete it and do the
+challenge with a single FS to avoid confusion, to delete a FS you can do:
+
+----
+# ceph config  set mon  mon_allow_pool_delete true
+# ceph fs volume  rm cephfs --yes-i-really-mean-it
+# ceph orch rm mds.cephfs
+----
+====
+
 
 == Deploy a CephFS Filesystem
 
