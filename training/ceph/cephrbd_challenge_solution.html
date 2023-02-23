@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>RBD Export :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/cephrbd_export.html">
+    <title>RBD Challenge :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/cephrbd_challenge_solution.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -133,7 +133,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="cephrbd_intro.html">RADOS Block Device introduction</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="cephrbd_export.html">RBD Import/Export</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -271,7 +271,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solution</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="cephrbd_challenge_solution.html">Ceph RBD Solution</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -308,163 +308,276 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RADOS Block Device</li>
-    <li><a href="cephrbd_export.html">RBD Import/Export</a></li>
+    <li>Ceph Challenge Solutions</li>
+    <li><a href="cephrbd_challenge_solution.html">Ceph RBD Solution</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/cephrbd_export.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/cephrbd_challenge_solution.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">RBD Export</h1>
+<h1 class="page">RBD Challenge</h1>
 <div class="sect1">
-<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<h2 id="_create_rbd_pool"><a class="anchor" href="#_create_rbd_pool"></a>1. Create RBD Pool</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise"><a class="anchor" href="#_exercise"></a>1.1. Exercise</h3>
 <div class="paragraph">
-<p>Ceph supports different import and export functionalities to address the following needs</p>
+<p>Perform the following operations:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Testing new versions using realistic volumes of data</p>
+<p>Create a pool <code>newrbd</code>  to host some RBDs. The pool will use a replication factor of 2.</p>
 </li>
 <li>
-<p>Running QA processes using realistic volumes of data</p>
+<p>Change the default RBD Image order to be 20 in  <code>newrbd</code></p>
 </li>
 <li>
-<p>Implement business continuity</p>
-</li>
-<li>
-<p>Decouple backup from the production environment</p>
+<p>Verify pool <code>rbdpool</code> exists. If not create it</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>These functionnalities can be used intra or inter cluster.</p>
 </div>
+<div class="sect2">
+<h3 id="_solution"><a class="anchor" href="#_solution"></a>1.2. Solution</h3>
 <div class="paragraph">
-<p>These capabilities are:</p>
+<p>Create the newrbd pool</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>rbd export</code> to export a RBD Image or snapshot of a RBD Image</p>
-</li>
-<li>
-<p><code>rbd export-diff</code> to export differences between 2 point in time</p>
-</li>
-<li>
-<p><code>rbd import</code> to import a RBD Image or snapshot</p>
-</li>
-<li>
-<p><code>rbd import-diff</code> to import differebces between 2 pint in time</p>
-</li>
-<li>
-<p><code>rbd merge-diff</code> to merge to set of differebces between multiple point in time</p>
-</li>
-</ul>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create newrbd 8 8
+# ceph osd pool application enable newrbd rbd
+# ceph osd pool set newrbd size 2
+# ceph osd pool set newrbd min_size 1</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Each RBD <code>export*</code> command uses the same format and must specify</p>
+<p>Change the Image order to be 20</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>image-spec</code> or <code>snap-spec</code> as the source</p>
-</li>
-<li>
-<p><code>destination</code> as the target that can be ommitted</p>
-<div class="ulist">
-<ul>
-<li>
-<p><code>-</code> represents the standard output to pipe export and import</p>
-</li>
-<li>
-<p><code>{file-name}</code> to store the data as a flat file</p>
-</li>
-</ul>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd config pool list newrbd | grep rbd_default_order
+rbd_default_order                                    22           config
+# rbd config pool set newrbd rbd_default_order 20
+[root@ceph-node01 ~]# rbd config pool list newrbd | grep rbd_default_order
+rbd_default_order                                    20           config</code></pre>
 </div>
-</li>
-</ul>
 </div>
-<div class="paragraph">
-<p>Each RBD <code>import*</code> command uses the same format and must specify</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>image-spec</code> or <code>snap-spec</code> as the target</p>
-</li>
-<li>
-<p><code>source</code> as the source</p>
-<div class="ulist">
-<ul>
-<li>
-<p><code>-</code> represents the standard input to pipe export and import</p>
-</li>
-<li>
-<p><code>{file-name}</code> to read the data from a flat file</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>During the import process you can indicate the characteristics
-of the target RBD Image where the data is to be injected:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>--oject-size</code> to specify the RADOS object size to use</p>
-</li>
-<li>
-<p><code>--stripe-unit</code> to specify the RBD format 2 unit size</p>
-</li>
-<li>
-<p><code>--stripe-count</code> to specify the RBD format 2 count</p>
-</li>
-<li>
-<p><code>--image-feature</code> to enable a specific set of features</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock warning">
+<div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-Remember custom <code>stripe-size</code> and <code>stripe-unit</code> are
-not supported by <code>krbd</code> clients.
+<div class="paragraph">
+<p><strong>rbd_default_order</strong>
+This configures the default object size for new images. The value is used as a power of two, meaning default_object_size = 2 ^
+rbd_default_order. Configure a value between 12 and 25 (inclusive), translating
+to 4KiB lower and 32MiB upper limit.  default value 22 (4MB)</p>
+</div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>To export and import the content of a RBD Image in a single Linux CLI
-command, you will use the following format <code>rbd export {pools}/{imgs} - | rbd import - {poolt}/{imgt}</code></p>
+<p>Verify rbdpool exists:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd lspools | grep rbdpool
+1 rbdpool</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_rbd_image"><a class="anchor" href="#_create_rbd_image"></a>2. Create RBD Image</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_2"><a class="anchor" href="#_exercise_2"></a>2.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a 256MiB RBD image <code>testimage</code></p>
+</li>
+<li>
+<p>Check used space( # rbd -p rbdpool du newrbd/testimage )</p>
+</li>
+<li>
+<p>Format the RBD Image with <code>ext4</code></p>
+</li>
+<li>
+<p>Copy the content of <code>/var/log</code> into the RBD Image in a directory called <code>batch1</code></p>
+</li>
+<li>
+<p>Create a snapshot <code>snap1</code> for the RBD Image</p>
+</li>
+<li>
+<p>Copy the content of <code>/var/lib/alternatives/</code> into the RBD Image in a directory called <code>batch2</code></p>
+</li>
+<li>
+<p>Create a snapshot <code>snap2</code> for the RBD Image</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_2"><a class="anchor" href="#_solution_2"></a>2.2. Solution</h3>
+<div class="paragraph">
+<p>Create a 256MiB RBD image <code>testimage</code> and Format the RBD Image with <code>ext4</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd create --pool newrbd --size 256M --image testimage
+# rbd -p newrbd info testimage
+# rbd -p rbdpool du newrbd/testimage
+# rbd map newrbd/testimage
+# mkfs.ext4 /dev/rbd0</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>To merge a set of differebces, use the following command from the Linux
-CLI: `rbd merge-diff {first-set} {second-set} {merged-set}.</p>
+<p>Rest of the steps to follow:</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-You can use <code>-</code> as the <code>{merged-set} to pipe multiple `merge-diff</code> operations.
-</td>
-</tr>
-</table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># mount /dev/rbd0 /mnt
+# mkdir -p /mnt/batch1
+# cp -pr /var/log /mnt/batch1/
+# rbd snap create newrbd/testimage@snap1
+# mkdir -p /mnt/batch2
+# cp -pr /var/lib/alternatives/ /mnt/batch2/
+# rbd snap create newrbd/testimage@snap2</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_export_and_import"><a class="anchor" href="#_export_and_import"></a>3. Export and Import</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_3"><a class="anchor" href="#_exercise_3"></a>3.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Export as a flat file the differences between the formatted RBD Image and <code>snap1</code></p>
+</li>
+<li>
+<p>Export as a flat file the differences between <code>snap1</code> and <code>snap2</code></p>
+</li>
+<li>
+<p>Import the differences you exported into a RBD Image named <code>target1</code> in pool <code>rbdpool</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_3"><a class="anchor" href="#_solution_3"></a>3.2. Solution</h3>
+<div class="paragraph">
+<p>We use the <code>rbd export-diff</code> command to output to file the differences between
+the current image state and snap1</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#  rbd export-diff newrbd/testimage@snap1 /tmp/diffsnap1.rbd
+Exporting image: 100% complete...done.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We do the same and capture the differences between snap1 and snap2 into file /tmp/diffsnap1tosnap2.rbd</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd export-diff --from-snap snap1 newrbd/testimage@snap2 /tmp/diffsnap1tosnap2.rbd
+Exporting image: 100% complete...done.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With both export files we have a full picture of the state of our image, so we
+can merge the exports in a single file with <code>rbd merge-diff</code> called
+<code>/tmp/final.rbd</code> and import the image into the <code>rbdpool</code> pool</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd merge-diff /tmp/diffsnap1.rbd /tmp/diffsnap1tosnap2.rbd /tmp/final.rbd
+Merging image diff: 100% complete...done.
+# rbd import /tmp/final.rbd rbdpool/target1
+Importing image: 100% complete...done.</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clone"><a class="anchor" href="#_clone"></a>4. Clone</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_4"><a class="anchor" href="#_exercise_4"></a>4.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a clone of <code>newrbd/testimage@snap2</code> in pool <code>rbdpool</code> and name it <code>clone1</code></p>
+</li>
+<li>
+<p>Make the clone rbdpool/clone1 an independent RBD Image</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_4"><a class="anchor" href="#_solution_4"></a>4.2. Solution</h3>
+<div class="paragraph">
+<p>Before we can clone an RBD snap we need to protect it, so it can&#8217;t be deleted</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd snap protect newrbd/testimage@snap2
+# rbd clone newrbd/testimage@snap2 rbdpool/clone1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are goig to <code>Flaten</code> the clone so it&#8217;s and independent RBD image in pool
+<code>rbdpool</code> we will see that after we flaten the clone it will consume the full
+space of the image not only the COW space.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd du rbdpool/clone1
+# rbd flatten rbdpool/clone1
+Image flatten: 100% complete...done.
+# rbd du rbdpool/clone1</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cleanup"><a class="anchor" href="#_cleanup"></a>5. Cleanup</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Delete all RBD Images</p>
+</li>
+<li>
+<p>Delete all pools you have created</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

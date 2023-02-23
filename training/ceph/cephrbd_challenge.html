@@ -269,7 +269,13 @@
     <span class="nav-text">Ceph Challenge Solutions</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solutions</a>
+    <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solution</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="cephrbd_challenge_solution.html">Ceph RBD Solution</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_cephfs_challenge_solution.html">Ceph CephFS Solution</a>
   </li>
 </ul>
   </li>
@@ -347,6 +353,9 @@
 <p>Create a 256MiB RBD image <code>testimage</code></p>
 </li>
 <li>
+<p>Check used space( # rbd -p rbdpool du newrbd/testimage )</p>
+</li>
+<li>
 <p>Format the RBD Image with <code>ext4</code></p>
 </li>
 <li>
@@ -390,49 +399,22 @@
 <h2 id="_clone"><a class="anchor" href="#_clone"></a>4. Clone</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Perform the following operations:</p>
+<p>Perform the following operations, check space consuption on every step you take:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Create a clone of <code>newrbd/batch1</code> in pool <code>rbd</code> and name it <code>clone1</code></p>
+<p>Create a clone of <code>newrbd/testimage@snap2</code> in pool <code>rbdpool</code> and name it <code>clone1</code></p>
 </li>
 <li>
-<p>Make the clone an independent RBD Image</p>
-</li>
-<li>
-<p>Create a clone of <code>newrbd/clone1</code> in pool <code>newrbd</code> and name it <code>clone2</code></p>
-</li>
-<li>
-<p>Add a file <code>batch3/testfile</code> containing 10 times the string "This is a test\n" to <code>clone2</code></p>
+<p>Make the clone rbdpool/clone1 an independent RBD Image</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_proof_of_success"><a class="anchor" href="#_proof_of_success"></a>5. Proof of success</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Proof that <code>batch1</code> and <code>target1</code> have the same content using the <code>rbd</code> command combined with Linux commands</p>
-</li>
-<li>
-<p>Proof that <code>clone1</code> and <code>clone2</code> have a different content using the <code>rbd</code> command combined with Linux commands</p>
-</li>
-<li>
-<p>Proof that <code>clone1</code> is no longer linked to <code>batch1</code></p>
-</li>
-<li>
-<p>How much used capacity is consumed in <code>batch1</code>, <code>target1</code>, <code>clone1</code> and <code>clone2</code></p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cleanup"><a class="anchor" href="#_cleanup"></a>6. Cleanup</h2>
+<h2 id="_cleanup"><a class="anchor" href="#_cleanup"></a>5. Cleanup</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
