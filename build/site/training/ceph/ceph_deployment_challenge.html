@@ -264,6 +264,15 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Challenge Solutions</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solutions</a>
+  </li>
+</ul>
+  </li>
 </ul>
   </nav>
 </div>
@@ -354,11 +363,11 @@ node as the container registry.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Deploy a Ceph cluster with 4 Nodes: ceph-mon01, ceph-mon02, ceph-mon03, proxy02</p>
+<p>Deploy a Ceph cluster with 4 Nodes: <code>ceph-node01, ceph-node02, ceph-node03, proxy01</code></p>
 <div class="ulist">
 <ul>
 <li>
-<p>Bootstrap node will be ceph-mon01</p>
+<p>Bootstrap node will be ceph-node01</p>
 </li>
 <li>
 <p>The cluster needs to have segregated networks, public and cluster network</p>
@@ -374,8 +383,7 @@ node as the container registry.</p>
 </div>
 </li>
 <li>
-<p>The cluster will be deployed using a specification file, to include the four
-nodes during the initial bootstrap</p>
+<p>The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap</p>
 </li>
 <li>
 <p>Only one OSD per Node is required</p>
@@ -398,7 +406,7 @@ nodes during the initial bootstrap</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_create_rbd_pools"><a class="anchor" href="#_create_rbd_pools"></a>3. Create RBD Pools</h2>
+<h2 id="_create_rbd_pools_docs"><a class="anchor" href="#_create_rbd_pools_docs"></a>3. Create RBD Pools <a href="https://docs.ceph.com/en/latest/rados/operations/pools/#pools">Docs</a></h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -422,14 +430,46 @@ nodes during the initial bootstrap</p>
 <div class="sect1">
 <h2 id="_scale_out_the_cluster"><a class="anchor" href="#_scale_out_the_cluster"></a>4. Scale out the Cluster</h2>
 <div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We need ssh access to nodes <code>ceph-mon01,ceph-mon02,ceph-mon03,proxy02</code> from the
+bootstrap node <code>ceph-node01</code></p>
+</div>
+<div class="paragraph">
+<p>The easiest way is to copy the public key being used in ceph-node01 to the
+.ssh/authorized_keys file in hosts <code>ceph-mon01,ceph-mon02,ceph-mon03,proxy02</code></p>
+</div>
+<div class="paragraph">
+<p>Take into account that the private ssh key being used for passwordless ssh in the hosts
+is ~/.ssh/ceph , as you can see from the ssh config file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph-node01 ~]# cat .ssh/config
+Host *
+User root
+IdentityFile ~/.ssh/ceph
+StrictHostKeyChecking no</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>We have to add nodes <code>ceph-node01,ceph-node02,ceph-node03,proxy01</code> to the cluster</p>
+<p>We have to add nodes <code>ceph-mon01,ceph-mon02,ceph-mon03,proxy02</code> to the cluster <a href="https://docs.ceph.com/en/quincy/cephadm/host-management/#adding-hosts">Docs</a></p>
 <div class="ulist">
 <ul>
 <li>
-<p>The new nodes will belong to a datacenter crushmap location of <code>RACK</code> called <code>RACK2</code></p>
+<p>The new nodes will belong to a crushmap location of <code>RACK</code> called <code>RACK2</code> <a href="https://docs.ceph.com/en/pacific/rados/operations/crush-map/#crush-maps">Docs</a></p>
 </li>
 <li>
 <p>Nodes <code>ceph-node01,ceph-node02,ceph-node03</code> will configure one OSD per node</p>
@@ -462,17 +502,24 @@ nodes during the initial bootstrap</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Create a new pool for cephfs called <code>cephfsreplica2</code> with PG count 16,</p>
+<p>Create a new pool for cephfs called <code>cephfsreplica2</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>with PG count 16</p>
 </li>
 <li>
 <p>replica 2, and the failure domain set to Rack</p>
 </li>
 </ul>
 </div>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_autoscale_pools"><a class="anchor" href="#_autoscale_pools"></a>7. Autoscale Pools</h2>
+<h2 id="_autoscale_pools_docs"><a class="anchor" href="#_autoscale_pools_docs"></a>7. Autoscale Pools <a href="https://docs.ceph.com/en/latest/rados/operations/placement-groups/#placement-groups">Docs</a></h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
@@ -512,7 +559,7 @@ nodes during the initial bootstrap</p>
 <p>We need to add 2 new drives from nodes <code>ceph-node01,ceph-node02 and ceph-node03</code></p>
 </li>
 <li>
-<p>We will configure 2 OSD&#8217;s per drive, With Encryption enabled at the OSD level.</p>
+<p>We will configure 2 OSD&#8217;s per drive, With Encryption enabled at the OSD level. <a href="https://docs.ceph.com/en/quincy/cephadm/services/osd/#additional-options">Docs</a></p>
 </li>
 <li>
 <p>We need to use a specific device class for the new osds that we want to segregate (take a look at <code>ceph osd crush class</code>, cephadm in 5.3 doesn&#8217;t support specifying a class during bootstrap)</p>

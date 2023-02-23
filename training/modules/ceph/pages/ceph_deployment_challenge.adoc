@@ -37,7 +37,7 @@ node as the container registry.
 ** Limit the amount of memory an osd can consume to 2GB
 *** The nodes will belong to a crushmap location of `RACK` called `RACK1`
 
-== Create RBD Pools
+== Create RBD Pools https://docs.ceph.com/en/latest/rados/operations/pools/#pools[Docs]
 
 * Once the Ceph cluster is deployed we have to create two pools
 ** pool1 called `rbdreplica2` with replica 2 
@@ -45,10 +45,32 @@ node as the container registry.
 
 == Scale out the Cluster
 
-* We have to add nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` to the cluster
-** The new nodes will belong to a crushmap location of `RACK` called `RACK2`
+* We have to add nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` to the cluster https://docs.ceph.com/en/quincy/cephadm/host-management/#adding-hosts[Docs]
+** The new nodes will belong to a crushmap location of `RACK` called `RACK2` https://docs.ceph.com/en/pacific/rados/operations/crush-map/#crush-maps[Docs]
 ** Nodes `ceph-node01,ceph-node02,ceph-node03` will configure one OSD per node
 ** Move the MGR services so we have one MGR on each RACK: RACK1 and RACK2.
+
+[IMPORTANT]
+====
+To add Nodes to our ceph cluster, We need passwordless ssh access to nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` from the
+bootstrap node `ceph-node01`
+
+The easiest way to achieve this is to copy the public key being used in ceph-node01 to the
+.ssh/authorized_keys file in hosts `ceph-mon01,ceph-mon02,ceph-mon03,proxy02`
+
+Take into account that the private ssh key being used for passwordless ssh in
+the hosts(deployed by automation)
+is ~/.ssh/ceph , as you can see from the ssh config file:
+
+----
+[root@ceph-node01 ~]# cat .ssh/config
+Host *
+User root
+IdentityFile ~/.ssh/ceph
+StrictHostKeyChecking no
+----
+====
+
 
 == Create EC cephfs Pool
 * Create a new pool for cephfs data called `cephfsec` with EC replication 4+2, set the failure domain to host
@@ -58,7 +80,7 @@ node as the container registry.
 ** with PG count 16
 ** replica 2, and the failure domain set to Rack
 
-== Autoscale Pools
+== Autoscale Pools https://docs.ceph.com/en/latest/rados/operations/placement-groups/#placement-groups[Docs]
 * Enable autoscale mode on all pools, and configure the target size ratio with the following ratios:
 ** rbdreplica2. 10%
 ** rbdreplica3. 20%
@@ -69,6 +91,6 @@ node as the container registry.
 
 * We need to add a dedicated data pool for RGW, that has to be physically segregated from the rest of the cluster data
 ** We need to add 2 new drives from nodes `ceph-node01,ceph-node02 and ceph-node03`
-** We will configure 2 OSD's per drive, With Encryption enabled at the OSD level.
+** We will configure 2 OSD's per drive, With Encryption enabled at the OSD level. https://docs.ceph.com/en/quincy/cephadm/services/osd/#additional-options[Docs]
 ** We need to use a specific device class for the new osds that we want to segregate (take a look at `ceph osd crush class`, cephadm in 5.3 doesn't support specifying a class during bootstrap)
 ** Create a pool called `rgw-security` with `replica 3`, it will use a rule that uses the new device classes we created

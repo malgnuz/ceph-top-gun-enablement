@@ -66,3 +66,6 @@
 
 .Ceph Stretched
 * xref:rhcs-stretched-deploy.adoc[Ceph Stretch Mode]
+
+.Ceph Challenge Solutions
+* xref:ceph_deployment_challenge_solution.adoc[Ceph Deployment Solutions]

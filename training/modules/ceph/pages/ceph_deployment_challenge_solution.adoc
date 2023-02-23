@@ -18,11 +18,10 @@
 * Review PG autoscaler configuration
 * Review the configuration of segregated physical pools
 
-[NOTE]
+[IMPORTANT]
 ====
-To increase the difficulty of the challenge you can do a disconnected
-deployment of ceph and the observavility stack, you can use the workstation
-node as the container registry.
+Please try and solve the challenge by yourself only come to this page as a last
+resource after fighting with ceph for a while :D
 ====
 
 == Deploy a Ceph Cluster
