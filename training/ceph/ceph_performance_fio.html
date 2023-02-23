@@ -264,6 +264,15 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Challenge Solutions</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solutions</a>
+  </li>
+</ul>
+  </li>
 </ul>
   </nav>
 </div>
@@ -466,6 +475,25 @@ bench  type write io_size 4096 io_threads 4 bytes 1073741824 pattern random
    55    257208   4873.89    19 MiB/s
 elapsed: 56   ops: 262144   ops/sec: 4667.5   bytes/sec: 18 MiB/s</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Don&#8217;t forget about the iotop rbd feature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd perf image iotop -p testbench</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>

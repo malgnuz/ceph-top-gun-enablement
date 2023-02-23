@@ -264,6 +264,15 @@
   </li>
 </ul>
   </li>
+  <li class="nav-item" data-depth="0">
+    <button class="nav-item-toggle"></button>
+    <span class="nav-text">Ceph Challenge Solutions</span>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solutions</a>
+  </li>
+</ul>
+  </li>
 </ul>
   </nav>
 </div>
@@ -417,11 +426,32 @@ Volume created successfully (no MDS daemons created)</code></pre>
 </div>
 </div>
 </li>
-<li>
-<p>Create a YAML file called <code>mds.spec.yaml</code>:</p>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If we use the ceph fs volume create fs_name --placement=ceph-node01,proxy01 ,
+cephadm the orchestrator takes care of deploying the MDS service for us, so it
+takes care of creating the ceph pools, the ceph daemons, and the ceph FS</p>
+</div>
+<div class="paragraph">
+<p>If you need to manually create the MDS services you can use this example:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">cat &lt;&lt;EOF &gt; mds.spec.yaml
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">Create a YAML file called `mds.spec.yaml`:
+
+[source,yaml]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>cat &lt;&lt;EOF &gt; mds.spec.yaml
 service_type: mds
 service_id: fs_name
 placement:
@@ -429,19 +459,30 @@ placement:
   hosts:
   - ceph-node01
   - proxy01
-EOF</code></pre>
+EOF</p>
 </div>
-</div>
-</li>
-<li>
-<p>As the root user on the <code>ceph-node01</code> server, apply the specification to manually deploy the MDS daemons using the YAML file that you created:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># ceph orch apply -i mds.spec.yaml
-Scheduled mds.fs_name update...</code></pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">As the root user on the `ceph-node01` server, apply the specification to manually deploy the MDS daemons using the YAML file that you created:
+
+[source,sh]</code></pre>
 </div>
 </div>
-</li>
+<div class="paragraph">
+<p># ceph orch apply -i mds.spec.yaml
+Scheduled mds.fs_name update&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"></code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
 <p>List the services that are running on the new installation and verify that the <code>mds.fs_name</code> service is created:</p>
 <div class="listingblock">
@@ -600,7 +641,7 @@ ceph-node01# cat /etc/ceph/ceph.client.0.keyring
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># scp -p ceph-node01:/etc/ceph/ceph.client.0.keyring /etc/ceph/ceph.client.0.keyring
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation#  scp -p ceph-node01:/etc/ceph/ceph.client.0.keyring /etc/ceph/ceph.client.0.keyring
 Warning: Permanently added 'ceph-node01,172.16.7.61' (ECDSA) to the list of known hosts.
 ceph.client.0.keyring                                                                                        100%  181   303.2KB/s   00:00</code></pre>
 </div>
@@ -619,6 +660,37 @@ specify the id of the user we created called <code>0</code></p>
 </div>
 <div class="paragraph">
 <p>Now we have the fulfilled the pre-reqs we are ready to mount the CephFS Filesystem.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you have more than one FS configured in your ceph cluster you will need to
+add an extra parameter to all your mount commands, examples:</p>
+</div>
+<div class="paragraph">
+<p>Fuse client</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">ceph-fuse --id 0 /mnt/cephfs-fuse --client_fs fs_name</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Kernel client</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/dir0 /mnt/cephfs-kernel -o name=0,secret="AQDTCOVjxKGiEBAA2EW9BpnpEz/5UQ+keKVfVw==",fs=fs_name</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
 <h3 id="_fuse_client"><a class="anchor" href="#_fuse_client"></a>5.1. FUSE client</h3>
