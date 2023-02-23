@@ -1,0 +1,765 @@
+= Ceph Deployment Challenge Solutions
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: pygments
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+
+== Goals
+
+* Review the the Ceph deployment with Cephadm
+* Setting specific CPU/memory targets for the ceph containers
+* Review the Pool and replica concepts.
+* Review scaling out the cluster with more nodes
+* Review PG autoscaler configuration
+* Review the configuration of segregated physical pools
+
+[NOTE]
+====
+To increase the difficulty of the challenge you can do a disconnected
+deployment of ceph and the observavility stack, you can use the workstation
+node as the container registry.
+====
+
+== Deploy a Ceph Cluster
+
+=== Exercise
+
+* Deploy a Ceph cluster with 4 Nodes: `ceph-node01, ceph-node02, ceph-node03, proxy01`
+** Bootstrap node will be ceph-node01
+** The cluster needs to have segregated networks, public and cluster network
+*** Public Network will be: `192.168.56.0/24`
+*** Cluster Network will be: `172.16.7.0/24`
+** The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap
+** Only one OSD per Node is required
+** Limit the amount of memory an osd can consume to 2GB
+*** The nodes will belong to a crushmap location of `RACK` called `RACK1`
+** Place the Observavility stack Services in node proxy01
+
+=== Solution
+
+Create a Spec file as the following:
+
+----
+# cat cluster-spec.yaml
+service_type: host
+hostname: ceph-node01
+addr: 192.168.56.61
+location:
+  root: default
+  rack: RACK1
+labels:
+- osd
+- mon
+- mgr
+---
+service_type: host
+hostname: ceph-node02
+addr: 192.168.56.62
+location:
+  rack: RACK1
+labels:
+- osd
+- mon
+- rgw
+---
+service_type: host
+hostname: ceph-node03
+addr: 192.168.56.63
+location:
+  rack: RACK1
+labels:
+- osd
+- mds
+- mon
+
+---
+service_type: host
+hostname: proxy01
+addr: 192.168.56.24
+location:
+  rack: RACK1
+labels:
+- mgmt
+---
+service_type: mon
+placement:
+  label: "mon"
+---
+service_type: mgr
+service_name: mgr
+placement:
+  label: "mgr"
+---
+service_type: osd
+service_id: all-available-devices
+service_name: osd.all-available-devices
+spec:
+  data_devices:
+    all: true
+    limit: 1
+placement:
+  label: "osd"
+---
+service_id: grafana.srv
+service_type: grafana
+placement: 
+  count: 1
+  label: mgmt
+---
+service_id: alertmanager.srv
+service_type: alertmanager
+placement:
+  count: 1
+  label: mgmt
+---
+service_id: prometheus.srv
+service_type: prometheus
+placement:
+  count: 1
+  label: mgmt
+----
+
+And then run the bootstrap command, adding the spec file and the cluster-network:
+
+----
+# cephadm bootstrap --registry-json /root/registry.json --dashboard-password-noupdate  --ssh-user=root --ssh-private-key /root/.ssh/ceph --ssh-public-key /root/.ssh/ceph.pub --mon-ip 192.168.56.61 --apply-spec /root/cluster-spec.yaml  --cluster-network 172.16.7.0/24
+----
+
+[TIP]
+====
+You can change the cluster_network on a running cluster
+
+----
+# ceph config set global cluster_network 172.16.7.0/24
+----
+
+A restart of the daemons is needed. Ceph daemons bind dynamically, so you do not have to restart the entire cluster at once if you change the network configuration for a specific daemon.
+====
+
+Once the cluster is deployed, configure the OSD memory target to 2GB
+
+----
+# ceph config set osd osd_memory_target_autotune false
+# ceph config set osd osd_memory_target 2147483648
+----
+
+With the Spec file we used during bootstrap we achieved all of the other
+requirements, only one osd per host:
+
+----
+service_type: osd
+service_id: all-available-devices
+service_name: osd.all-available-devices
+spec:
+  data_devices:
+    all: true
+    limit: 1   <---- Here
+placement:
+  label: "osd"
+----
+
+The observability stack is deployed in proxy01 with the use of labels, example
+of one service:
+
+----
+---
+service_type: host
+hostname: proxy01
+addr: 192.168.56.24
+location:
+  rack: RACK1
+labels:
+- mgmt   <---- Label set in proxy01
+---
+service_id: alertmanager.srv
+service_type: alertmanager
+placement:
+  count: 1
+  label: mgmt <--- Same label specified in the services placement
+---
+
+
+# ceph orch ps | grep -E '(grafana|prom|alert)'
+alertmanager.proxy01       proxy01      *:9093,9094  running (6m)     5m ago   8m    13.7M        -                    0496af347f36  c9322ad0b959
+grafana.proxy01            proxy01      *:3000       running (6m)     5m ago   7m    43.2M        -  8.3.5             bf676a29bcc5  5568a4470d96
+prometheus.proxy01         proxy01      *:9095       running (6m)     5m ago   6m    50.7M        -                    dd9d8964582c  e1bd0f538a4c
+----
+
+Also the rack location of RACK1 is achieved during bootstrap:
+
+----
+---
+service_type: host
+hostname: proxy01
+addr: 192.168.56.24
+location:           <--- Using the location config option
+  rack: RACK1
+labels:
+- mgmt
+---
+
+# ceph osd tree
+ID  CLASS  WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+-1         0.02939  root default
+-3         0.02939      rack RACK1
+-2         0.00980          host ceph-node01
+ 0    hdd  0.00980              osd.0             up   1.00000  1.00000
+-4         0.00980          host ceph-node02
+ 1    hdd  0.00980              osd.1             up   1.00000  1.00000
+-5         0.00980          host ceph-node03
+ 2    hdd  0.00980              osd.2             up   1.00000  1.00000
+----
+
+[TIP]
+====
+Using `location` inside service_type: host is only used during bootstrap, if you
+change the `location` to a different value and use `ceph orch apply -i` the
+changed won't get applied, you would need to use `ceph osd crush move`
+commands. for example
+
+----
+# ceph osd crush add-bucket RACK1 rack
+# ceph osd crush move RACK1 root=default
+# ceph osd crush move ceph-node01 rack=RACK1
+# ceph osd crush move ceph-node02 rack=RACK1
+# ceph osd crush move ceph-node03 rack=RACK1
+----
+
+====
+
+
+== Create RBD Pools
+
+=== Exercise
+
+* Once the Ceph cluster is deployed we have to create two pools
+** pool1 called `rbdreplica2` with replica 2
+** pool2 called `rbdreplica3` with replica 3
+
+=== Solution
+
+Create pools and specify the app type
+
+----
+# ceph osd pool create rbdreplica2 replicate
+# ceph osd pool set rbdreplica2 size 2
+# ceph osd pool set rbdreplica2 min_size 1
+# ceph osd pool application enable rbdreplica2 rbd
+# ceph osd pool ls detail  | grep rbdreplica2
+pool 5 'rbdreplica2' replicated size 2 min_size 1 crush_rule 0 object_hash rjenkins pg_num 32 pgp_num 32 autoscale_mode on last_change 54 flags hashpspool stripe_width 0 application rbd
+
+# ceph osd pool create rbdreplica3 replicate
+# ceph osd pool application enable rbdreplica3 rbd
+----
+
+== Scale out the Cluster
+
+=== Exercise
+
+* We have to add nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` to the cluster
+** The new nodes will belong to a crushmap location of `RACK` called `RACK2`
+** Nodes `ceph-mon01,ceph-mon02,ceph-mon03` will configure one OSD per node
+** Move the MGR services so we have one MGR on each RACK: RACK1 and RACK2.
+
+=== Solution
+
+We need ssh access to nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` from the
+bootstrap node `ceph-node01`
+
+The easiest way is to copy the public key being used in ceph-node01 to the
+.ssh/authorized_keys file in hosts `ceph-mon01,ceph-mon02,ceph-mon03,proxy02`
+
+Take into account that the ssh key being used for passwordless ssh in the hosts
+is ~/.ssh/ceph , as you can see from the config file:
+
+----
+[root@ceph-node01 ~]# cat .ssh/config
+Host *
+User root
+IdentityFile ~/.ssh/ceph
+StrictHostKeyChecking no
+----
+
+Once passwordless ssh is in place, we can add the nodes to our running cluster
+
+----
+# ceph orch host add ceph-mon01 192.168.56.64
+# ceph orch host add ceph-mon02 192.168.56.65
+# ceph orch host add ceph-mon03 192.168.56.66
+# ceph orch host add proxy02 192.168.56.25
+
+# ceph orch host ls
+HOST         ADDR           LABELS              STATUS
+ceph-mon01   192.168.56.64
+ceph-mon02   192.168.56.65
+ceph-mon03   192.168.56.66
+ceph-node01  192.168.56.61  _admin osd mon mgr
+ceph-node02  192.168.56.62  osd mon rgw
+ceph-node03  192.168.56.63  osd mds mon
+proxy01      192.168.56.24  mgmt
+proxy02      192.168.56.25
+----
+
+We need add the osd labels to the new hosts so the OSDs get configured on those nodes
+
+----
+# ceph orch host label add ceph-mon01 osd
+# ceph orch host label add ceph-mon02 osd
+# ceph orch host label add ceph-mon03 osd
+----
+
+[IMPORTANT]
+====
+ceph-mon0X nodes need their drives zapped/deleted before they can be use you
+can use script /root/zap-disks.sh available in ceph-mon01, to zap all
+ceph-mon0X disks
+====
+
+After a while the ceph-mon OSDs should show up in the device list, and in turn
+be consumed as OSDs by the cluster
+
+----
+# ceph orch device ls --refresh
+ceph orch device ls
+HOST         PATH      TYPE  DEVICE ID              SIZE  AVAILABLE  REFRESHED  REJECT REASONS
+ceph-mon01   /dev/vdb  hdd   19ec5c29-2ac6-4851-8  10.7G  Yes        6s ago
+ceph-mon02   /dev/vdb  hdd   5044b50b-6a2b-4103-9  10.7G  Yes        6s ago
+ceph-mon03   /dev/vdb  hdd   9453fae9-2f4b-4802-9  10.7G  Yes        6s ago
+----
+
+Once OSDs are created:
+
+----
+[root@ceph-node01 ~]# ceph osd tree
+ID   CLASS  WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+ -1         0.05878  root default
+ -3         0.02939      rack RACK1
+ -2         0.00980          host ceph-node01
+  0    hdd  0.00980              osd.0             up   1.00000  1.00000
+ -4         0.00980          host ceph-node02
+  1    hdd  0.00980              osd.1             up   1.00000  1.00000
+ -5         0.00980          host ceph-node03
+  2    hdd  0.00980              osd.2             up   1.00000  1.00000
+ -6               0          host proxy01
+-13         0.00980      host ceph-mon01
+  5    hdd  0.00980          osd.5                 up   1.00000  1.00000
+-15         0.00980      host ceph-mon02
+  3    hdd  0.00980          osd.3                 up   1.00000  1.00000
+-17         0.00980      host ceph-mon03
+  4    hdd  0.00980          osd.4                 up   1.00000  1.00000
+----
+
+We are still missing the RACK2 crush label, let's configure it.
+
+----
+# ceph osd crush add-bucket RACK2 rack
+# ceph osd crush move RACK2 root=default
+# ceph osd crush move ceph-mon01 rack=RACK2
+# ceph osd crush move ceph-mon02 rack=RACK2
+# ceph osd crush move ceph-mon03 rack=RACK2
+# ceph osd tree
+ID   CLASS  WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+ -1         0.05878  root default                                       
+ -3         0.02939      rack RACK1                                     
+ -2         0.00980          host ceph-node01                           
+  0    hdd  0.00980              osd.0             up   1.00000  1.00000
+ -4         0.00980          host ceph-node02                           
+  1    hdd  0.00980              osd.1             up   1.00000  1.00000
+ -5         0.00980          host ceph-node03                           
+  2    hdd  0.00980              osd.2             up   1.00000  1.00000
+ -6               0          host proxy01                               
+-19         0.02939      rack RACK2                                     
+-13         0.00980          host ceph-mon01                            
+  5    hdd  0.00980              osd.5             up   1.00000  1.00000
+-15         0.00980          host ceph-mon02                            
+  3    hdd  0.00980              osd.3             up   1.00000  1.00000
+-17         0.00980          host ceph-mon03                            
+  4    hdd  0.00980              osd.4             up   1.00000  1.00000
+----
+
+
+== Create EC cephfs Pool
+
+=== Exercise
+
+* Create a new pool for cephfs data called `cephfsec` with EC replication profile 4+2, set the failure domain to host
+
+=== Solution
+
+First we need to create a new EC 4+2 profile:
+
+----
+# ceph osd erasure-code-profile set profile42 k=4 m=2
+----
+
+We cam see that by default the failure domain for the profile is host:
+
+----
+# ceph osd erasure-code-profile get profile42
+crush-device-class=
+crush-failure-domain=host     <--------- Host
+crush-root=default
+jerasure-per-chunk-alignment=false
+k=4
+m=2
+plugin=jerasure
+technique=reed_sol_van
+w=8
+----
+
+Create the pool using the new profile we created:
+
+----
+# ceph osd pool create cephfsec 16 16 erasure profile42
+# ceph osd pool application enable cephfsec cephfs
+# ceph osd pool ls detail | grep cephfsec
+pool 6 'cephfsec' erasure profile profile42 size 6 min_size 5 crush_rule 1 object_hash rjenkins pg_num 16 pgp_num 16 autoscale_mode on last_change 78 flags hashpspool stripe_width 16384
+----
+
+Do a quick test and upload an object at the rados layer
+
+----
+# rados -p cephfsec put mytestvi /usr/bin/vi
+# rados -p cephfsec ls
+mytestvi
+----
+
+== Create a cephfs Pool
+
+=== Exercise
+
+* Create a new pool for cephfs called `cephfsreplica2` 
+** with PG count 16
+** replica 2, and the failure domain set to Rack
+
+=== Solution
+
+If we check our current crush rules, we only have 1 created, and the failure domain it uses it's set to host
+
+----
+#  ceph osd crush rule dump replicated_rule
+{
+    "rule_id": 0,
+    "rule_name": "replicated_rule",
+    "ruleset": 0,
+    "type": 1,
+    "min_size": 1,
+    "max_size": 10,
+    "steps": [
+        {
+            "op": "take",
+            "item": -1,
+            "item_name": "default"
+        },
+        {
+            "op": "chooseleaf_firstn",
+            "num": 0,
+            "type": "host"     <--------------- Failure domain set at the crush host level
+        },
+        {
+            "op": "emit"
+        }
+    ]
+}
+----
+
+So we need to create a new crush rule
+
+----
+# ceph osd crush rule create-replicated rackrule default rack
+# ceph osd crush rule dump  rackrule
+{
+    "rule_id": 2,
+    "rule_name": "rackrule",
+    "ruleset": 2,
+    "type": 1,
+    "min_size": 1,
+    "max_size": 10,
+    "steps": [
+        {
+            "op": "take",
+            "item": -12,
+        },
+        {
+            "op": "chooseleaf_firstn",
+            "num": 0,
+            "type": "rack"  <----- Rack Failure domain 
+        },
+        {
+            "op": "emit"
+        }
+    ]
+}
+----
+
+And use it when creating our new replica 2 pool
+
+----
+# ceph osd pool create cephfsreplica2 16 16 replicated rackrule
+pool 'cephfsreplica2' created
+# ceph osd pool set cephfsreplica2 size 2
+set pool 7 size to 2
+# ceph osd pool set cephfsreplica2 min_size 2
+set pool 7 min_size to 2
+# ceph osd pool application enable cephfsreplica2 cephfs
+enabled application 'cephfs' on pool 'cephfsreplica2'
+----
+
+
+
+
+== Autoscale Pools
+
+=== Exercise
+* Enable autoscale mode on all pools, and configure the target size ratio with the following ratios:
+** rbdreplica2. 10%
+** rbdreplica3. 20%
+** cephfsreplica2 20%
+** cephfsec 50%
+
+=== Solution
+
+Auto scale is on by default
+
+----
+# ceph osd pool get cephfsreplica2 pg_autoscale_mode
+pg_autoscale_mode: on
+# ceph osd pool get noautoscale
+noautoscale is off
+----
+
+But we need to set the ratios for each pool
+
+----
+# ceph osd pool autoscale-status
+POOL                     SIZE  TARGET SIZE  RATE  RAW CAPACITY   RATIO  TARGET RATIO  EFFECTIVE RATIO  BIAS  PG_NUM  NEW PG_NUM  AUTOSCALE  BULK   
+device_health_metrics      0                 3.0        61416M  0.0000                                  1.0       1              on         False  
+rbdreplica3                0                 3.0        61416M  0.0000                                  1.0      32              on         False  
+rbdreplica2                0                 2.0        61416M  0.0000                                  1.0      32              on         False  
+cephfsec                1168k                1.5        61416M  0.0000                                  1.0      16              on         False  
+cephfsreplica2             0                 2.0        61416M  0.0000                                  1.0      16              on         False  
+
+# ceph osd pool set rbdreplica3 target_size_ratio 0.3
+# ceph osd pool set rbdreplica3 target_size_ratio 0.2
+# ceph osd pool set rbdreplica2 target_size_ratio 0.1
+# ceph osd pool set cephfsreplica2 target_size_ratio 0.2
+# ceph osd pool set cephfsec target_size_ratio 0.5
+
+# ceph osd pool autoscale-status
+POOL                     SIZE  TARGET SIZE  RATE  RAW CAPACITY   RATIO  TARGET RATIO  EFFECTIVE RATIO  BIAS  PG_NUM  NEW PG_NUM  AUTOSCALE  BULK   
+device_health_metrics      0                 3.0        61416M  0.0000                                  1.0       1              on         False  
+rbdreplica3                0                 3.0        61416M  0.2000        0.2000           0.2000   1.0     128          32  on         False  
+rbdreplica2                0                 2.0        61416M  0.1000        0.1000           0.1000   1.0      32              on         False  
+cephfsec                1168k                1.5        61416M  0.5000        0.5000           0.5000   1.0      16              on         False  
+cephfsreplica2             0                 2.0        61416M  0.2000        0.2000           0.2000   1.0      16              on         False  
+----
+
+
+== Add OSDs to the cluster
+
+=== Exercise
+
+* We need to add a dedicated data pool for RGW, that has to be physically segregated from the rest of the cluster data
+** We need to add 2 new drives from nodes `ceph-node01,ceph-node02 and ceph-node03`
+** We will configure 2 OSD's per drive, With Encryption enabled at the OSD level.
+** We need to use a specific device class for the new osds that we want to
+segregate (take a look at `ceph osd crush class`, cephadm in 5.3 doesn't support specifying a class during bootstrap of the osd service)
+** Create a pool called `rgw-security` with `replica 3`, it will use a rule that uses the new device classes we created
+
+=== Solution
+
+We need to create a new OSD drivegroup service that only has 3 nodes listed
+`ceph-node01,ceph-node02 and ceph-node03`, we are going to use labels for
+placement, I will create a new label called osd-secure
+
+----
+# ceph orch host label add ceph-node01 osd-secure
+# ceph orch host label add ceph-node02 osd-secure
+# ceph orch host label add ceph-node03 osd-secure
+----
+
+Now we create a OSD service spec with Encryption and 2 OSD's per drive added to
+the config
+
+----
+# cat osds-crypt.yaml
+---
+service_type: osd
+service_id: osds-encrypt
+service_name: osds-encrypt.cephnodes
+placement:
+  label: osd-secure
+spec:
+  data_devices:
+    all: true
+    limit: 2
+  encrypted: true
+  osds_per_device: 2
+----
+
+And finally apply the config
+
+----
+# ceph orch apply -i osds-crypt.yaml
+Scheduled osd.osds-encrypt update...
+----
+
+After a while the OSDs get created and we can see 2 new devices being used in
+the device list
+
+----
+# ceph orch device ls ceph-node01
+HOST         PATH      TYPE  DEVICE ID              SIZE  AVAILABLE  REFRESHED  REJECT REASONS                                                 
+ceph-node01  /dev/vdb  hdd   78cc2058-d24c-473a-b  10.7G             39s ago    Insufficient space (<10 extents) on vgs, LVM detected, locked  
+ceph-node01  /dev/vdc  hdd   1c10de98-ff4d-4fbe-9  10.7G             39s ago    Insufficient space (<10 extents) on vgs, LVM detected, locked  
+ceph-node01  /dev/vdd  hdd   aa586e5a-52a4-4557-8  10.7G             39s ago    Insufficient space (<10 extents) on vgs, LVM detected, locked  
+ceph-node01  /dev/vde  hdd   f5fd6339-69b3-4c05-8  10.7G  Yes        39s ago                                  
+----
+
+And also the OSDs are now part of the crush tree, because we are using
+`osds_per_device: 2` for each device we have 2 OSDs:
+
+----
+# ceph osd tree
+ID   CLASS  WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+ -1         0.11755  root default
+ -3         0.08817      rack RACK1
+ -2         0.02939          host ceph-node01
+  0    hdd  0.00980              osd.0             up   1.00000  1.00000
+ 13    hdd  0.00490              osd.13            up   1.00000  1.00000
+ 15    hdd  0.00490              osd.15            up   1.00000  1.00000
+ 16    hdd  0.00490              osd.16            up   1.00000  1.00000
+ 17    hdd  0.00490              osd.17            up   1.00000  1.00000
+ -4         0.02939          host ceph-node02
+  1    hdd  0.00980              osd.1             up   1.00000  1.00000
+  6    hdd  0.00490              osd.6             up   1.00000  1.00000
+  7    hdd  0.00490              osd.7             up   1.00000  1.00000
+  9    hdd  0.00490              osd.9             up   1.00000  1.00000
+ 12    hdd  0.00490              osd.12            up   1.00000  1.00000
+ -5         0.02939          host ceph-node03
+  2    hdd  0.00980              osd.2             up   1.00000  1.00000
+  8    hdd  0.00490              osd.8             up   1.00000  1.00000
+ 10    hdd  0.00490              osd.10            up   1.00000  1.00000
+ 11    hdd  0.00490              osd.11            up   1.00000  1.00000
+ 14    hdd  0.00490              osd.14            up   1.00000  1.00000
+----
+
+We can also check the OSDs are encrypted with luks at the node level
+
+----
+# lsblk | grep -A 5 vdd
+vdd                                                                                                   252:48   0   10G  0 disk
+├─ceph--9d343a25--72a9--42d2--ac40--b73924eda2ee-osd--block--6828dece--055f--4673--8b24--baaf9f3fd2e2 253:5    0    5G  0 lvm
+│ └─NJaa3E-Rfr1-T8d2-C4Cv-gBuL-Q7gX-sr4hXY                                                            253:6    0    5G  0 crypt
+└─ceph--9d343a25--72a9--42d2--ac40--b73924eda2ee-osd--block--1dc3a1b0--b9a3--4b90--a40d--1cc2d0299999 253:7    0    5G  0 lvm
+  └─iqYzvh-2W3w-gHAV-yykP-C79U-v7Zz-2OgeNd                                                            253:8    0    5G  0 crypt
+----
+
+Or at the OSD level:
+
+----
+
+----
+
+We create the new device class called secret
+
+----
+# ceph osd crush class ls
+[
+    "hdd"
+]
+# ceph osd crush class create secret
+# ceph osd crush class ls
+[
+    "hdd",
+    "secret"
+]
+----
+
+Now we assing the new device class to our encrypted OSDs, to get a list of the
+we can use `ceph device ls`
+
+----
+# ceph device ls | grep ceph-node | grep -v vdb
+1c10de98-ff4d-4fbe-9  ceph-node01:vdc  osd.13 osd.15
+3e305801-0444-4489-b  ceph-node02:vdc  osd.7 osd.9
+9b722a39-8135-42f1-a  ceph-node02:vdd  osd.12 osd.6
+aa586e5a-52a4-4557-8  ceph-node01:vdd  osd.16 osd.17
+b583f9cc-cbc7-48a7-a  ceph-node03:vdc  osd.10 osd.8
+f5e09ef3-f755-4a85-a  ceph-node03:vdd  osd.11 osd.14
+----
+
+We now need to delete the hdd device class and add our secrete device class for
+the list of OSDs
+
+----
+# for i in {6..17} ; do ceph osd crush rm-device-class $i ; ceph osd crush set-device-class secret $i ; done
+done removing class of osd(s): 6
+set osd(s) 6 to class 'secret'
+done removing class of osd(s): 7
+set osd(s) 7 to class 'secret'
+done removing class of osd(s): 8
+set osd(s) 8 to class 'secret'
+done removing class of osd(s): 9
+set osd(s) 9 to class 'secret'
+done removing class of osd(s): 10
+set osd(s) 10 to class 'secret'
+done removing class of osd(s): 11
+set osd(s) 11 to class 'secret'
+done removing class of osd(s): 12
+set osd(s) 12 to class 'secret'
+done removing class of osd(s): 13
+set osd(s) 13 to class 'secret'
+done removing class of osd(s): 14
+set osd(s) 14 to class 'secret'
+done removing class of osd(s): 15
+set osd(s) 15 to class 'secret'
+done removing class of osd(s): 16
+set osd(s) 16 to class 'secret'
+done removing class of osd(s): 17
+set osd(s) 17 to class 'secret'
+
+# ceph osd tree
+ID   CLASS   WEIGHT   TYPE NAME                 STATUS  REWEIGHT  PRI-AFF
+ -1          0.11755  root default
+ -3          0.08817      rack RACK1
+ -2          0.02939          host ceph-node01
+  0     hdd  0.00980              osd.0             up   1.00000  1.00000
+ 13  secret  0.00490              osd.13            up   1.00000  1.00000
+ 15  secret  0.00490              osd.15            up   1.00000  1.00000
+ 16  secret  0.00490              osd.16            up   1.00000  1.00000
+ 17  secret  0.00490              osd.17            up   1.00000  1.00000
+ -4          0.02939          host ceph-node02
+  1     hdd  0.00980              osd.1             up   1.00000  1.00000
+  6  secret  0.00490              osd.6             up   1.00000  1.00000
+  7  secret  0.00490              osd.7             up   1.00000  1.00000
+  9  secret  0.00490              osd.9             up   1.00000  1.00000
+ 12  secret  0.00490              osd.12            up   1.00000  1.00000
+ -5          0.02939          host ceph-node03
+  2     hdd  0.00980              osd.2             up   1.00000  1.00000
+  8  secret  0.00490              osd.8             up   1.00000  1.00000
+ 10  secret  0.00490              osd.10            up   1.00000  1.00000
+ 11  secret  0.00490              osd.11            up   1.00000  1.00000
+ 14  secret  0.00490              osd.14            up   1.00000  1.00000
+----
+
+Now we need to create a new crush rule that uses the `secret` device class, we
+specify the device class at the end of the `crush rule create-replicated`
+command:
+
+----
+# ceph osd crush rule create-replicated secretrule default host secret
+----
+
+
+Now that we have the rule in place we can create the pool:
+
+----
+# ceph osd pool create rgw-security 16 16 replicated secretrule
+# ceph osd pool application enable rgw-security rgw
+----

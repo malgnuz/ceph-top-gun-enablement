@@ -27,13 +27,12 @@ node as the container registry.
 
 == Deploy a Ceph Cluster
 
-* Deploy a Ceph cluster with 4 Nodes: ceph-mon01, ceph-mon02, ceph-mon03, proxy02
-** Bootstrap node will be ceph-mon01
+* Deploy a Ceph cluster with 4 Nodes: `ceph-node01, ceph-node02, ceph-node03, proxy01`
+** Bootstrap node will be ceph-node01
 ** The cluster needs to have segregated networks, public and cluster network
 *** Public Network will be: `192.168.56.0/24`
 *** Cluster Network will be: `172.16.7.0/24`
-** The cluster will be deployed using a specification file, to include the four
-nodes during the initial bootstrap
+** The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap
 ** Only one OSD per Node is required
 ** Limit the amount of memory an osd can consume to 2GB
 *** The nodes will belong to a crushmap location of `RACK` called `RACK1`
@@ -46,8 +45,8 @@ nodes during the initial bootstrap
 
 == Scale out the Cluster
 
-* We have to add nodes `ceph-node01,ceph-node02,ceph-node03,proxy01` to the cluster
-** The new nodes will belong to a datacenter crushmap location of `RACK` called `RACK2`
+* We have to add nodes `ceph-mon01,ceph-mon02,ceph-mon03,proxy02` to the cluster
+** The new nodes will belong to a crushmap location of `RACK` called `RACK2`
 ** Nodes `ceph-node01,ceph-node02,ceph-node03` will configure one OSD per node
 ** Move the MGR services so we have one MGR on each RACK: RACK1 and RACK2.
 
@@ -55,8 +54,9 @@ nodes during the initial bootstrap
 * Create a new pool for cephfs data called `cephfsec` with EC replication 4+2, set the failure domain to host
 
 == Create a cephfs Pool
-* Create a new pool for cephfs called `cephfsreplica2` with PG count 16,
-* replica 2, and the failure domain set to Rack
+* Create a new pool for cephfs called `cephfsreplica2` 
+** with PG count 16
+** replica 2, and the failure domain set to Rack
 
 == Autoscale Pools
 * Enable autoscale mode on all pools, and configure the target size ratio with the following ratios:
