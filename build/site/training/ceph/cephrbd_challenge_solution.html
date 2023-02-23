@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>RadosGW Secure Token Service (STS) :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_sts_introduction.html">
+    <title>RBD Challenge :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/cephrbd_challenge_solution.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -193,7 +193,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_bucket_policy.html">RGW S3 Bucket Policy</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_sts_introduction.html">RGW Secure Token Service</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -271,7 +271,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_deployment_challenge_solution.html">Ceph Deployment Solutions</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="cephrbd_challenge_solution.html">Ceph RBD Solutions</a>
   </li>
 </ul>
@@ -305,319 +305,276 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph RadosGW</li>
-    <li><a href="radosgw_sts_introduction.html">RGW Secure Token Service</a></li>
+    <li>Ceph Challenge Solutions</li>
+    <li><a href="cephrbd_challenge_solution.html">Ceph RBD Solutions</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_sts_introduction.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/cephrbd_challenge_solution.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">RadosGW Secure Token Service (STS)</h1>
+<h1 class="page">RBD Challenge</h1>
 <div class="sect1">
-<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. introduction.</h2>
+<h2 id="_create_rbd_pool"><a class="anchor" href="#_create_rbd_pool"></a>1. Create RBD Pool</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise"><a class="anchor" href="#_exercise"></a>1.1. Exercise</h3>
 <div class="paragraph">
-<p>AWS provides the Security Token Service (STS) to allow secure federation with existing OpenID
-Connect/ OAuth 2.0 compliant identity services such as Keycloak. STS is a standalone REST
-service that provides temporary tokens for an application or user to access an S3 endpoint after
-the user authenticates against an identity provider.</p>
+<p>Perform the following operations:</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a pool <code>newrbd</code>  to host some RBDs. The pool will use a replication factor of 2.</p>
+</li>
+<li>
+<p>Change the default RBD Image order to be 20 in  <code>newrbd</code></p>
+</li>
+<li>
+<p>Verify pool <code>rbdpool</code> exists. If not create it</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution"><a class="anchor" href="#_solution"></a>1.2. Solution</h3>
 <div class="paragraph">
-<p>Ceph supports a subset of Amazon Secure Token Service (STS) APIs. Users first authenticate against STS and, upon success, receive a short-lived s3 access and secret key that can be used in subsequent requests.</p>
-</div>
-<div class="paragraph">
-<p>In Ceph RGW STS can be configured to work with several authentication methods such as LDAP, keystone, or OpenID connect.</p>
-</div>
-<div class="paragraph">
-<p>Workflow of STS is shown in the next diagram.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_overview.png" alt="STS Overview">
-</div>
-</div>
-<div class="paragraph">
-<p>We also need to introduce the concept of an Amazon Resource Name (ARN), Permission Policies, Bucket Policies and Roles.</p>
-</div>
-<div class="paragraph">
-<p>An ARN is used to identify a user, group or role amongst others. The ARN of a username has the general format of arn:aws:iam:::user1. ARNS are important as they are required in the permission policy language that S3 uses.</p>
-</div>
-<div class="paragraph">
-<p>A permission policy instructs what actions are allowed or denied on a set of resources by a set of principals. Principals are identified via an ARN.</p>
-</div>
-<div class="paragraph">
-<p>Permission policies are used in two instances: bucket policy and role policy.</p>
-</div>
-<div class="paragraph">
-<p>A bucket policy determines what actions can be performed inside an s3 bucket and is generally used to restrict who can read/write objects. The bucket policy is administered via the S3 API and can be self-managed by end users if they have appropriate permissions defined.</p>
-</div>
-<div class="paragraph">
-<p>A role is similar to a user and has its own ARN in the general format of arn:aws:iam:::role/rolename. In a bucket policy, instead of giving access to users based on their user ARN, a role ARN can be used instead. Users can then assume the role based on another permission policy which we refer to as the assume-role-policy-doc. The assume-role-policy-doc grants access to the roles if the user can meet its conditions.</p>
-</div>
-<div class="paragraph">
-<p>If you choose to use the STS protocol, be aware that several commercials off-the-shelf products will not be able to use the STS protocol due to a lack of engineering. For example, Quay currently has no option to use STS. Therefore, you will likely need to configure local users as a fallback option for such applications.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_rgw_local_user_database_using_sts"><a class="anchor" href="#_rgw_local_user_database_using_sts"></a>2. RGW local user database using STS.</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>RadosGW, by default, has a local user database to manage authentication and authorization. The user information and credentials are stored in a rados pool, so no extra work is needed to set up this authentication setup. It works with STS. An admin user can create roles and policies for the roles and then indicate the RGW local users authorised to assume the new role.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_local.png" alt="STS local">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_oauthoidc_sts_authentication"><a class="anchor" href="#_oauthoidc_sts_authentication"></a>3. OAUTH(OIDC) + STS authentication.</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>With OAUTH authentication, we use an OIDC service to authenticate against. We need to have an OpenID Connect/ OAuth2 compatible service. Red Hat has tested the integration with RGW of the following OIDC products: Red Hat SSO and keycloak IDPs.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/STS_oidc.png" alt="STS OIDC">
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_sts_with_local_rgw_user_lab"><a class="anchor" href="#_sts_with_local_rgw_user_lab"></a>4. STS with Local RGW User Lab</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In this module, we will complete a lab using RGW local users with STS.</p>
-</div>
-<div class="paragraph">
-<p>By default, the STS API is disabled in RGW, we need to enable the STS endpoint
-and restart the RGW daemons. The S3 and STS endpoints can be shared on the same
-RGW endpoint.</p>
+<p>Create the newrbd pool</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># ceph config set client.rgw.multi.zone1 rgw_s3_auth_use_sts true
-# ceph config set client.rgw.multi.zone1 rgw_sts_key = "abcdefghijklmnop"
-# ceph orch restart rgw.multi.zone1</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create newrbd 8 8
+# ceph osd pool application enable newrbd rbd
+# ceph osd pool set newrbd size 2
+# ceph osd pool set newrbd min_size 1</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Create three users, Admin who will own the bucket, and users: user1 and user2, that
-will assume a role to gain access to the admin bucket.</p>
+<p>Change the Image order to be 20</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>radosgw-admin user create --uid admin --display-name admin --admin --secret-key=admin --access-key=admin
-radosgw-admin user create --uid user1 --display-name user1 --secret-key=user1 --access-key=user1
-radosgw-admin user create --uid user2 --display-name user2 --secret-key=user2 --access-key=user2</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd config pool list newrbd | grep rbd_default_order
+rbd_default_order                                    22           config
+# rbd config pool set newrbd rbd_default_order 20
+[root@ceph-node01 ~]# rbd config pool list newrbd | grep rbd_default_order
+rbd_default_order                                    20           config</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>configure s3cmd for the admin user, and create bucket + user:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># cat &lt;&lt; EOF &gt; ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin
-[default]
-access_key = admin
-secret_key = admin
-host_base = proxy01:8000
-host_bucket = proxy01:8000
-use_https = False
-signature_v2 = True
-#check_ssl_certificate = False
-EOF
-
-# s3cmd -c ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin mb s3://bucket-data
-Bucket 's3://bucket-data/' created
-# s3cmd -c ~/s3cmd-credentials/s3cfg-test-user-radosgw-direct-test-admin put /etc/hosts s3://bucket-data/hosts
-upload: '/etc/hosts' -&gt; 's3://bucket-data/hosts'  [1 of 1]
- 492 of 492   100% in    0s    20.96 kB/s  done</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We create a role called S3A-user13 that will give user1 and user3 to assume this role</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># radosgw-admin role create --role-name=S3A-user13 --path=/ --assume-role-policy-doc=\{\"Version\":\"2012-10-17\",\"Statement\":\[\{\"Effect\":\"Allow\",\"Principal\":\{\"AWS\":\[\"arn:aws:iam:::user/user1\",\"arn:aws:iam:::user/user2\"\]\},\"Action\":\[\"sts:AssumeRole\"\]\}\]\}
-
-# radosgw-admin role list
-[
-    {
-        "RoleId": "194ff4bb-9929-4bb7-8d7f-7181dca456aa",
-        "RoleName": "S3A-user13",
-        "Path": "/",
-        "Arn": "arn:aws:iam:::role/S3A-user13",
-        "CreateDate": "2022-12-23T09:41:08.222Z",
-        "MaxSessionDuration": 3600,
-        "AssumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam:::user/user1\",\"arn:aws:iam:::user/user2\"]},\"Action\":[\"sts:AssumeRole\"]}]}"
-    }
-]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can also manage roles from the AWS client. The user will need the required
-caps to work with roles. In this example, when we created the admin user, we used
-the <code>--admin</code> flag, but you could be more granular and use the specific <code>roles</code> cap</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># aws --profile admin --endpoint http://proxy01:8000 iam list-roles
-{
-    "Roles": [
-        {
-            "Path": "/",
-            "RoleName": "S3A-user13",
-            "RoleId": "194ff4bb-9929-4bb7-8d7f-7181dca456aa",
-            "Arn": "arn:aws:iam:::role/S3A-user13",
-            "CreateDate": "2022-12-23T09:41:08.222000+00:00",
-            "AssumeRolePolicyDocument": {
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Effect": "Allow",
-                        "Principal": {
-                            "AWS": [
-                                "arn:aws:iam:::user/user1",
-                                "arn:aws:iam:::user/user2"
-                            ]
-                        },
-                        "Action": [
-                            "sts:AssumeRole"
-                        ]
-                    }
-                ]
-            },
-            "MaxSessionDuration": 3600
-        }
-    ]
-}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We are now going to add a policy to the S3A-user13 role. The policy will allow to only list created buckets</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>cat &lt;&lt; EOF &gt; policy.json
-{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:ListBucket"],"Resource":"arn:aws:s3:::*"}]}
-EOF
-
-#  radosgw-admin role-policy put --role-name=S3A-user13 --policy-name=access-list-bucket --policy-doc=$(&lt;policy.json)
-Permission policy attached successfully
-
-#  radosgw-admin role-policy list --role-name=S3A-user13
-[
-    "access-list-bucket"
-]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Using user1  credentials, we use the AWS cli to assume the S3A-user13 user role,
-this will create a temporary authentication token to be used</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># aws --profile user1 --endpoint http://proxy01:8000 sts assume-role --role-arn arn:aws:iam:::role/S3A-user13 --role-session-name S3A-user13
-{
-    "Credentials": {
-        "AccessKeyId": "cXu2A3ZerKFrhBDQCL2",
-        "SecretAccessKey": "0N628VOMT5ZSLE9Q1WJRHV0NKZMZZWZ1WDIN3XU",
-        "SessionToken": "LONGOSETSIONTOKENpamGS6dXn3d3yiMKJUS6p2GhatKPzgXcGXB9nJi3rQ6hfq9CdhL+uZOakceomeXr1I8hIYv6GUsZVcwWiKv2NbRDdhDCaxbCKp4egfCcd9wnQ8q5HQxIr/hWR965f9Q3kSst0vy3HBPHzLqhusdPFWfpHvAcAfqL0kdEsWT1kmbDnHz0cjqWM2DgE9CQFXUYAyQVmiOBiRrnLzjqHI9bEl/pc97jQgreHuk+80s5CZfxSt3D/auW/yJVdDSxMwCITgqiWj9HzSOYbZJiFEdtUVkQvSMBtdxhclubBb",
-        "Expiration": "2022-12-23T11:08:13.562974+00:00"
-    },
-    "AssumedRoleUser": {
-        "Arn": "arn:aws:sts:::assumed-role/S3A-user13/S3A-user13"
-    },
-    "PackedPolicySize": 0
-}</pre>
-</div>
-</div>
-<div class="admonitionblock note">
+<div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The session token is Opaque to the end user, it&#8217;s Encrypted using AES 128, it
-contains Authentication, Authorization information, Information about roles
-(permission policy) and Users.</p>
+<p><strong>rbd_default_order</strong>
+This configures the default object size for new images. The value is used as a power of two, meaning default_object_size = 2 ^
+rbd_default_order. Configure a value between 12 and 25 (inclusive), translating
+to 4KiB lower and 32MiB upper limit.  default value 22 (4MB)</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>We will create a new AWS cli profile with the credentials provided by the sts
-assume role command, these credentials will give user1 access to list
-bucket bucket-data per the policy we added to the S3A-user13 role</p>
+<p>Verify rbdpool exists:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>cat .aws/credentials
-[sts]
-aws_access_key_id = cXu2A3ZerKFrhBDQCL2
-aws_secret_access_key = 0N628VOMT5ZSLE9Q1WJRHV0NKZMZZWZ1WDIN3XU
-aws_session_token = LONGOSETSIONTOKENpamGS6dXn3d3yiMKJUS6p2GhatKPzgXcGXB9nJi3rQ6hfq9CdhL+uZOakceomeXr1I8hIYv6GUsZVcwWiKv2NbRDdhDCaxbCKp4egfCcd9wnQ8q5HQxIr/hWR965f9Q3kSst0vy3HBPHzLqhusdPFWfpHvAcAfqL0kdEsWT1kmbDnHz0cjqWM2DgE9CQFXUYAyQVmiOBiRrnLzjqHI9bEl/pc97jQgreHuk+80s5CZfxSt3D/auW/yJVdDSxMwCITgqiWj9HzSOYbZJiFEdtUVkQvSMBtdxhclubBb
-
-# aws --profile sts --endpoint http://proxy01:8000 s3 ls s3://bucket-data
-2022-12-23 04:38:53       1330 hosts</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd lspools | grep rbdpool
+1 rbdpool</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_rbd_image"><a class="anchor" href="#_create_rbd_image"></a>2. Create RBD Image</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_2"><a class="anchor" href="#_exercise_2"></a>2.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a 256MiB RBD image <code>testimage</code></p>
+</li>
+<li>
+<p>Check used space( # rbd -p rbdpool du newrbd/testimage )</p>
+</li>
+<li>
+<p>Format the RBD Image with <code>ext4</code></p>
+</li>
+<li>
+<p>Copy the content of <code>/var/log</code> into the RBD Image in a directory called <code>batch1</code></p>
+</li>
+<li>
+<p>Create a snapshot <code>snap1</code> for the RBD Image</p>
+</li>
+<li>
+<p>Copy the content of <code>/var/lib/alternatives/</code> into the RBD Image in a directory called <code>batch2</code></p>
+</li>
+<li>
+<p>Create a snapshot <code>snap2</code> for the RBD Image</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_2"><a class="anchor" href="#_solution_2"></a>2.2. Solution</h3>
+<div class="paragraph">
+<p>Create a 256MiB RBD image <code>testimage</code> and Format the RBD Image with <code>ext4</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd create --pool newrbd --size 256M --image testimage
+# rbd -p newrbd info testimage
+# rbd -p rbdpool du newrbd/testimage
+# rbd map newrbd/testimage
+# mkfs.ext4 /dev/rbd0</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>But with the same credentials, we can&#8217;t delete or upload objects to the bucket
-as the role policy only allowed "s3:ListBucket"</p>
+<p>Rest of the steps to follow:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --profile sts --endpoint http://proxy01:8000 s3 rm s3://bucket-data/hosts
-delete failed: s3://bucket-data/hosts An error occurred (AccessDenied) when calling the DeleteObject operation: Unknown
-# aws --profile sts --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://bucket-data/file1
-upload failed: ../etc/hosts to s3://bucket-data/file1 An error occurred (AccessDenied) when calling the PutObject operation: Unknown</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># mount /dev/rbd0 /mnt
+# mkdir -p /mnt/batch1
+# cp -pr /var/log /mnt/batch1/
+# rbd snap create newrbd/testimage@snap1
+# mkdir -p /mnt/batch2
+# cp -pr /var/lib/alternatives/ /mnt/batch2/
+# rbd snap create newrbd/testimage@snap2</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_export_and_import"><a class="anchor" href="#_export_and_import"></a>3. Export and Import</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_3"><a class="anchor" href="#_exercise_3"></a>3.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations in pool <code>newrbd</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Export as a flat file the differences between the formatted RBD Image and <code>snap1</code></p>
+</li>
+<li>
+<p>Export as a flat file the differences between <code>snap1</code> and <code>snap2</code></p>
+</li>
+<li>
+<p>Import the differences you exported into a RBD Image named <code>target1</code> in pool <code>rbdpool</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_3"><a class="anchor" href="#_solution_3"></a>3.2. Solution</h3>
+<div class="paragraph">
+<p>We use the <code>rbd export-diff</code> command to output to file the differences between
+the current image state and snap1</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">#  rbd export-diff newrbd/testimage@snap1 /tmp/diffsnap1.rbd
+Exporting image: 100% complete...done.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>We can add a second policy to the role that will Allow uploading and downloading objects to bucket-data</p>
+<p>We do the same and capture the differences between snap1 and snap2 into file /tmp/diffsnap1tosnap2.rbd</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># cat &lt;&lt; EOF &gt; policy2.json
-{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:PutObject","s3:GetObject","s3:DeleteObject"],"Resource":"arn:aws:s3:::bucket-data/*"}]}
-EOF</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd export-diff --from-snap snap1 newrbd/testimage@snap2 /tmp/diffsnap1tosnap2.rbd
+Exporting image: 100% complete...done.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>We add this second policy to the S3A-user13 role:</p>
+<p>With both export files we have a full picture of the state of our image, so we
+can merge the exports in a single file with <code>rbd merge-diff</code> called
+<code>/tmp/final.rbd</code> and import the image into the <code>rbdpool</code> pool</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin role-policy put --role-name=S3A-user13 --policy-name=access-put-bucket --policy-doc=$(&lt;policy2.json)
-Permission policy attached successfully
-
-# radosgw-admin role-policy get --role-name=S3A-user13 --policy-name=access-put-bucket
-{
-    "Permission policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:PutObject\",\"s3:GetObject\",\"s3:DeleteObject\"],\"Resource\":\"arn:aws:s3:::bucket-data/*\"}]}"</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd merge-diff /tmp/diffsnap1.rbd /tmp/diffsnap1tosnap2.rbd /tmp/final.rbd
+Merging image diff: 100% complete...done.
+# rbd import /tmp/final.rbd rbdpool/target1
+Importing image: 100% complete...done.</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clone"><a class="anchor" href="#_clone"></a>4. Clone</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_4"><a class="anchor" href="#_exercise_4"></a>4.1. Exercise</h3>
+<div class="paragraph">
+<p>Perform the following operations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create a clone of <code>newrbd/testimage@snap2</code> in pool <code>rbdpool</code> and name it <code>clone1</code></p>
+</li>
+<li>
+<p>Make the clone rbdpool/clone1 an independent RBD Image</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_4"><a class="anchor" href="#_solution_4"></a>4.2. Solution</h3>
+<div class="paragraph">
+<p>Before we can clone an RBD snap we need to protect it, so it can&#8217;t be deleted</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd snap protect newrbd/testimage@snap2
+# rbd clone newrbd/testimage@snap2 rbdpool/clone1</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>We are now able to put and delete objects:</p>
+<p>We are goig to <code>Flaten</code> the clone so it&#8217;s and independent RBD image in pool
+<code>rbdpool</code> we will see that after we flaten the clone it will consume the full
+space of the image not only the COW space.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --profile sts --endpoint http://proxy01:8000 s3 cp /etc/hosts s3://bucket-data/file1
-upload: ../etc/hosts to s3://bucket-data/file1
-# aws --profile sts --endpoint http://proxy01:8000 s3 rm s3://bucket-data/hosts
-delete: s3://bucket-data/hosts</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rbd du rbdpool/clone1
+# rbd flatten rbdpool/clone1
+Image flatten: 100% complete...done.
+# rbd du rbdpool/clone1</code></pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cleanup"><a class="anchor" href="#_cleanup"></a>5. Cleanup</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Delete all RBD Images</p>
+</li>
+<li>
+<p>Delete all pools you have created</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

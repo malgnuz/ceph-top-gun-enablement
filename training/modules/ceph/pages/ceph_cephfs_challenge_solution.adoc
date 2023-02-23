@@ -254,17 +254,115 @@ RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DI
 0-s   standby-replay  newfs.ceph-node02.rhftca  Evts:    0 /s     6      9      7      0
 ----
 
+We can se our new MDS is configured on `Rank 1`, so we are going to pin `Rank
+1` to the `/mnt/data/work` directory from the `workstation`:
+
+----
+workstation# setfattr -n ceph.dir.pin -v 1 /mnt/data/work
+workstation# getfattr -n ceph.dir.pin /mnt/data/work
+# file: mnt/data/work
+ceph.dir.pin="1"
+----
+
+Double the size of the MDS cache for the new Active MDS daemon
+
+----
+# ceph config set mds.newfs.proxy01.cvopqn mds_cache_memory_limit 8589934592
+----
+
+Add new Standby MDS for the new Active MDS
+
+----
+# cat mds.yaml
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - ceph-node02
+  - proxy01
+  - ceph-node03
+
+# ceph orch apply -i mds.yaml
+Scheduled mds.newfs update...
+
+# ceph fs status
+newfs - 1 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    16     19     17      7
+ 1        active        newfs.proxy01.cvopqn    Reqs:    0 /s    10     13     11      0
+0-s   standby-replay  newfs.ceph-node02.rhftca  Evts:    0 /s     6      9      7      0
+1-s   standby-replay  newfs.ceph-node03.ajfkpn  Evts:    0 /s     0      3      1      0
+----
 
 
 
 == Configure a scheduled snapshot
 
+=== Exercise
+
 * The `/data/critical` folder has important information, periodic snapshots for the folder have to be configured
 ** Create a schedule snapshot policy for the `/data/critical` that runs every 3 hours.
 
+=== Solution
+
+Create a schedule snapshot policy for the `/data/critical` that runs every 3 hours.
+
+----
+# ceph mgr module enable snap_schedule
+# ceph fs snap-schedule add /data/critical 3h
+# ceph fs snap-schedule list /data/critical
+/data/critical 3h
+----
+
+
 == Create Quotas
+
+=== Exercise
 
 * We need to give `user1` privileges to configure quotas on the `/data/users` folder
 ** Create user1 and assigned the needed client caps to assign quotas
 ** As user1 set the quota to 100MB for the `/data/users` folder
 * As `user2` mount the folder and check the quota limit is working.
+
+=== Solution
+
+Create user1 and assigned the needed client caps to assign quotas
+
+----
+# ceph fs authorize newfs client.user1 /data/users rwp
+# ceph auth ls | grep -A 4 user1
+installed auth entries:
+client.user1
+	key: AQD/ivdjmrbLJxAATxseoobv9BpgEfwDewe06A==
+	caps: [mds] allow rwp fsname=newfs path=/data/users
+	caps: [mon] allow r fsname=newfs
+	caps: [osd] allow rw tag cephfs data=newfs
+----
+
+As user1 set the quota to 100MB for the `/data/users` folder
+
+----
+# workstation# umount /mnt
+# workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/data/users /mnt/ -o name=user1,secret="AQD/ivdjmrbLJxAATxseoobv9BpgEfwDewe06A=="
+# workstation# setfattr -n ceph.quota.max_bytes -v 10000000 /mnt/
+----
+
+We create a new user, user2 with rw permissions on /data/users at try to right
+a file of 150 MB:
+
+----
+# ceph fs authorize newfs client.user2 /data/users rw
+[client.user2]
+	key = AQC4jfdj8NovExAAaEJmMkDjMMCXLbin1VLOsQ==
+
+workstation# umount /mnt
+workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/data/users /mnt/ -o name=user2,secret="AQC4jfdj8NovExAAaEJmMkDjMMCXLbin1VLOsQ=="
+workstation# dd if=/dev/zero of=/mnt/test-quota bs=1M count=150
+dd: error writing '/mnt/test-quota': Disk quota exceeded
+14+0 records in
+13+0 records out
+13631488 bytes (14 MB, 13 MiB) copied, 0.0309827 s, 440 MB/s
+----

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Ceph CephFS Challenge :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_cephfs_challenge.html">
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_cephfs_challenge_solution.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -154,7 +154,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="cephfs_advanced.html">CephFS Deep Dive</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cephfs_challenge.html">Challenge Cephfs</a>
   </li>
 </ul>
@@ -305,11 +305,10 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>CephFS Shared FileSystem</li>
-    <li><a href="ceph_cephfs_challenge.html">Challenge Cephfs</a></li>
+    <li><a href="ceph_cephfs_challenge_solution.html">Ceph CephFS Challenge</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_cephfs_challenge.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_cephfs_challenge_solution.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -344,6 +343,8 @@
 <div class="sect1">
 <h2 id="_deploy_a_cephfs_filesystem"><a class="anchor" href="#_deploy_a_cephfs_filesystem"></a>2. Deploy a CephFS Filesystem</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise"><a class="anchor" href="#_exercise"></a>2.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -357,8 +358,8 @@
 <p>One of the stand-by MDS servers has to be configured as Standby-replay</p>
 </li>
 <li>
-<p>Mount the Filesystem with a client on the <code>workstation</code> and create the
-the following tree</p>
+<p>Mount the Filesystem at the <code>/</code> level with a client on the <code>workstation</code> and create the
+the following tree:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -389,10 +390,182 @@ the following tree</p>
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution"><a class="anchor" href="#_solution"></a>2.2. Solution</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you already have a previous FS it&#8217;s a good idea to delete it and do the
+challenge with a single FS to avoid confusion, to delete a FS you can do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph config  set mon  mon_allow_pool_delete true
+# ceph fs volume  rm cephfs --yes-i-really-mean-it
+# ceph orch rm mds.cephfs</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Deploy a Ceph CephFS filesystem called <code>newfs</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs volume create newfs --placement=ceph-node01,proxy01</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The newfs filesystem will have 2 stand-by mds servers</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs get newfs | grep standby_count_wanted
+standby_count_wanted	1
+# ceph fs set newfs standby_count_wanted 2
+# ceph fs get newfs | grep standby_count_wanted
+standby_count_wanted	2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We need to increase the placement count to 3 nodes, so we can run 3 MDS, 1
+Active and 2 Stand-by</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph health detail
+HEALTH_WARN insufficient standby MDS daemons available
+[WRN] MDS_INSUFFICIENT_STANDBY: insufficient standby MDS daemons available
+    have 1; want 1 more
+
+# ceph orch ls mds --export
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - proxy01
+
+# ceph orch ls mds --export  &gt; mds.yaml
+# vi mds.yaml  &lt;--------------Edit the file add ceph-node02
+# cat mds.yaml
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - ceph-node02
+  - proxy01
+# ceph orch apply -i mds.yaml
+Scheduled mds.newfs update...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We should now have 2 standby MDS running</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph health
+HEALTH_OK
+# ceph fs status
+newfs - 0 clients
+=====
+RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0    active  newfs.ceph-node01.mpdxtm  Reqs:    0 /s    10     13     12      0
+       POOL          TYPE     USED  AVAIL
+cephfs.newfs.meta  metadata  96.0k  9501M
+cephfs.newfs.data    data       0   9501M
+      STANDBY MDS
+  newfs.proxy01.adwbtv    #&lt;---- Standby 1
+newfs.ceph-node02.rhftca  #&lt;---- Standby 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One of the stand-by MDS servers has to be configured as Standby-replay</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs set newfs allow_standby_replay true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One of the stand-by MDS servers is now a dedicated standby-replay MDS for this Filesystem</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs status
+newfs - 0 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    10     13     12      0
+0-s   standby-replay    newfs.proxy01.adwbtv    Evts:    0 /s     0      0 0      0
+       POOL          TYPE     USED  AVAIL
+cephfs.newfs.meta  metadata  96.0k  9501M
+cephfs.newfs.data    data       0   9501M
+      STANDBY MDS
+newfs.ceph-node02.rhftca
+MDS version: ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Mount the newfs from the workstation server using the admin key</p>
+</div>
+<div class="paragraph">
+<p>Workstation doesn&#8217;t have an admin key deployed</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# ceph -s
+Error initializing cluster client: ObjectNotFound('RADOS object not found (error calling conf_read_file)',)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s copy the key from the bastion host ceph-node01</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# scp -p ceph-node01:/etc/ceph/ceph.client.admin.keyring /etc/ceph/ceph.client.admin.keyring
+workstation# scp -p ceph-node01:/etc/ceph/ceph.conf /etc/ceph/ceph.conf
+workstation# cat /etc/ceph/ceph.client.admin.keyring  | grep key
+	key = AQByMfdjyZliKxAAATe9A/kOwKnG4Dmau5YVRA==</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And kernel moun the newfs at the / root level</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/ /mnt -o name=admin,secret="AQByMfdjyZliKxAAATe9A/kOwKnG4Dmau5YVRA=="</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create folders</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# mkdir -p /mnt/data/archive
+workstation# mkdir -p /mnt/data/work
+workstation# mkdir -p /mnt/data/users
+workstation# mkdir -p /mnt/data/critical</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_add_dedicate_a_pool_to_a_specific_directory"><a class="anchor" href="#_add_dedicate_a_pool_to_a_specific_directory"></a>3. Add dedicate a pool to a specific directory</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_2"><a class="anchor" href="#_exercise_2"></a>3.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -401,6 +574,9 @@ the following tree</p>
 <ul>
 <li>
 <p>Create a new EC pool called <code>fs_data_archive_ec</code> with 2+1 and host failure domain</p>
+</li>
+<li>
+<p>Assing the new EC pool <code>fs_data_archive_ec</code> to folder <code>/data/archive</code></p>
 </li>
 </ul>
 </div>
@@ -414,18 +590,62 @@ the following tree</p>
 </div>
 </div>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>Assing the new EC pool <code>fs_data_archive_ec</code> to folder <code>/data/archive</code></p>
-</li>
-</ul>
+</div>
+<div class="sect2">
+<h3 id="_solution_2"><a class="anchor" href="#_solution_2"></a>3.2. Solution</h3>
+<div class="paragraph">
+<p>Create a new EC pool called <code>fs_data_archive_ec</code> with 2+1 and host failure domain</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd erasure-code-profile set profile21 k=2 m=1
+# ceph osd pool create fs_data_archive_ec 16 16 erasure profile21
+# ceph osd pool application enable fs_data_archive_ec cephfs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We need to enable ec overwrites to use an EC pool with Cephfs</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool set fs_data_archive_ec allow_ec_overwrites true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add the new pool to our Filesystem</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs add_data_pool newfs fs_data_archive_ec</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From the workstation, we install attr</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# dnf install -y attr</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We modify the pool layout for <code>/mnt/data/archive</code> so it uses the new EC pool <code>fs_data_archive_ec</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># setfattr -n ceph.dir.layout.pool -v fs_data_archive_ec /mnt/data/archive
+# cp /etc/hosts /mnt/data/archive
+# rados -p fs_data_archive_ec ls
+10000000005.00000000</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_add_another_active_mds_daemon"><a class="anchor" href="#_add_another_active_mds_daemon"></a>4. Add another Active MDS daemon</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_3"><a class="anchor" href="#_exercise_3"></a>4.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -448,10 +668,89 @@ as a backup for the new ACTIVE MDS you created</p>
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution_3"><a class="anchor" href="#_solution_3"></a>4.2. Solution</h3>
+<div class="paragraph">
+<p>In this example before adding a new active MDS we are going to remove one
+standby daemon, currently we have 2:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs set newfs  standby_count_wanted 1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add two active MDS, increasing max_mds from 1 to 2</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs set newfs max_mds 2
+# ceph fs status
+newfs - 1 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    16     19     17      7
+ 1        active        newfs.proxy01.cvopqn    Reqs:    0 /s    10     13     11      0
+0-s   standby-replay  newfs.ceph-node02.rhftca  Evts:    0 /s     6      9      7      0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can se our new MDS is configured on <code>Rank 1</code>, so we are going to pin <code>Rank
+1</code> to the <code>/mnt/data/work</code> directory from the <code>workstation</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">workstation# setfattr -n ceph.dir.pin -v 1 /mnt/data/work
+workstation# getfattr -n ceph.dir.pin /mnt/data/work
+# file: mnt/data/work
+ceph.dir.pin="1"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Double the size of the MDS cache for the new Active MDS daemon</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph config set mds.newfs.proxy01.cvopqn mds_cache_memory_limit 8589934592</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add new Standby MDS for the new Active MDS</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat mds.yaml
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - ceph-node02
+  - proxy01
+  - ceph-node03
+
+# ceph orch apply -i mds.yaml
+Scheduled mds.newfs update...
+
+# ceph fs status
+newfs - 1 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    16     19     17      7
+ 1        active        newfs.proxy01.cvopqn    Reqs:    0 /s    10     13     11      0
+0-s   standby-replay  newfs.ceph-node02.rhftca  Evts:    0 /s     6      9      7      0
+1-s   standby-replay  newfs.ceph-node03.ajfkpn  Evts:    0 /s     0      3      1      0</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_configure_a_scheduled_snapshot"><a class="anchor" href="#_configure_a_scheduled_snapshot"></a>5. Configure a scheduled snapshot</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_4"><a class="anchor" href="#_exercise_4"></a>5.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -467,10 +766,27 @@ as a backup for the new ACTIVE MDS you created</p>
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution_4"><a class="anchor" href="#_solution_4"></a>5.2. Solution</h3>
+<div class="paragraph">
+<p>Create a schedule snapshot policy for the <code>/data/critical</code> that runs every 3 hours.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph mgr module enable snap_schedule
+# ceph fs snap-schedule add /data/critical 3h
+# ceph fs snap-schedule list /data/critical
+/data/critical 3h</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_create_quotas"><a class="anchor" href="#_create_quotas"></a>6. Create Quotas</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_5"><a class="anchor" href="#_exercise_5"></a>6.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -490,6 +806,54 @@ as a backup for the new ACTIVE MDS you created</p>
 <p>As <code>user2</code> mount the folder and check the quota limit is working.</p>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_5"><a class="anchor" href="#_solution_5"></a>6.2. Solution</h3>
+<div class="paragraph">
+<p>Create user1 and assigned the needed client caps to assign quotas</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs authorize newfs client.user1 /data/users rwp
+# ceph auth ls | grep -A 4 user1
+installed auth entries:
+client.user1
+	key: AQD/ivdjmrbLJxAATxseoobv9BpgEfwDewe06A==
+	caps: [mds] allow rwp fsname=newfs path=/data/users
+	caps: [mon] allow r fsname=newfs
+	caps: [osd] allow rw tag cephfs data=newfs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As user1 set the quota to 100MB for the <code>/data/users</code> folder</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># workstation# umount /mnt
+# workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/data/users /mnt/ -o name=user1,secret="AQD/ivdjmrbLJxAATxseoobv9BpgEfwDewe06A=="
+# workstation# setfattr -n ceph.quota.max_bytes -v 10000000 /mnt/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We create a new user, user2 with rw permissions on /data/users at try to right
+a file of 150 MB:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph fs authorize newfs client.user2 /data/users rw
+[client.user2]
+	key = AQC4jfdj8NovExAAaEJmMkDjMMCXLbin1VLOsQ==
+
+workstation# umount /mnt
+workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/data/users /mnt/ -o name=user2,secret="AQC4jfdj8NovExAAaEJmMkDjMMCXLbin1VLOsQ=="
+workstation# dd if=/dev/zero of=/mnt/test-quota bs=1M count=150
+dd: error writing '/mnt/test-quota': Disk quota exceeded
+14+0 records in
+13+0 records out
+13631488 bytes (14 MB, 13 MiB) copied, 0.0309827 s, 440 MB/s</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
