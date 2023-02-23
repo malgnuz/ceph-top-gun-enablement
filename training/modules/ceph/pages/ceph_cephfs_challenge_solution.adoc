@@ -1,0 +1,270 @@
+= Ceph CephFS Challenge
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: pygments
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+
+== Goals
+
+* Deploy CephFS with HA
+* Assing dedicated pools to folders
+* Increase the Number of Active MDS
+* Work with and schedule snapshots
+* Work with Quotas
+
+
+== Deploy a CephFS Filesystem
+
+=== Exercise
+
+* Deploy a Ceph CephFS filesystem called `newfs`
+** The newfs filesystem will have 2 stand-by mds servers
+** One of the stand-by MDS servers has to be configured as Standby-replay
+** Mount the Filesystem at the `/` level with a client on the `workstation` and create the
+the following tree:
+*** /data
+**** /data/archive
+**** /data/work
+**** /data/users
+**** /data/critical
+
+=== Solution
+
+[TIP]
+====
+If you already have a previous FS it's a good idea to delete it and do the
+challenge with a single FS to avoid confusion, to delete a FS you can do:
+
+----
+# ceph config  set mon  mon_allow_pool_delete true
+# ceph fs volume  rm cephfs --yes-i-really-mean-it
+# ceph orch rm mds.cephfs
+----
+====
+
+Deploy a Ceph CephFS filesystem called `newfs`
+
+----
+# ceph fs volume create newfs --placement=ceph-node01,proxy01
+----
+
+The newfs filesystem will have 2 stand-by mds servers
+
+----
+# ceph fs get newfs | grep standby_count_wanted
+standby_count_wanted	1
+# ceph fs set newfs standby_count_wanted 2
+# ceph fs get newfs | grep standby_count_wanted
+standby_count_wanted	2
+----
+
+We need to increase the placement count to 3 nodes, so we can run 3 MDS, 1
+Active and 2 Stand-by
+
+----
+# ceph health detail
+HEALTH_WARN insufficient standby MDS daemons available
+[WRN] MDS_INSUFFICIENT_STANDBY: insufficient standby MDS daemons available
+    have 1; want 1 more
+
+# ceph orch ls mds --export
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - proxy01
+
+# ceph orch ls mds --export  > mds.yaml
+# vi mds.yaml  <--------------Edit the file add ceph-node02
+# cat mds.yaml
+service_type: mds
+service_id: newfs
+service_name: mds.newfs
+placement:
+  hosts:
+  - ceph-node01
+  - ceph-node02
+  - proxy01
+# ceph orch apply -i mds.yaml
+Scheduled mds.newfs update...
+----
+
+We should now have 2 standby MDS running
+
+----
+# ceph health
+HEALTH_OK
+# ceph fs status
+newfs - 0 clients
+=====
+RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0    active  newfs.ceph-node01.mpdxtm  Reqs:    0 /s    10     13     12      0
+       POOL          TYPE     USED  AVAIL
+cephfs.newfs.meta  metadata  96.0k  9501M
+cephfs.newfs.data    data       0   9501M
+      STANDBY MDS
+  newfs.proxy01.adwbtv    #<---- Standby 1
+newfs.ceph-node02.rhftca  #<---- Standby 2
+----
+
+One of the stand-by MDS servers has to be configured as Standby-replay
+
+----
+# ceph fs set newfs allow_standby_replay true
+----
+
+
+One of the stand-by MDS servers is now a dedicated standby-replay MDS for this Filesystem 
+
+----
+# ceph fs status
+newfs - 0 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    10     13     12      0
+0-s   standby-replay    newfs.proxy01.adwbtv    Evts:    0 /s     0      0 0      0 
+       POOL          TYPE     USED  AVAIL
+cephfs.newfs.meta  metadata  96.0k  9501M
+cephfs.newfs.data    data       0   9501M
+      STANDBY MDS
+newfs.ceph-node02.rhftca
+MDS version: ceph version 16.2.10-94.el8cp (48ce8ed67474ea50f10c019b9445be7f49749d23) pacific (stable)
+----
+
+Mount the newfs from the workstation server using the admin key
+
+
+Workstation doesn't have an admin key deployed
+----
+workstation# ceph -s
+Error initializing cluster client: ObjectNotFound('RADOS object not found (error calling conf_read_file)',)
+----
+
+Let's copy the key from the bastion host ceph-node01
+
+----
+workstation# scp -p ceph-node01:/etc/ceph/ceph.client.admin.keyring /etc/ceph/ceph.client.admin.keyring
+workstation# scp -p ceph-node01:/etc/ceph/ceph.conf /etc/ceph/ceph.conf
+workstation# cat /etc/ceph/ceph.client.admin.keyring  | grep key
+	key = AQByMfdjyZliKxAAATe9A/kOwKnG4Dmau5YVRA==
+----
+
+And kernel moun the newfs at the / root level
+
+----
+workstation# mount -t ceph ceph-node01.example.com,ceph-node02.example.com:/ /mnt -o name=admin,secret="AQByMfdjyZliKxAAATe9A/kOwKnG4Dmau5YVRA=="
+----
+
+Create folders
+
+----
+workstation# mkdir -p /mnt/data/archive
+workstation# mkdir -p /mnt/data/work
+workstation# mkdir -p /mnt/data/users
+workstation# mkdir -p /mnt/data/critical
+----
+
+== Add dedicate a pool to a specific directory
+
+=== Exercise
+
+* The `/data/archive` folder is going to be used for long-lived file archival, a very low number of metadata operations is required, and performance is not an issue.
+** Create a new EC pool called `fs_data_archive_ec` with 2+1 and host failure domain
+** Assing the new EC pool `fs_data_archive_ec` to folder `/data/archive`
+
+[NOTICE]
+====
+EC 2+1 schema is not supported for production workloads, check-out supported configurations https://access.redhat.com/articles/1548993[here]
+====
+
+=== Solution
+
+Create a new EC pool called `fs_data_archive_ec` with 2+1 and host failure domain
+
+----
+# ceph osd erasure-code-profile set profile21 k=2 m=1
+# ceph osd pool create fs_data_archive_ec 16 16 erasure profile21
+# ceph osd pool application enable fs_data_archive_ec cephfs
+----
+
+We need to enable ec overwrites to use an EC pool with Cephfs
+----
+# ceph osd pool set fs_data_archive_ec allow_ec_overwrites true
+----
+
+Add the new pool to our Filesystem
+----
+# ceph fs add_data_pool newfs fs_data_archive_ec
+----
+
+From the workstation, we install attr
+
+----
+workstation# dnf install -y attr
+----
+
+We modify the pool layout for `/mnt/data/archive` so it uses the new EC pool `fs_data_archive_ec`
+
+----
+# setfattr -n ceph.dir.layout.pool -v fs_data_archive_ec /mnt/data/archive
+# cp /etc/hosts /mnt/data/archive
+# rados -p fs_data_archive_ec ls
+10000000005.00000000
+----
+
+
+
+
+== Add another Active MDS daemon
+
+=== Exercise
+
+* The `/data/work` folder has a high count of create/delete operations, it's not performing as expected
+** Add a new Active MDS daemon and manually ping it to the `/data/work`
+** Double the size of the assigned MDS Daemon Cache
+** Each Active MDS needs a backup MDS daemon, so you will need to add a new MDS 
+as a backup for the new ACTIVE MDS you created
+
+=== Solution
+
+In this example before adding a new active MDS we are going to remove one
+standby daemon, currently we have 2:
+
+----
+# ceph fs set newfs  standby_count_wanted 1
+----
+
+Add two active MDS, increasing max_mds from 1 to 2
+
+----
+# ceph fs set newfs max_mds 2
+# ceph fs status
+newfs - 1 clients
+=====
+RANK      STATE                 MDS                ACTIVITY     DNS    INOS   DIRS   CAPS
+ 0        active      newfs.ceph-node01.mpdxtm  Reqs:    0 /s    16     19     17      7
+ 1        active        newfs.proxy01.cvopqn    Reqs:    0 /s    10     13     11      0
+0-s   standby-replay  newfs.ceph-node02.rhftca  Evts:    0 /s     6      9      7      0
+----
+
+
+
+
+== Configure a scheduled snapshot
+
+* The `/data/critical` folder has important information, periodic snapshots for the folder have to be configured
+** Create a schedule snapshot policy for the `/data/critical` that runs every 3 hours.
+
+== Create Quotas
+
+* We need to give `user1` privileges to configure quotas on the `/data/users` folder
+** Create user1 and assigned the needed client caps to assign quotas
+** As user1 set the quota to 100MB for the `/data/users` folder
+* As `user2` mount the folder and check the quota limit is working.
