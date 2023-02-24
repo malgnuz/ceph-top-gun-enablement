@@ -742,9 +742,14 @@ NOTE: Volumes and Subvolumes are used by rook in turn by ODF & Fusion/ODF.
 == Snapshots
 CephFS enables asynchronous snapshots by default These snapshots are stored in a hidden directory called .snap.
 
-To create a snapshot, first mount the CephFS file system on your client node. 
-Create a subdirectory inside the .snap directory. The snapshot name is the new subdirectory name. This
-snapshot contains a copy of all the current files in the CephFS file system.
+You can enable/disable snapshots per FS with:
+
+----
+# ceph fs set <fs_name> allow_new_snaps true
+----
+
+When snapshots are enabled, all directories in CephFS will have a special .snap directory. (You may configure a different name with the client snapdir setting if you wish.)
+To create a CephFS snapshot, you need to mount the FS and create a subdirectory under .snap with a name of your choice. 
 
 ----
 # umount /mnt
@@ -1028,14 +1033,18 @@ It follows the patter: <inode number>.<stripe index>
 
 
 == MDS Autoscaler
-CephFS shared file systems require at least one active MDS service for correct operation, and
-at least one standby MDS to ensure high availability. The MDS autoscaler module ensures the
-availability of enough MDS daemons.
-This module monitors the number of ranks and the number of standby daemons and adjusts the
-the number of MDS daemons that the orchestrator spawns.
 
-To enable the MDS autoscaler module.
+The MDS Autoscaler Module monitors file systems to ensure sufficient MDS daemons are available. It works by adjusting the placement specification for the orchestrator backend of the MDS service. To enable, use:
 
 ----
 # ceph mgr module enable mds_autoscaler
 ----
+
+The module will monitor the following file system settings to inform placement count adjustments:
+
+----
+max_mds file system setting
+standby_count_wanted file system setting
+----
+
+The Ceph monitor daemons are still responsible for promoting or stopping MDS according to these settings. The mds_autoscaler simply adjusts the number of MDS which are spawned by the orchestrator.

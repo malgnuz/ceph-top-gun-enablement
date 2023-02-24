@@ -4,10 +4,8 @@
 
 == introduction.
 
-AWS provides the Security Token Service (STS) to allow secure federation with existing OpenID
-Connect/ OAuth 2.0 compliant identity services such as Keycloak. STS is a standalone REST
-service that provides temporary tokens for an application or user to access an S3 endpoint after
-the user authenticates against an identity provider. 
+AWS introduced the Security Token Service (STS) feature to allow secure federation with existing OpenID
+Connect/ OAuth 2.0 compliant identity services. AWS S3 can make use of the Security Token Service to authenticate users.
 
 Ceph supports a subset of Amazon Secure Token Service (STS) APIs. Users first authenticate against STS and, upon success, receive a short-lived s3 access and secret key that can be used in subsequent requests.
 

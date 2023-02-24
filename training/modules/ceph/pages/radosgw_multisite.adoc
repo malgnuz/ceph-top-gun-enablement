@@ -47,19 +47,15 @@ by one or more object gateways underneath one single Ceph cluster.
 
 . *Zone Group*
 
-A zone group is a set of one or more zones. Data stored in one zone in the zone group is
-replicated to all other zones in the zone group. One zone in every zone group is designated as
-the master zone for that group. The other zones in the zone group are secondary zones.
+A zone group is a set of one or more zones. Data can be replicated between
+zones inside the same zonegroup. 
+
 
 . *Realm*
 
-A realm represents the global namespace for all objects and buckets in the multisite
-replication space. A realm contains one or more zone groups, each of which contains one
-or more zones. One zone group in the realm is designated as the master zone group, and
-the others are secondary zone groups. All RADOS Gateways in the environment pull their
-configuration from the RADOS Gateway in the master zone group and master zone.
-Because the master zone in the master zone group handles all metadata updates, operations such
-as creating users must occur in the master zone.
+A realm forms a global/unified namespace for all objects and buckets in the
+realm . A realm contains one or more zone groups, each of which contains one
+or more zones. 
 
 . *Multi-zone*
 

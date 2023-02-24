@@ -14,7 +14,7 @@ Two user types:
 NOTE: Swift users are out of the scope of this workshop
 
 
-When creating RADOS Gateway users, both the --uid and --display-name options are required and specify a unique account name and a human-friendly display name. Use the -- access-key and --secret options to specify a custom AWS account and secret key for the RADOS user.
+When creating RGW users, both the --uid and --display-name options are required 
 
 ----
 # radosgw-admin user create --uid='user2' --display-name='Second User' --access-key='S3user2' --secret-key='S3user2key'
@@ -87,7 +87,8 @@ You can check user info, and usage stats with the following commands:
 # radosgw-admin user info --uid='user2'
 ----
 
-To regenerate only the secret key of an existing user, use the radosgw-admin key create command with the --gen-secret option.
+To re-create  the secret key of an existing user, use the `radosgw-admin key
+create` command with the `--gen-secret option`.
 
 ----
 # radosgw-admin key create  --uid='user2' --access-key='S3user2' --gen-secret
@@ -292,7 +293,8 @@ radosgw-admin caps add --uid=user2 --caps="users=*;buckets=*"
 
 NOTE: `--caps="[users|buckets|metadata|usage|zone|amz-cache|info|bilog|mdlog|datalog|user-policy|oidc-provider|roles|ratelimit]=[*|read|write|read,write]" `
 
-To remove a user and also delete their objects and buckets, use the --purge-data option.
+Use the --purge-data option with the `radosgw-admin user rm` to delete all
+buckets and data from that user
 
 ----
 # radosgw-admin user rm --uid=user2 --purge-data
@@ -381,14 +383,6 @@ Accessing buckets with explicit tenants, Python Boto3 example
 ----
 
 == Quotas
-
-Set quotas to limit the amount of storage a user or bucket can consume. Set the quota parameters
-first, then enable the quota. To disable a quota, set a negative value for the quota parameter.
-Bucket quotas apply to all buckets owned by a specific UUID, regardless of the user accessing or
-uploading to those buckets.
-
-- Limit a maximum number of objects
-- Limit a maximum storage size in megabytes
 
 Quotas Can be Applied to:
 

@@ -352,7 +352,7 @@ Swift users are out of the scope of this workshop
 </table>
 </div>
 <div class="paragraph">
-<p>When creating RADOS Gateway users, both the --uid and --display-name options are required and specify a unique account name and a human-friendly display name. Use the&#8201;&#8212;&#8201;access-key and --secret options to specify a custom AWS account and secret key for the RADOS user.</p>
+<p>When creating RGW users, both the --uid and --display-name options are required</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -447,7 +447,8 @@ Swift users are out of the scope of this workshop
 </div>
 </div>
 <div class="paragraph">
-<p>To regenerate only the secret key of an existing user, use the radosgw-admin key create command with the --gen-secret option.</p>
+<p>To re-create  the secret key of an existing user, use the <code>radosgw-admin key
+create</code> command with the <code>--gen-secret option</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -667,7 +668,8 @@ old key pair.</p>
 </table>
 </div>
 <div class="paragraph">
-<p>To remove a user and also delete their objects and buckets, use the --purge-data option.</p>
+<p>Use the --purge-data option with the <code>radosgw-admin user rm</code> to delete all
+buckets and data from that user</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -769,22 +771,6 @@ make_bucket: butent
 <div class="sect1">
 <h2 id="_quotas"><a class="anchor" href="#_quotas"></a>3. Quotas</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Set quotas to limit the amount of storage a user or bucket can consume. Set the quota parameters
-first, then enable the quota. To disable a quota, set a negative value for the quota parameter.
-Bucket quotas apply to all buckets owned by a specific UUID, regardless of the user accessing or
-uploading to those buckets.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Limit a maximum number of objects</p>
-</li>
-<li>
-<p>Limit a maximum storage size in megabytes</p>
-</li>
-</ul>
-</div>
 <div class="paragraph">
 <p>Quotas Can be Applied to:</p>
 </div>

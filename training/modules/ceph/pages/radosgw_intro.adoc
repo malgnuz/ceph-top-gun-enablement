@@ -36,13 +36,7 @@
 * Object storage can be used for a variety of use cases, including archiving, backup and disaster recovery, media and entertainment, and big data analytics.
 
 == Introducing RadosGW
-The RADOS Gateway also called the Object Gateway (RGW), is a service that provides access to
-the Ceph cluster for clients using standard object storage APIs. The RADOS Gateway supports
-both the Amazon S3 and OpenStack Swift APIs.
-
-The core daemon, radosgw, is built on top of the librados library. The daemon provides a web
-service interface, based on the Beast HTTP, WebSocket, and networking protocol library, as a
-front-end to handle API requests.
+Ceph Object Storage uses the Ceph Object Gateway daemon (radosgw), an HTTP server designed for interacting with a Ceph Storage Cluster. The Ceph Object Gateway provides interfaces that are compatible with both Amazon S3 and OpenStack Swift, and it has its own user management. 
 
 The radosgw is a client to Ceph Storage that provides object access to other client
 applications. Client applications use standard APIs to communicate with the RADOS Gateway, and
@@ -466,20 +460,7 @@ You begin by logging into `ceph-mon01` to create RADOS Gateway user accounts to 
 == Accessing S3 Objects Using RADOS Gateway
 
 The Amazon S3 API enables developers to manage object storage resources using an Amazon
-S3 compatible interface. Applications implemented with the S3 API can inter-operate with other
-S3-compatible object storage services, besides the RADOS Gateway, migrate storage from
-other locations to your Ceph storage cluster. In a hybrid cloud environment, you can configure
-your applications to use different authentication keys, regions, and vendor services to mix private
-enterprise and public cloud resources and storage locations seamlessly using the same API.
-The Amazon S3 interface defines the namespace in which objects are stored as a bucket. To
-access and manage objects and buckets using the S3 API, applications use RADOS Gateway
-users for authentication. Each user has an access key that identifies the user and a secret key that
-authenticates the user.
-There are object and metadata size limits to consider when using the Amazon S3 API:
-• An object size is between a minimum of OB and a maximum of 5 TB.
-• The maximum size is 5GB in a single upload operation.
-• Upload objects larger than 100MB by using the multipart upload capability.
-• The maximum metadata size is 16,000 bytes in a single HTTP request.
+S3 compatible interface. 
 
 == Using Amazon S3 API Clients
 

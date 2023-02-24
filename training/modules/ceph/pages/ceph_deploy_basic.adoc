@@ -114,10 +114,13 @@ the needed auth details, if any modifications are needed edit the file.
 
 The `cephadm` utility performs the following tasks during the bootstrap process:
 
-* Installs and starts Ceph Monitor and Ceph Manager daemons for a new Red Hat Ceph Storage cluster on the local node as containers.
-* Generates a new SSH key, in the `/etc/ceph/ceph.pub` file by default, for the Ceph storage cluster and adds the SSH key to the root user’s `/root/.ssh/authorized_keys` file.
-* Writes a minimal configuration file needed to communicate with the new cluster to `/etc/ceph/ceph.conf`.
-* Writes a copy of the `client.admin` administrative secret key to `/etc/ceph/ceph.client.admin.keyring`.
+
+* Create a monitor and manager daemon for the new cluster on the local host.
+* Generate a new SSH key for the Ceph cluster and add it to the root user’s /root/.ssh/authorized_keys file.
+* Write a copy of the public key to /etc/ceph/ceph.pub.
+* Write a minimal configuration file to /etc/ceph/ceph.conf. This file is needed to communicate with the new cluster.
+* Write a copy of the client.admin administrative (privileged!) secret key to /etc/ceph/ceph.client.admin.keyring.
+* Add the _admin label to the bootstrap host. By default, any host with this label will (also) get a copy of /etc/ceph/ceph.conf and /etc/ceph/ceph.client.admin.keyring.
 * Deploys a basic monitoring stack with Prometheus, Grafana, and other tools such as `node-exporter` and `alertmanager`.
 
 * Running the bootstrapping process establishes the default user name and password for the initial login to the dashboard. Be sure to change the password after you log in.

@@ -19,42 +19,104 @@
 Every Ceph daemon, process, and library accesses its configuration from one of these sources:
 * The compiled-in default value
 * The centralized configuration database
-* Configuration file that is stored on the local host
+* Configuration file `ceph.conf` that is usually saved in `/etc/ceph.conf`
 
 One of the first things a Ceph process does on startup is parse the configuration options provided via the command line, environment, and local configuration file. The process will then contact the monitor cluster to retrieve configuration stored centrally for the entire cluster. Once a complete view of the configuration is available, the daemon or process startup will proceed.
 
 == Ceph Configuration Sections
 
-Ceph organizes configuration settings into groups, whether stored in the configuration file or in
-the configuration database, using sections called for the daemons or clients to which they apply.
+Ceph organizes confi settings into groups, doesn't matter if stored in the
+ceph.conf or in the configuration database
 
-* The [global] section stores general configuration that is common to all daemons or any
-process that reads the configuration, including clients. You can override [global] parameters
-by creating called sections for individual daemons or clients.
-* The [mon] section stores configuration for the Monitors (MON).
-* The [osd] section stores configuration for the OSD daemons.
-* The [mgr] section stores configuration for the Managers (MGR).
-* The [mds] section stores configuration for the Metadata Servers (MDS).
-* The [client] section stores configuration that applies to all the Ceph clients.
+* The [global] section stores general configuration that is common to all services
+* The [osd] section for the OSD daemons.
+* The [mds] section for the Metadata Servers (MDS).
+* The [mon] section for the Monitors (MON).
+* The [mgr] section for the Managers (MGR).
+* The [mds] section for the Metadata Servers (MDS).
+* The [client] section for all the Ceph clients. (RGW config is included in the client section)
 
-Sections may also specify an individual daemon or client name. For example, mon.foo, osd.123, and client.smith are all valid section names.
+For example to make a modification to the mons in ceph config database
+
+----
+# ceph config set mon 
+----
+
+To get current config from the ceph config database the for mds filesystem
+called newfs and query the parameter mds_cache_memory_limit
+
+----
+# ceph config get mds.newfs mds_cache_memory_limit
+4294967296
+----
+
+To get current config from the ceph config database to a specific MDS daemon
+called proxy01.cvopqn and query the parameter mds_cache_memory_limit
+
+----
+# ceph config get mds.newfs.proxy01.cvopqn mds_cache_memory_limit
+4294967296
+----
 
 
 == Using the Ceph centralized configuration database
 
-The MON cluster manages and stores the centralized configuration database on the MON nodes.
-You can either change a setting temporarily, until the daemons restart, or configure a setting
-permanently and store it in the database. You can change most configuration settings while the
-cluster is running.
+The Ceph Centralized configuration database is the prefered way of configuring
+Ceph parameters when we want to make them permanent, the values for the config
+database are stored in the Monitors.
 
 Use ceph config commands to query the database and view configuration information.
 
-* `ceph config ls` to list all possible configuration settings.
-* `ceph config help` setting, for help with a particular configuration setting.
-* `ceph config dump`, to show the cluster configuration database settings.
-* `ceph config show $type.$id`, to show the database settings for a specific daemon. Use `show-with-defaults` to include default settings.
-* `ceph config get $type.$id`, to get a specific configuration setting.
-* `ceph config set $type.$id`, to set a specific configuration setting.
+* `ceph config ls` list all ceph configuration settings. Good for when you don't remember the exact parameter you want to modify
+
+----
+# ceph config ls | grep pool_delete
+mon_allow_pool_delete
+mon_fake_pool_delete
+----
+
+* `ceph config get`. Once we get the config setting we want to modify from `ceph config ls` we can query its current value with `ceph config get`
+
+----
+# ceph config get mon mon_allow_pool_delete
+true
+----
+
+* `ceph config set`, Now that we have the current value we can use `set` to * modify the parameter to a new value
+
+----
+# ceph config set mon mon_allow_pool_delete true
+----
+
+* `ceph config dump`, show the cluster configuration database parameters. Good to check what parameters have been changed from their default value
+
+----
+# ceph config dump
+WHO                                         MASK  LEVEL     OPTION                                     VALUE                                                                                                             RO
+global                                            basic     container_image                            registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:04c39425bc9e05e667ebe23513847b905b5998994cc95572c6a4549b8826bd81  *
+global                                            advanced  mon_max_pg_per_osd                         512
+global                                            dev       rbd_config_pool_override_update_timestamp  1677145632
+global                                            advanced  rbd_default_order                          20
+  mon                                             advanced  auth_allow_insecure_global_id_reclaim      false
+  mon                                             advanced  mon_allow_pool_delete                      true
+  mon                                             advanced  mon_max_pg_per_osd                         512
+  mon                                             advanced  public_network                             192.168.56.0/24                                                                                                   *
+  mgr                                             advanced  mgr/cephadm/container_init                 True                                                                                                              *
+  mgr                                             advanced  mgr/cephadm/migration_current              5                                                                                                                 *
+  mgr                                             advanced  mgr/dashboard/ALERTMANAGER_API_HOST        http://proxy01.example.com:9093                                                                                   *
+  mgr                                             advanced  mgr/dashboard/GRAFANA_API_SSL_VERIFY       false                                                                                                             *
+  mgr                                             advanced  mgr/dashboard/GRAFANA_API_URL              https://proxy01.example.com:3000                                                                                  *
+  mgr                                             advanced  mgr/dashboard/PROMETHEUS_API_HOST          http://proxy01.example.com:9095                                                                                   *
+  mgr                                             advanced  mgr/dashboard/RGW_API_ACCESS_KEY           71M1JD7FSWU1BR2UYARK                                                                                              *
+  mgr                                             advanced  mgr/dashboard/RGW_API_SECRET_KEY           CZ7t4uJySQvqxIeLYLPxCgDq60EAGRQf8372mjAi                                                                          *
+  mgr                                             advanced  mgr/dashboard/ssl_server_port              8443                                                                                                              *
+  mgr                                             advanced  mgr/orchestrator/orchestrator              cephadm
+  osd                                             advanced  osd_memory_target_autotune                 true
+    mds.newfs                                     basic     mds_join_fs                                newfs
+    mds.newfs.proxy01.cvopqn                      basic     mds_cache_memory_limit                     8589934592
+    client.rgw.objectgw.ceph-node02.dunkir        basic     rgw_frontends                              beast port=8080                                                                                                   *
+----
+
 
 == The new role of ceph.conf
 
