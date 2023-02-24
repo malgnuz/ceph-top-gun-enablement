@@ -492,16 +492,22 @@ the needed auth details, if any modifications are needed edit the file.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Installs and starts Ceph Monitor and Ceph Manager daemons for a new Red Hat Ceph Storage cluster on the local node as containers.</p>
+<p>Create a monitor and manager daemon for the new cluster on the local host.</p>
 </li>
 <li>
-<p>Generates a new SSH key, in the <code>/etc/ceph/ceph.pub</code> file by default, for the Ceph storage cluster and adds the SSH key to the root user’s <code>/root/.ssh/authorized_keys</code> file.</p>
+<p>Generate a new SSH key for the Ceph cluster and add it to the root user’s /root/.ssh/authorized_keys file.</p>
 </li>
 <li>
-<p>Writes a minimal configuration file needed to communicate with the new cluster to <code>/etc/ceph/ceph.conf</code>.</p>
+<p>Write a copy of the public key to /etc/ceph/ceph.pub.</p>
 </li>
 <li>
-<p>Writes a copy of the <code>client.admin</code> administrative secret key to <code>/etc/ceph/ceph.client.admin.keyring</code>.</p>
+<p>Write a minimal configuration file to /etc/ceph/ceph.conf. This file is needed to communicate with the new cluster.</p>
+</li>
+<li>
+<p>Write a copy of the client.admin administrative (privileged!) secret key to /etc/ceph/ceph.client.admin.keyring.</p>
+</li>
+<li>
+<p>Add the _admin label to the bootstrap host. By default, any host with this label will (also) get a copy of /etc/ceph/ceph.conf and /etc/ceph/ceph.client.admin.keyring.</p>
 </li>
 <li>
 <p>Deploys a basic monitoring stack with Prometheus, Grafana, and other tools such as <code>node-exporter</code> and <code>alertmanager</code>.</p>

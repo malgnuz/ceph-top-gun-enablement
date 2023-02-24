@@ -626,15 +626,6 @@ access the default pool.
 </div>
 <div class="title">Figure 2. librbd Diagram</div>
 </div>
-<div class="paragraph">
-<p>Because the user space implementation of the Ceph block device (for example, librbd) cannot take
-advantage of the Linux page cache, it performs its own in-memory caching, known as
-RBD caching. When the OS implements a barrier mechanism or a flush request, Ceph writes all dirty
-data to the OSDs. This means that using write-back caching is just as safe as using physical hard
-disk caching with a VM that properly sends flushes (for example, Linux kernel &gt;= 2.6.32). The
-cache uses a Least Recently Used (LRU) algorithm, and in write-back mode it can coalesce contiguous
-requests for better throughput.</p>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -731,12 +722,12 @@ The following table provides a summary of the different RBD commands.</p>
 <h2 id="_snapshots"><a class="anchor" href="#_snapshots"></a>5. Snapshots</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>RBD snapshots are read-only copies of an RBD image created at a particular time. RBD snapshots use
-a COW technique to reduce the amount of storage needed to maintain snapshots. Before applying a
-write I/O request to an RBD snapshot image, the cluster copies the original data to another area
-in the placement group of the object affected by the I/O operation. Snapshots do not consume any
-storage space when created, but grow in size as the objects that they contain change. RBD images
-support incremental snapshots</p>
+<p>A snapshot is a read-only logical copy of an image at a particular point in
+time: a checkpoint. One of the advanced features of Ceph block devices is that
+you can create snapshots of images to retain point-in-time state history. Ceph
+also supports snapshot layering, which allows you to clone images (for example,
+VM images) quickly and easily. Ceph block device snapshots are managed using
+the rbd command and several higher-level interfaces.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -745,8 +736,7 @@ support incremental snapshots</p>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-Remember to suspend access to the block device via the <code>fsfreeze</code> command before creating
-a snapshot and to thaw the block device using <code>fsfreeze --unfreeze</code> once done.
+Because RBD is unaware of any file system within an image (volume), snapshots are merely crash-consistent unless they are coordinated within the mounting (attaching) operating system. We therefore recommend that you pause or stop I/O before taking a snapshot.  Remember to suspend access to the block device via the <code>fsfreeze</code> command before creating a snapshot and to thaw the block device using <code>fsfreeze --unfreeze</code> once done.
 </td>
 </tr>
 </table>
@@ -779,9 +769,10 @@ a snapshot and to thaw the block device using <code>fsfreeze --unfreeze</code> o
 <h2 id="_clones"><a class="anchor" href="#_clones"></a>6. Clones</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>RBD clones are read-write copies of an RBD image that use a protected RBD snapshot as a base. A
-RBD clone can also be flattened, which converts it into an RBD image independent of its source.
-The cloning process has three steps:</p>
+<p>Ceph supports the ability to create many copy-on-write (COW) clones of a block device snapshot. Snapshot layering enables Ceph block device clients to create images very quickly. For example, you might create a block device image with a Linux VM written to it, snapshot the image, protect the snapshot, and create as many copy-on-write clones as you like. A snapshot is read-only, so cloning a snapshot simplifies semantics, making it possible to create clones rapidly.</p>
+</div>
+<div class="paragraph">
+<p>The cloning process has three steps:</p>
 </div>
 <div class="ulist">
 <ul>

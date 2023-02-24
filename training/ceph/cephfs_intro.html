@@ -337,16 +337,16 @@
 <img src="_images/cephfs-architecture.svg" alt="cephfs" width="740" height="580">
 </div>
 </div>
+<div class="paragraph">
+<p>Upstream documentation on MDS Architecture and Concepts <a href="https://docs.ceph.com/en/latest/cephfs/#cephfs-concepts">link</a></p>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_mds_the_metadata_server"><a class="anchor" href="#_mds_the_metadata_server"></a>2. MDS the metadata server</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Metadata Server (MDS) manages metadata for CephFS clients. This daemon provides
-information that CephFS clients need to access RADOS objects, such as providing file locations
-within the file-system tree. MDS manages the directory hierarchy and stores file metadata in a RADOS cluster, such as the owner, time stamps, and permission modes. MDS is also responsible for
-access caching and managing client caches to maintain cache coherence.</p>
+<p>The Metadata Server (MDS) manages metadata for CephFS clients.</p>
 </div>
 <div class="paragraph">
 <p>While the data for inodes in a Ceph file system is stored in RADOS and accessed by the clients directly, inode metadata and directory information is managed by the Ceph metadata server (MDS). The MDSs act as mediators for all metadata-related activity, storing the resulting information in a separate RADOS pool from the file data.</p>
@@ -369,13 +369,7 @@ inode</p>
 <p>Clients can also request caps directly from the MDS, which is necessary to read or write file data.</p>
 </div>
 <div class="paragraph">
-<p>MDS daemons operate in two modes: active and standby. An active MDS manages the metadata
-on the CephFS file system. A standby MDS serves as a backup and switches to the active mode
-if the active MDS becomes unresponsive. CephFS shared file systems require an active MDS
-service. You should deploy at least one standby MDS in your cluster to ensure high availability.
-CephFS clients first contact a MON to authenticate and retrieve the cluster map. Then, the client
-queries an active MDS for file metadata. The client uses the metadata to access the objects that
-comprise the requested file or directory by communicating directly with the OSDs.</p>
+<p>MDS daemons operate in two modes: active and standby.  You need a minimum of 2 mds services to have HA at the MDS service level.</p>
 </div>
 </div>
 </div>
