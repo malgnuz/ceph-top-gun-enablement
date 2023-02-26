@@ -17,6 +17,11 @@
 * Work with and schedule snapshots
 * Work with Quotas
 
+[IMPORTANT]
+====
+Please try and solve the challenge by yourself only come to this page as a last
+resource after fighting with ceph for a while :D
+====
 
 == Deploy a CephFS Filesystem
 
@@ -179,7 +184,7 @@ workstation# mkdir -p /mnt/data/critical
 ** Create a new EC pool called `fs_data_archive_ec` with 2+1 and host failure domain
 ** Assing the new EC pool `fs_data_archive_ec` to folder `/data/archive`
 
-[NOTICE]
+[IMPORTANT]
 ====
 EC 2+1 schema is not supported for production workloads, check-out supported configurations https://access.redhat.com/articles/1548993[here]
 ====

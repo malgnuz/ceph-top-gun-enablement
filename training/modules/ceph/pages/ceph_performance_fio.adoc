@@ -225,6 +225,7 @@ After several tests, you should end up with a configuration that gives you the b
 This is an example FIO file using the FIO RBD engine. No actual operating system mount happens when using this engine. 
 
 NOTE: With FIO RBD engine, we have to use a job count of 1 per RBD volume. 
+
 NOTE: With FIO RBD engine, use single image for single client (exclusive lock kills performance)
 
 ----

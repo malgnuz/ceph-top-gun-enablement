@@ -14,6 +14,12 @@
 :toc: left
 :toclevels: 4
 
+[IMPORTANT]
+====
+Please try and solve the challenge by yourself only come to this page as a last
+resource after fighting with ceph for a while :D
+====
+
 
 == Create RBD Pool
 
