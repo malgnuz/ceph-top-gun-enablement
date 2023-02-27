@@ -752,27 +752,6 @@ this file to your needs:</p>
 -rw-r--r-- 1 root root 1240 Dec 27 16:13 /root/cluster-spec.yaml</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>For a fully automated deployment of Ceph in the lab, we can run:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># bash one_step_cluster_deploy.sh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This will provide a ceph cluster with 1 OSD per node, and with the RGW and MDS
-services running, also the observability stack will be moved to a specific node
-tagged in ansible inside the mgr group</p>
-</div>
-<div class="paragraph">
-<p>To purge the cluster you can use the script:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># bash purge_ceph_cluster.sh</pre>
-</div>
-</div>
 </div>
 </div>
 </div>

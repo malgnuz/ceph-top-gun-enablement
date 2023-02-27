@@ -376,7 +376,7 @@ node as the container registry.</p>
 <p>Bootstrap node will be ceph-node01</p>
 </li>
 <li>
-<p>The cluster needs to have segregated networks, public and cluster network</p>
+<p>The cluster needs to have segregated networks, public and cluster network. <a href="https://docs.ceph.com/en/latest/rados/configuration/network-config-ref/#id3">Docs</a></p>
 <div class="ulist">
 <ul>
 <li>
@@ -389,17 +389,17 @@ node as the container registry.</p>
 </div>
 </li>
 <li>
-<p>The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap</p>
+<p>The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap. <a href="https://docs.ceph.com/en/quincy/cephadm/host-management/#creating-many-hosts-at-once">Docs</a></p>
 </li>
 <li>
 <p>Only one OSD per Node is required</p>
 </li>
 <li>
-<p>Limit the amount of memory an osd can consume to 2GB</p>
+<p>Limit the amount of memory an osd can consume to 2GB. <a href="https://docs.ceph.com/en/quincy/cephadm/services/osd/#automatically-tuning-osd-memory">Docs</a></p>
 <div class="ulist">
 <ul>
 <li>
-<p>The nodes will belong to a crushmap location of <code>RACK</code> called <code>RACK1</code></p>
+<p>The nodes will belong to a crushmap location of <code>RACK</code> called <code>RACK1</code>. <a href="https://docs.ceph.com/en/quincy/cephadm/host-management/#setting-the-initial-crush-location-of-host">Docs</a></p>
 </li>
 </ul>
 </div>
@@ -408,6 +408,20 @@ node as the container registry.</p>
 </div>
 </li>
 </ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you need to change the crush location for a running cluster checkout this <a href="https://docs.ceph.com/en/quincy/rados/operations/crush-map/#add-a-bucket">Doc</a>.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -569,7 +583,9 @@ StrictHostKeyChecking no</code></pre>
 <p>We will configure 2 OSD&#8217;s per drive, With Encryption enabled at the OSD level. <a href="https://docs.ceph.com/en/quincy/cephadm/services/osd/#additional-options">Docs</a></p>
 </li>
 <li>
-<p>We need to use a specific device class for the new osds that we want to segregate (take a look at <code>ceph osd crush class</code>, cephadm in 5.3 doesn&#8217;t support specifying a class during bootstrap)</p>
+<p>We need to use a specific device class for the new osds that we want to
+segregate (take a look at <code>ceph osd crush class</code>, cephadm in 5.3 doesn&#8217;t
+support specifying a class during bootstrap) <a href="https://docs.ceph.com/en/quincy/rados/operations/crush-map/#device-classes">Docs</a></p>
 </li>
 <li>
 <p>Create a pool called <code>rgw-security</code> with <code>replica 3</code>, it will use a rule that uses the new device classes we created</p>
