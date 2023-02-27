@@ -36,11 +36,6 @@ ceph.conf or in the configuration database
 * The [mds] section for the Metadata Servers (MDS).
 * The [client] section for all the Ceph clients. (RGW config is included in the client section)
 
-For example to make a modification to the mons in ceph config database
-
-----
-# ceph config set mon 
-----
 
 To get current config from the ceph config database the for mds filesystem
 called newfs and query the parameter mds_cache_memory_limit
