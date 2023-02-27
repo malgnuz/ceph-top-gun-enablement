@@ -29,13 +29,18 @@ node as the container registry.
 
 * Deploy a Ceph cluster with 4 Nodes: `ceph-node01, ceph-node02, ceph-node03, proxy01`
 ** Bootstrap node will be ceph-node01
-** The cluster needs to have segregated networks, public and cluster network
+** The cluster needs to have segregated networks, public and cluster network. https://docs.ceph.com/en/latest/rados/configuration/network-config-ref/#id3[Docs]
 *** Public Network will be: `192.168.56.0/24`
 *** Cluster Network will be: `172.16.7.0/24`
-** The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap
+** The cluster will be deployed using a specification file, to include the four nodes during the initial bootstrap. https://docs.ceph.com/en/quincy/cephadm/host-management/#creating-many-hosts-at-once[Docs]
 ** Only one OSD per Node is required
-** Limit the amount of memory an osd can consume to 2GB
-*** The nodes will belong to a crushmap location of `RACK` called `RACK1`
+** Limit the amount of memory an osd can consume to 2GB. https://docs.ceph.com/en/quincy/cephadm/services/osd/#automatically-tuning-osd-memory[Docs]
+*** The nodes will belong to a crushmap location of `RACK` called `RACK1`. https://docs.ceph.com/en/quincy/cephadm/host-management/#setting-the-initial-crush-location-of-host[Docs]
+
+[TIP]
+====
+If you need to change the crush location for a running cluster checkout this https://docs.ceph.com/en/quincy/rados/operations/crush-map/#add-a-bucket[Doc].
+====
 
 == Create RBD Pools https://docs.ceph.com/en/latest/rados/operations/pools/#pools[Docs]
 
@@ -92,5 +97,7 @@ StrictHostKeyChecking no
 * We need to add a dedicated data pool for RGW, that has to be physically segregated from the rest of the cluster data
 ** We need to add 2 new drives from nodes `ceph-node01,ceph-node02 and ceph-node03`
 ** We will configure 2 OSD's per drive, With Encryption enabled at the OSD level. https://docs.ceph.com/en/quincy/cephadm/services/osd/#additional-options[Docs]
-** We need to use a specific device class for the new osds that we want to segregate (take a look at `ceph osd crush class`, cephadm in 5.3 doesn't support specifying a class during bootstrap)
+** We need to use a specific device class for the new osds that we want to
+segregate (take a look at `ceph osd crush class`, cephadm in 5.3 doesn't
+support specifying a class during bootstrap) https://docs.ceph.com/en/quincy/rados/operations/crush-map/#device-classes[Docs]
 ** Create a pool called `rgw-security` with `replica 3`, it will use a rule that uses the new device classes we created

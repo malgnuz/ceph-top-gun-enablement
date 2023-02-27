@@ -203,6 +203,13 @@ the remote/opentlc dns server, in linux we can use `sshuttle` for example:
 ----
 # sshuttle --dns -r USER@workstation.dynamic.opentlc.com 192.168.56.0/24
 ----
+
+Install sshutle for Mac:
+
+----
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+$ brew install sshuttle //
+----
 ====
 
 Get the Public IP address of `ceph-node01` to access the dashboard from your browser:
