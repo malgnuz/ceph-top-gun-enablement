@@ -416,6 +416,22 @@ resource after fighting with ceph for a while :D</p>
 </div>
 <div class="sect2">
 <h3 id="_solution"><a class="anchor" href="#_solution"></a>2.2. Solution</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you are using your already running cluster don&#8217;t use the following spec
+file, because the location only works during the initial bootstrap of the node
+ti can be modifed afterwards.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Create a Spec file as the following:</p>
 </div>
@@ -671,14 +687,14 @@ commands. for example</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create rbdreplica2 replicate
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create rbdreplica2 replicated replicated_rule
 # ceph osd pool set rbdreplica2 size 2
 # ceph osd pool set rbdreplica2 min_size 1
 # ceph osd pool application enable rbdreplica2 rbd
 # ceph osd pool ls detail  | grep rbdreplica2
 pool 5 'rbdreplica2' replicated size 2 min_size 1 crush_rule 0 object_hash rjenkins pg_num 32 pgp_num 32 autoscale_mode on last_change 54 flags hashpspool stripe_width 0 application rbd
 
-# ceph osd pool create rbdreplica3 replicate
+# ceph osd pool create rbdreplica3 replicated replicated_rule
 # ceph osd pool application enable rbdreplica3 rbd</code></pre>
 </div>
 </div>

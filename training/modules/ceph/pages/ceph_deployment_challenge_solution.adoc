@@ -41,6 +41,13 @@ resource after fighting with ceph for a while :D
 
 === Solution
 
+[IMPORTANT]
+====
+If you are using your already running cluster don't use the following spec
+file, because the location only works during the initial bootstrap of the node
+ti can be modifed afterwards.
+====
+
 Create a Spec file as the following:
 
 ----
