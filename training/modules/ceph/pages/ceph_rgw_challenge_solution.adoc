@@ -1,0 +1,132 @@
+= Ceph RadosGW Challenge
+
+:toc:
+:toclevels: 3
+:icons: font
+:source-highlighter: pygments
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+
+== Goals
+
+* Deploy RGW in HA mode
+* Work with Placement Targets and Storage Classes
+* Use Life Cycle policies to transition object to other tiers
+* Work with bucket policies
+* Configure basic STS authentication
+* Secure the RGW endpoint with SSL
+* Audit all S3 operations in RGW
+* Configure a Multisite Replicated 
+
+== Deploy RGW services
+
+=== Exercide
+
+* Create a realm called `single`, add a zonegroup called `singlezg`, and a master zone called `singlezone`
+* Deploy two RGW services, using the above-mentioned realm and zone, on port 8080
+* Create a test user called `user1`, and test rgw setup by creating a bucket * called `bucket1` and upload an object with S3 client
+
+=== Solution
+
+----
+# radosgw-admin realm create --rgw-realm=single --default
+# radosgw-admin zonegroup create --rgw-zonegroup=singlezg --master --default
+# radosgw-admin zone create --rgw-zonegroup=singlezg --rgw-zone=singlezone --master --default
+# radosgw-admin period update --rgw-realm=single --commit
+# ceph orch apply rgw single.zone --realm=single --zone=singlezone --placement="2 proxy01 ceph-node02" --port=8080
+# radosgw-admin user create --uid=user1 --display-name="user1" --access-key=user1
+----
+
+----
+# aws configure
+AWS Access Key ID [None]: user1
+AWS Secret Access Key [None]: user1
+Default region name [None]: singlezg
+Default output format [None]: text
+----
+
+
+
+
+== Deploy a secured(SSL) Ingress service to provide HA
+
+* Deploy an ingress service using ip `192.168.56.100` that will load-balance client requests between both of the deployed RGW services
+* Configure SSL, the SSL termination must be done at the Ingress/HAproxy level
+** You can use certificates available on /root/certificates of the admin nodes,
+or create your own custom certificates, the SAN of the provided certs covers `s3.example.com` and `s3zone1.example.com`
+
+== Add a new placement target to zonegroup `singlezg`
+
+* Create dedicated EC pools for the placement target
+** Create a new EC pool called `singlezone.rgw.ssd.buckets.data` pg count 32, with 2+1 EC and host failure domain
+WARNING: EC 2+1 Setting is not supported in production, just for lab testing, check-out valid configurations https://access.redhat.com/articles/1548993[here]
+*** Enable Bluestore compression: aggressive, snappy
+** Create a new replicated pool `singlezone.rgw.ssd.buckets.index` pg count: 8, replica 3 and host failure domain
+** Create a new replicated pool `singlezone.rgw.ssd.buckets.non-ec` pg count: 8, replica 3 and host failure domain
+* Create a Placement target called rgwec
+** Users should be able to store data on the new placement target using a reference tag when they create their buckets
+
+== Configure a LifeCycle policy to transition objects to a COLD Storage Class
+
+* Create a new RGW data pool used for storing Cold Data
+** Create a new EC pool called `singlezone.rgw.cold.buckets.data` pg count 16, with 2+1 EC and host failure domain
+* Create a new Storage Class called `COLD` in the DEFAULT Placement Group
+** Create a new bucket called `data1`
+** Configure a Life Cycle policy that will transition objects to the `COLD` Storage class after 10 days
+** Apply the LCP to the `data1` bucket
+** Upload some objects and test the LCP is working(Remember rgw_lc_debug_interval to speed things up)
+
+== Create a Bucket Life Cycle policy
+
+* Create a new user called `user2`, and create a bucket called `policy` with the following layout:
+** Policy
+*** Policy/reads
+*** Policy/write
+* Create a Bucket policy that will give `user1` the following access to bucket `policy`
+** Policy/ <-  list objects(not read/GET)
+** Policy/reads <- read(GET) 
+** Policy/write <-  write(PUT/DELETE) 
+
+== Configure Local Database STS(using AssumeRole)
+
+* We need to allow `user1` and `user2` to assume an IAM role called `role1` that will give them full access to a bucket called `admin`
+** Create a new RGW `admin` user
+*** With the `admin` user create an `admin` bucket and add 1 object
+** Enable the STS endpoint in the RGW services
+** Create a new IAM role called `admin` 
+** Create a Role Policy Document that will allow `user1` and `user2` to assume `role1`
+** Create a new role policy that allows `user1` and `user2` full access to bucket `admin`
+** Using an AWS client assume the IAM `admin` role using STS
+** Use the temporal token created to access the `admin` bucket
+
+== Audit all S3 operations
+* Configure the opslog, so all S3 operations get stored in * /var/log/ceph/`FSID`/opslog.log
+
+== Configure a new realm that has multisite replication
+
+* New Realm/Zonegroup/Zone
+** On site1 the one we already have configured, we need to create:
+*** A realm called: `multi`
+*** A zonegroup called: `singlezg1`
+*** A zone called: `singlezone1`
+*** New RGW instances and pools for this Realm
+
+* We need a second Ceph Cluster configured
+** The second site ceph deployment needs:
+*** A realm called: `multi`
+*** A zonegroup called: `singlezg2`
+*** A zone called: `singlezone2`
+*** RGW instances and pools for this Realm
+
+* Test that the Multisite replication is working between sites.
+
+== Enable per-bucket replication
+
+* Disable Full zonegroup replication
+* Create a new bucket called `sync1`
+* Configure symmetrical replication for bucket `sync1`
+* Create a new bucket called `sync2`
+* Configure uni-directional replication from zone `singlezone1` to `singlezone2`
+* Test bucket granular replication

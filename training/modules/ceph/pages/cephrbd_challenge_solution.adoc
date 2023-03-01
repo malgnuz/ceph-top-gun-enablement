@@ -105,6 +105,15 @@ Rest of the steps to follow:
 # rbd snap create newrbd/testimage@snap2
 ----
 
+If your /mnt/ directory fills up with the data you copy, remember that you can
+expand rbd volumes and their underliying FS online
+
+----
+# rbd resize rbdpool/testimage --size 20G
+# resize2fs /dev/rbd0
+----
+
+
 == Export and Import
 
 === Exercise

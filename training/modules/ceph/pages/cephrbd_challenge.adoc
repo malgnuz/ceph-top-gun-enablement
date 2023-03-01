@@ -35,6 +35,11 @@ Perform the following operations in pool `newrbd`:
 * Copy the content of `/var/lib/alternatives/` into the RBD Image in a directory called `batch2`
 * Create a snapshot `snap2` for the RBD Image
 
+[NOTE]
+====
+If you get a full system, remember, you can extend rbd images online!
+====
+
 == Export and Import
 
 Perform the following operations in pool `newrbd`:

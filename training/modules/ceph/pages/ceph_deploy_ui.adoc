@@ -15,9 +15,7 @@
 :toclevels: 4
 
 
-
-
-[WARN]
+[IMPORTANT]
 ====
 Before performing this hands-on lab, you must go through the LAB env
 preparation steps described in the xref:opentlc_lab_env.adoc[OpenTLC LAB] section 
