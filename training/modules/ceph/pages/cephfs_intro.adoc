@@ -313,6 +313,12 @@ stored in the fs_name filesystem, still from our workstation:
 
 ----
 dd if=/dev/zero of=/mnt/100MB bs=4k iflag=fullblock,count_bytes count=100M
+----
+
+We can write to the FS ok, but we can't query the FS status with user 0 that we
+created it doesn't have permisions.
+
+----
 # ceph --id 0 fs status
 Error EACCES: access denied: does your client key have mgr caps? See http://docs.ceph.com/en/latest/mgr/administrator/#client-authentication
 ----
