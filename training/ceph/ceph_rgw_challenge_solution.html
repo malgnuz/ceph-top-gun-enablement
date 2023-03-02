@@ -380,7 +380,7 @@
 # radosgw-admin zone create --rgw-zonegroup=singlezg --rgw-zone=singlezone --master --default
 # radosgw-admin period update --rgw-realm=single --commit
 # ceph orch apply rgw single.zone --realm=single --zone=singlezone --placement="2 proxy01 ceph-node02" --port=8080
-# radosgw-admin user create --uid=user1 --display-name="user1" --access-key=user1</code></pre>
+# radosgw-admin user create --uid='user1' --display-name='First User' --access-key='user1' --secret-key='user1'</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -389,7 +389,8 @@
 AWS Access Key ID [None]: user1
 AWS Secret Access Key [None]: user1
 Default region name [None]: singlezg
-Default output format [None]: text</code></pre>
+Default output format [None]: text
+# aws s3 --endpoint http://proxy01:8080 mb s3://bucket1 --region singlezg</code></pre>
 </div>
 </div>
 </div>
@@ -398,6 +399,8 @@ Default output format [None]: text</code></pre>
 <div class="sect1">
 <h2 id="_deploy_a_securedssl_ingress_service_to_provide_ha"><a class="anchor" href="#_deploy_a_securedssl_ingress_service_to_provide_ha"></a>3. Deploy a secured(SSL) Ingress service to provide HA</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise"><a class="anchor" href="#_exercise"></a>3.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -417,10 +420,54 @@ or create your own custom certificates, the SAN of the provided certs covers <co
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution_2"><a class="anchor" href="#_solution_2"></a>3.2. Solution</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat &lt;&lt; EOF &gt;  rgw-ingress.yaml
+service_type: ingress
+service_id: rgw.objectgw
+placement:
+  hosts:
+    - ceph-node02
+    - ceph-node03
+spec:
+  backend_service: rgw.single.zone
+  virtual_ip: 192.168.56.100/24
+  frontend_port: 443
+  monitor_port:  1967
+  ssl_cert: |
+     -----BEGIN CERTIFICATE-----
+$( cat /root/certificates/certificate.pem | grep -v CERTIFICATE | awk '{$1="     "$1}1' )
+     -----END CERTIFICATE-----
+     -----BEGIN RSA PRIVATE KEY-----
+$( cat /root/certificates/certificate.key | grep -v PRIVATE | awk '{$1="     "$1}1' )
+     -----END RSA PRIVATE KEY-----
+EOF</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply -i rgw-ingress.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After a couple of minutes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># curl https://s3zone1.example.com &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"&gt;&lt;Owner&gt;&lt;ID&gt;anonymous&lt;/ID&gt;&lt;DisplayName&gt;&lt;/DisplayName&gt;&lt;/Owner&gt;&lt;Buckets&gt;&lt;/Buckets&gt;&lt;/ListAllMyBucketsResult&gt;
+# aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 ls</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_add_a_new_placement_target_to_zonegroup_singlezg"><a class="anchor" href="#_add_a_new_placement_target_to_zonegroup_singlezg"></a>4. Add a new placement target to zonegroup <code>singlezg</code></h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_2"><a class="anchor" href="#_exercise_2"></a>4.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -448,22 +495,171 @@ WARNING: EC 2+1 Setting is not supported in production, just for lab testing, ch
 </div>
 </li>
 <li>
-<p>Create a Placement target called rgwec</p>
+<p>Create a Placement target called <code>rgwec</code></p>
 <div class="ulist">
 <ul>
 <li>
 <p>Users should be able to store data on the new placement target using a reference tag when they create their buckets</p>
 </li>
+<li>
+<p>Modify <code>user1</code> adding the new tag, create a bucket with reference tag <code>rgwec</code></p>
+</li>
 </ul>
 </div>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_3"><a class="anchor" href="#_solution_3"></a>4.2. Solution</h3>
+<div class="paragraph">
+<p>Create the requested pools for the Placement Target and also enable compresion
+for the data pool <code>singlezone.rgw.ssd.buckets.data</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create zone1.rgw.ssd.buckets.index 8 8 replicated
+# ceph osd pool create zone1.rgw.ssd.buckets.non-ec 8 8 replicated
+# ceph osd erasure-code-profile set profile21 k=2 m=1
+# ceph osd pool create singlezone.rgw.ssd.buckets.data 32 32 erasure profile21
+# ceph osd pool application enable zone1.rgw.ssd.buckets.index rgw
+# ceph osd pool application enable zone1.rgw.ssd.buckets.non-ec rgw
+# ceph osd pool application enable singlezone.rgw.ssd.buckets.data rgw
+# ceph osd pool set singlezone.rgw.ssd.buckets.data compression_mode aggressive
+# ceph osd pool set singlezone.rgw.ssd.buckets.data compression_algorithm snappy</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create the placement group called <code>rgwec</code> , and add the dedicated pools for
+this new placement group</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin zonegroup placement add --rgw-zonegroup singlezg --placement-id rgwec
+# radosgw-admin zone placement add --rgw-zone singlezone --placement-id rgwec --data-pool singlezone.rgw.ssd.buckets.data --index-pool singlezone.rgw.ssd.buckets.index --data-extra-pool singlezone.rgw.ssd.buckets.non-ec
+#  radosgw-admin period update --commit</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We are going to add a tag called <code>allowed-rgwrc</code> so only users with this tag are able to create buckets in this placement group</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin zonegroup get &gt; /etc/ceph/zonegroup.json
+# vi /etc/ceph/zonegroup.json
+{
+    "id": "41eed131-da38-461e-a5ca-b633189f7f38",
+    "name": "singlezg",
+    "api_name": "singlezg",
+    "is_master": "true",
+    "endpoints": [],
+    "hostnames": [],
+    "hostnames_s3website": [],
+    "master_zone": "d2aca484-dfa7-433d-8469-8df6a3a242e9",
+    "zones": [
+        {
+            "id": "d2aca484-dfa7-433d-8469-8df6a3a242e9",
+            "name": "singlezone",
+            "endpoints": [],
+            "log_meta": "false",
+            "log_data": "false",
+            "bucket_index_max_shards": 11,
+            "read_only": "false",
+            "tier_type": "",
+            "sync_from_all": "true",
+            "sync_from": [],
+            "redirect_zone": "",
+            "supported_features": [
+                "resharding"
+            ]
+        }
+    ],
+    "placement_targets": [
+        {
+            "name": "default-placement",
+            "tags": [],
+            "storage_classes": [
+                "STANDARD"
+            ]
+        },
+        {
+            "name": "rgwec",
+            "tags": ["allowed-rgwrc"],       &lt;---- Add Tag to placement targer
+            "storage_classes": [
+                "STANDARD"
+            ]
+        }
+    ],
+    "default_placement": "default-placement",
+    "realm_id": "5bc04cc6-1ddb-47e3-ab8b-5d556c63ae9b",
+    "sync_policy": {
+        "groups": []
+    },
+    "enabled_features": [
+        "resharding"
+    ]
+}
+
+# radosgw-admin zonegroup set &lt; /etc/ceph/zonegroup.json
+# radosgw-admin period update --commit</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we add the tag <code>allowed-rgwrc</code> so we allow user1 to use the new placement group we created with the EC data pool</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user modify --uid user1 --placement-id default-placement --storage-class STANDARD --tags allowed-rgwrc</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As user1 if we create a bucket with specifiying the placement group it will get
+create in the default placement called <code>default-placement</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api create-bucket --bucket normalbucket --region singlezg
+# radosgw-admin bucket stats --bucket normalbucket | grep placement_rule
+    "placement_rule": "default-placement",</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As user1 if we use the LocationConstraint with <code>singlezg:rgwec</code> we will create
+the bucket in the rgwec placement group</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api create-bucket --bucket my-bucket --region singlezg --create-bucket-configuration LocationConstraint=singlezg:rgwec
+
+# radosgw-admin bucket stats --bucket my-bucket | grep placement_rule
+    "placement_rule": "rgwec",
+
+# radosgw-admin bucket stats --bucket my-bucket | grep marker
+    "marker": "d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1",
+    "max_marker": "0#,1#,2#,3#,4#,5#,6#,7#,8#,9#,10#",
+
+# rados -p singlezone.rgw.ssd.buckets.index ls | grep 44443
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.8
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.2
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.9
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.5
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.3
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.7
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.6
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.0
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.10
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.1
+.dir.d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.1.4</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"><a class="anchor" href="#_configure_a_lifecycle_policy_to_transition_objects_to_a_cold_storage_class"></a>5. Configure a LifeCycle policy to transition objects to a COLD Storage Class</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_3"><a class="anchor" href="#_exercise_3"></a>5.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -498,9 +694,114 @@ WARNING: EC 2+1 Setting is not supported in production, just for lab testing, ch
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution_4"><a class="anchor" href="#_solution_4"></a>5.2. Solution</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph osd pool create singlezone.rgw.cold.buckets.data 16 16  erasure profile21
+# ceph osd pool application enable singlezone.rgw.cold.buckets.data  rgw</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin zonegroup placement add --rgw-zonegroup singlezg --placement-id default-placement --storage-class COLD
+# radosgw-admin zone placement add --rgw-zone singlezone --placement-id default-placement --storage-class COLD --data-pool singlezone.rgw.cold.buckets.data
+# radosgw-admin period update --commit</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api create-bucket --bucket data1 --region singlezg
+# aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 cp /etc/hosts s3://data1/hosts --region singlezg
+# aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api list-objects-v2 --bucket data1 | jq '.Contents[].StorageClass'
+"STANDARD"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat lc_cold.xml
+{
+    "Rules": [
+     {
+      "ID": "Archive all objects older than 10 days",
+      "Filter": {
+        "Prefix": ""
+      },
+      "Status": "Enabled",
+      "Transitions": [
+        {
+        "Days": 10,
+        "StorageClass": "COLD"
+        }
+     ]
+    }
+  ]
+}
+
+
+# aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api put-bucket-lifecycle-configuration --bucket data1 --lifecycle-configuration file://lc_cold.xml
+
+# aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api get-bucket-lifecycle-configuration --bucket data1
+{
+    "Rules": [
+        {
+            "ID": "Archive all objects older than 10 days",
+            "Prefix": "",
+            "Status": "Enabled",
+            "Transitions": [
+                {
+                    "Days": 10,
+                    "StorageClass": "COLD"
+                }
+            ]
+        }
+    ]
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rados ls -p singlezone.rgw.buckets.data
+d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.2_hosts2
+d2aca484-dfa7-433d-8469-8df6a3a242e9.44443.2_hosts</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>just for the transition to happen faster we are going to set the following
+value:</p>
+</div>
+<div class="paragraph">
+<p># ceph config set client.rgw rgw_lc_debug_interval 10</p>
+</div>
+<div class="paragraph">
+<p>And restart the RGWs.</p>
+</div>
+<div class="paragraph">
+<p># ceph orch restart rgw.single.zone</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api list-objects-v2 --bucket data1 | jq '.Contents[].StorageClass'
+"COLD"
+"COLD"</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
-<h2 id="_create_a_bucket_life_cycle_policy"><a class="anchor" href="#_create_a_bucket_life_cycle_policy"></a>6. Create a Bucket Life Cycle policy</h2>
+<h2 id="_create_a_bucket_policy"><a class="anchor" href="#_create_a_bucket_policy"></a>6. Create a Bucket policy</h2>
 <div class="sectionbody">
 <div class="ulist">
 <ul>
