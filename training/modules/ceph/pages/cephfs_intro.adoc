@@ -194,7 +194,7 @@ following details the implementation status of various CephFS features in the
 kernel driver. For more information on the current kernel client, supported
 features check this upstream https://docs.ceph.com/en/quincy/cephfs/kernel-features/[link]
 
-[NOTICE]
+[TIP]
 ====
 The kernel client requires Linux, which is available starting with RHEL 8.
 ====
@@ -220,7 +220,7 @@ workstation# scp -p ceph-node01:/etc/ceph/ceph.conf /etc/ceph/ceph.conf
 ----
 
 Authorise the client to access the CephFS file system. In this example, we give
-the user `0` Read/
+the user `0` Read/Write in the CephFS filesystem we created.
 
 ----
 ceph-node01# ceph fs authorize fs_name client.0 / rw
