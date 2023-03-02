@@ -729,8 +729,16 @@ stored in the fs_name filesystem, still from our workstation:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">dd if=/dev/zero of=/mnt/100MB bs=4k iflag=fullblock,count_bytes count=100M
-# ceph --id 0 fs status
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">dd if=/dev/zero of=/mnt/100MB bs=4k iflag=fullblock,count_bytes count=100M</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can write to the FS ok, but we can&#8217;t query the FS status with user 0 that we
+created it doesn&#8217;t have permisions.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph --id 0 fs status
 Error EACCES: access denied: does your client key have mgr caps? See http://docs.ceph.com/en/latest/mgr/administrator/#client-authentication</code></pre>
 </div>
 </div>

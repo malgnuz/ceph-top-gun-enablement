@@ -803,6 +803,8 @@ value:</p>
 <div class="sect1">
 <h2 id="_create_a_bucket_policy"><a class="anchor" href="#_create_a_bucket_policy"></a>6. Create a Bucket policy</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_4"><a class="anchor" href="#_exercise_4"></a>6.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -844,10 +846,122 @@ value:</p>
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_solution_5"><a class="anchor" href="#_solution_5"></a>6.2. Solution</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user create --uid='user2' --display-name='First User' --access-key='user2' --secret-key='user2'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat .aws/credentials
+[user1]
+aws_access_key_id = user1
+aws_secret_access_key = user1
+[user2]
+aws_access_key_id = user2
+aws_secret_access_key = user2
+
+# aws --profile user2 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 mb s3://policy --region singlezg
+# aws --profile user2 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 cp /etc/hosts s3://policy/read/read --region singlezg
+# aws --profile user2 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 cp /etc/hosts s3://policy/write/write --region singlezg</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 ls s3://policy
+An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Unknown</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat ok.yaml
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::user/user1"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:Get*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::policy"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::user/user1"
+        ]
+      },
+      "Action": [
+      "s3:Get*",
+      "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::policy/read/*",
+        "arn:aws:s3:::policy/read",
+        "arn:aws:s3:::policy/read/"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam:::user/user1"
+        ]
+      },
+      "Action": [
+      "s3:Get*",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::policy/write-folder/*",
+        "arn:aws:s3:::policy/write-folder",
+        "arn:aws:s3:::policy/write-folder/"
+      ]
+    }
+  ]
+}
+
+# aws --profile user2 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3api put-bucket-policy --bucket policy --policy file://ok.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 ls s3://policy
+                           PRE read/
+                           PRE write/
+# aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 ls s3://policy/read/
+2023-03-02 07:30:49       1330 read
+# aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 rm s3://policy/read/read
+delete failed: s3://policy/read/read An error occurred (AccessDenied) when calling the DeleteObject operation: Unknown
+# aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 cp /etc/hosts s3://policy/read/noperms
+upload failed: ../etc/hosts to s3://policy/read/noperms An error occurred (AccessDenied) when calling the PutObject operation: Unknown
+# aws --profile user1 --ca-bundle /etc/ssl/certs/ca-bundle.crt --endpoint https://s3zone1.example.com s3 cp /etc/hosts s3://policy/write/ok
+upload: ../etc/hosts to s3://policy/write/ok</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="sect1">
 <h2 id="_configure_local_database_stsusing_assumerole"><a class="anchor" href="#_configure_local_database_stsusing_assumerole"></a>7. Configure Local Database STS(using AssumeRole)</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_exercise_5"><a class="anchor" href="#_exercise_5"></a>7.1. Exercise</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -886,6 +1000,11 @@ value:</p>
 </div>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solution_6"><a class="anchor" href="#_solution_6"></a>7.2. Solution</h3>
+
 </div>
 </div>
 </div>
