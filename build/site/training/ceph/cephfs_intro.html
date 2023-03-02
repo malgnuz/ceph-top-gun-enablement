@@ -443,15 +443,13 @@ takes care of creating the ceph pools, the ceph daemons, and the ceph FS</p>
 <div class="paragraph">
 <p>If you need to manually create the MDS services you can use this example:</p>
 </div>
+<div class="paragraph">
+<p>Create a YAML file called <code>mds.spec.yaml</code>:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">Create a YAML file called `mds.spec.yaml`:
-
-[source,yaml]</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>cat &lt;&lt;EOF &gt; mds.spec.yaml
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[source,yaml]
+cat &lt;&lt;EOF &gt; mds.spec.yaml
 service_type: mds
 service_id: fs_name
 placement:
@@ -459,22 +457,16 @@ placement:
   hosts:
   - ceph-node01
   - proxy01
-EOF</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">As the root user on the `ceph-node01` server, apply the specification to manually deploy the MDS daemons using the YAML file that you created:
-
-[source,sh]</code></pre>
+EOF</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p># ceph orch apply -i mds.spec.yaml
-Scheduled mds.fs_name update&#8230;&#8203;</p>
+<p>As the root user on the <code>ceph-node01</code> server, apply the specification to manually deploy the MDS daemons using the YAML file that you created:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"></code></pre>
+<pre class="highlightjs highlight"><code class="language-sh hljs" data-lang="sh"># ceph orch apply -i mds.spec.yaml
+Scheduled mds.fs_name update...</code></pre>
 </div>
 </div>
 </td>

@@ -94,11 +94,10 @@ takes care of creating the ceph pools, the ceph daemons, and the ceph FS
 
 If you need to manually create the MDS services you can use this example:
 
-----
 Create a YAML file called `mds.spec.yaml`:
 
-[source,yaml]
 ----
+[source,yaml]
 cat <<EOF > mds.spec.yaml
 service_type: mds
 service_id: fs_name
