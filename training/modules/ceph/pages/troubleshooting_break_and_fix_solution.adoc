@@ -460,6 +460,72 @@ HEALTH_OK
 
 
 
+[TIP]
+====
+There is a way to change the keyring for the OSD, without removing the OSD like
+we did in the exercise:
+
+You need to modify the OSD unit run and betweein the ceph-volume activate pod
+and the osd start pod, add the following container run, change the key for they
+new OSD key you want to use, you can find it with -v at the very end of the
+podman run command
+
+----
+# vi /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0/unit.run
+...
+! /bin/podman rm -f ceph-4d197f56-b77c-11ed-80f2-2cc26078e4ef-osd.0-activate 2> /dev/null
+! /bin/podman rm -f ceph-4d197f56-b77c-11ed-80f2-2cc26078e4ef-osd-0-activate 2> /dev/null
+! /bin/podman rm -f --storage ceph-4d197f56-b77c-11ed-80f2-2cc26078e4ef-osd-0-activate 2> /dev/null
+! /bin/podman rm -f --storage ceph-4d197f56-b77c-11ed-80f2-2cc26078e4ef-osd.0-activate 2> /dev/null
+/bin/podman run --rm --ipc=host --stop-signal=SIGTERM --authfile=/etc/ceph/podman-auth.json --net=host --entrypoint /usr/bin/ceph-bluestore-tool --privileged --group-add=disk --init --name ceph-4d197f56-b77c-11ed-80f2-2cc26078e4ef-osd-0-activate -e CONTAINER_IMAGE=registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:8aed15890a6b27a02856e66bf13611a15e6dba71c781a0ae09b3ecc8616ab8fa -e NODE_NAME=ceph-node01 -e CEPH_USE_RANDOM_NONCE=1 -e CEPH_VOLUME_SKIP_RESTORECON=yes -e CEPH_VOLUME_DEBUG=1 -v /var/run/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef:/var/run/ceph:z -v /var/log/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef:/var/log/ceph:z -v /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/crash:/var/lib/ceph/crash:z -v /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0:/var/lib/ceph/osd/ceph-0:z -v /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0/config:/etc/ceph/ceph.conf:z -v /dev:/dev -v /run/udev:/run/udev -v /sys:/sys -v /run/lvm:/run/lvm -v /run/lock/lvm:/run/lock/lvm -v /:/rootfs -v /etc/hosts:/etc/hosts:ro registry.redhat.io/rhceph/rhceph-5-rhel8@sha256:8aed15890a6b27a02856e66bf13611a15e6dba71c781a0ae09b3ecc8616ab8fa set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=='
+...
+----
+
+After you restart( or use bash
+/var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0/unit.run) once with
+add  this line the new key will be in place and the OSD will work fine, after
+the rist reboot you need to remove the extra podman run we added to the
+unit.run file,
+
+The explanation being:
+
+the command that is creating the new keyring and overwriting the key deployed by cephadm is `/usr/bin/ceph-bluestore-tool   prime-osd-dir` that is part of `ceph-volume activate` command that runs when the OSD container is started, it reads the information from a label in the main bluestore block device that contains OSD metadata, one of the keys it contains is the OSD keyring
+
+----
+# /usr/bin/ceph-bluestore-tool show-label --path /var/lib/ceph/osd/ceph-0
+inferring bluefs devices from bluestore path
+{
+    "/var/lib/ceph/osd/ceph-0/block": {
+        "osd_uuid": "3c190bab-0c06-4950-9942-d41dc8f93afb",
+        "size": 10733223936,
+        "btime": "2023-02-28T15:28:23.907605+0000",
+        "description": "main",
+        "bfm_blocks": "2620416",
+        "bfm_blocks_per_key": "128",
+        "bfm_bytes_per_block": "4096",
+        "bfm_size": "10733223936",
+        "bluefs": "1",
+        "ceph_fsid": "4d197f56-b77c-11ed-80f2-2cc26078e4ef",
+        "kv_backend": "rocksdb",
+        "magic": "ceph osd volume v026",
+        "mkfs_done": "yes",
+        "osd_key": "AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=v",
+        "osdspec_affinity": "all-available-devices",
+        "ready": "ready",
+        "require_osd_release": "16",
+        "whoami": "0"
+    }
+}
+----
+
+Changing the old key for the new key with the set-label-key makes a permanent
+change to the bluestore lable for the device, and fixed the issue
+
+----
+# /usr/bin/ceph-bluestore-tool set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQC3OOZj5a5MARAAW4+XD/sESGy7AW
+----
+
+====
 
 
 
