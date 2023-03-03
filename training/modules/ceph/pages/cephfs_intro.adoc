@@ -388,8 +388,8 @@ total 204800
 If we want to auto-mount the FS on boot, we need to add it to /etc/fstab with the following format:
 
 ----
-# cat /etc/ceph/ceph.client.0.keyring | grep key | awk '{print $NF}' > /etc/ceph/ceph.client.0.kernel.keyring
-# echo 'ceph-node01.example.com,ceph-node02.example.com:/dir0 /mnt ceph name=0,secretfile=/etc/ceph/ceph.client.0.kernel.keyring,_netdev 0 0' > /etc/fstab 
+# cat /etc/ceph/ceph.client.0.keyring | grep key | awk '{print $NF}' >> /etc/ceph/ceph.client.0.kernel.keyring
+# echo 'ceph-node01.example.com,ceph-node02.example.com:/dir0 /mnt ceph # name=0,secretfile=/etc/ceph/ceph.client.0.kernel.keyring,_netdev 0 0' >> /etc/fstab 
 # mount /mnt
 ----
 
