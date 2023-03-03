@@ -119,6 +119,9 @@
     <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="ceph_version.html">What version of Ceph am I running?</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph-upgrades_cephadm.html">Upgrade Ceph with Cephadm</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -837,8 +840,8 @@ total 204800
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /etc/ceph/ceph.client.0.keyring | grep key | awk '{print $NF}' &gt; /etc/ceph/ceph.client.0.kernel.keyring
-# echo 'ceph-node01.example.com,ceph-node02.example.com:/dir0 /mnt ceph name=0,secretfile=/etc/ceph/ceph.client.0.kernel.keyring,_netdev 0 0' &gt; /etc/fstab
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># cat /etc/ceph/ceph.client.0.keyring | grep key | awk '{print $NF}' &gt;&gt; /etc/ceph/ceph.client.0.kernel.keyring
+# echo 'ceph-node01.example.com,ceph-node02.example.com:/dir0 /mnt ceph # name=0,secretfile=/etc/ceph/ceph.client.0.kernel.keyring,_netdev 0 0' &gt;&gt; /etc/fstab
 # mount /mnt</code></pre>
 </div>
 </div>
