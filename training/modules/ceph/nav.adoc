@@ -72,3 +72,4 @@
 * xref:ceph_deployment_challenge_solution.adoc[Ceph Deployment Solution]
 * xref:cephrbd_challenge_solution.adoc[Ceph RBD Solution]
 * xref:ceph_cephfs_challenge_solution.adoc[Ceph CephFS Solution]
+* xref:ceph_rgw_challenge_solution.adoc[Ceph RGW Solution]
