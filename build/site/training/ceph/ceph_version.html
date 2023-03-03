@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Troubleshooting with Break and Fix Exercises :: Ceph Top Gun Enablement</title>
-    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/troubleshooting_break_and_fix.html">
+    <title>Ceph version Matrix :: Ceph Top Gun Enablement</title>
+    <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/ceph_version.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
     <script>var uiRootPath = '../../_'</script>
@@ -118,7 +118,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="ceph_cephx.html">Rados CephX Auth/AuthZ</a>
   </li>
-  <li class="nav-item" data-depth="1">
+  <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="ceph_version.html">What version of Ceph am I running?</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -238,7 +238,7 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="trouble-shooting-large-omap-objects.html">Troubleshooting Large Omap Objects</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a>
   </li>
 </ul>
@@ -311,83 +311,81 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li>Ceph Troubleshooting</li>
-    <li><a href="troubleshooting_break_and_fix.html">Troubleshooting Break &amp; Fix Hands-on</a></li>
+    <li>Core Ceph</li>
+    <li><a href="ceph_version.html">What version of Ceph am I running?</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/troubleshooting_break_and_fix.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/ceph_version.adoc">Edit this Page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Troubleshooting with Break and Fix Exercises</h1>
+<h1 class="page">Ceph version Matrix</h1>
 <div class="sect1">
-<h2 id="_prepare_the_environment"><a class="anchor" href="#_prepare_the_environment"></a>Prepare the Environment</h2>
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To be able to complete the Break &amp; Fix exercises we need to fulfil certain pre-reqs:</p>
+<p>What version of ceph am I running?</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Deploy the ceph cluster <code>ceph-mon0X</code>.</p>
-</li>
-<li>
-<p>Use the script available in the admin node <code>ceph-mon01</code> called <code>/root/one_step_cluster_deploy.sh</code></p>
-</li>
-</ol>
 </div>
-<div class="paragraph">
-<p>Once the cluster is deployed and in a healthy state, you will have ceph,rgw and
-mds services running</p>
 </div>
+<div class="sect1">
+<h2 id="_list_the_ceph_version_for_all_running_daemons"><a class="anchor" href="#_list_the_ceph_version_for_all_running_daemons"></a>2. List the ceph version for all running daemons</h2>
+<div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre># ceph -s
-  cluster:
-    id:     3c6182ba-9b1d-11ed-87b3-2cc260754989
-    health: HEALTH_OK
-
-  services:
-    mon: 3 daemons, quorum ceph-mon01,ceph-mon02,ceph-mon03 (age 22m)
-    mgr: ceph-mon01.ndicbs(active, since 22m)
-    mds: 1/1 daemons up
-    osd: 3 osds: 3 up (since 22m), 3 in (since 13h)
-    rgw: 1 daemon active (1 hosts, 1 zones)
-...</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">[root@ceph-node01 ~]# ceph versions
+{
+    "mon": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 3
+    },
+    "mgr": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 2
+    },
+    "osd": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 9
+    },
+    "mds": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 1
+    },
+    "rgw": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 2
+    },
+    "overall": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 17
+    }
+}</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>At this point from the <code>workstation</code> node, run the <code>break_and_fix.yaml</code> playbook</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_list_the_container_image_tag"><a class="anchor" href="#_list_the_container_image_tag"></a>3. List the Container image Tag</h2>
+<div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre>ansible-playbook -i /root/cluster2 /root/cephadmdeploy/ansible-cephadm-deploy/break-fix.yaml</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># podman inspect registry.redhat.io/rhceph/rhceph-5-rhel8 --format='{{ json .Config.Labels.release }}'
+"404"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_list_the_cepadm_versions"><a class="anchor" href="#_list_the_cepadm_versions"></a>4. List the Cepadm versions</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rpm -qa | grep cephadm
+cephadm-16.2.10-138.el8cp.noarch
+cephadm-ansible-1.11.0-1.el8cp.noarch</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Take a look at the cluster health in detail</p>
-</li>
-<li>
-<p>Increase debug log verbosity if needed</p>
-</li>
-<li>
-<p>Take a look at the container logs during the startup</p>
-</li>
-<li>
-<p>ceph pg PG.NUM query can help identify the problem</p>
-</li>
-<li>
-<p>Once problems have been fixed restart the affected daemons if needed</p>
-</li>
-</ul>
+<p>Check that all the versions, from running daemons, containers and cephadm
+packages all match with the same Ceph Release version, you can check in this
+<a href="https://access.redhat.com/solutions/2045583">link</a></p>
 </div>
 </div>
 </div>

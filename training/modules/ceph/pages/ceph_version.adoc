@@ -1,0 +1,64 @@
+= Ceph version Matrix
+
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
+:numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
+
+
+== Introduction 
+
+What version of ceph am I running?
+
+== List the ceph version for all running daemons
+----
+[root@ceph-node01 ~]# ceph versions
+{
+    "mon": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 3
+    },
+    "mgr": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 2
+    },
+    "osd": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 9
+    },
+    "mds": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 1
+    },
+    "rgw": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 2
+    },
+    "overall": {
+        "ceph version 16.2.10-138.el8cp (a63ae467c8e1f7503ea3855893f1e5ca189a71b9) pacific (stable)": 17
+    }
+}
+----
+
+== List the Container image Tag
+
+----
+# podman inspect registry.redhat.io/rhceph/rhceph-5-rhel8 --format='{{ json .Config.Labels.release }}'
+"404"
+----
+
+== List the Cepadm versions
+
+----
+# rpm -qa | grep cephadm
+cephadm-16.2.10-138.el8cp.noarch
+cephadm-ansible-1.11.0-1.el8cp.noarch
+----
+
+Check that all the versions, from running daemons, containers and cephadm
+packages all match with the same Ceph Release version, you can check in this
+https://access.redhat.com/solutions/2045583[link]
