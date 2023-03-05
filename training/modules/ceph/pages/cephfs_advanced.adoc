@@ -220,6 +220,12 @@ set pool 5 allow_ec_overwrites to true
 enabled application 'cephfs' on pool 'cephfs-data-ec'
 ----
 
+[TIP]
+====
+To get more information on why EC pools for Cephfs need to enable
+the config parameter cephfs-data-ec allow_ec_overwrites check out this https://docs.ceph.com/en/latest/rados/operations/erasure-code/#erasure-coding-with-overwrites[Doc]
+====
+
 Let's add the new pool to our filesystem
 
 ----

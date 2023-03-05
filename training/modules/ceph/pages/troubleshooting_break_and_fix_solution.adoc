@@ -2,12 +2,12 @@
 
 == Prepare the Environment
 
-To be able to complete the Break & Fix exercises we need to fulfil certain pre-reqs:
+To be able to complete the Break & Fix exercises, we need to fulfil certain prereqs:
 
 . Deploy the ceph cluster `ceph-mon0X`.
 . Use the script available in the admin node `ceph-mon01` called `/root/one_step_cluster_deploy.sh`
 
-Once the cluster is deployed and in a healthy state, you will have ceph,rgw and
+Once the cluster is deployed, and in a healthy state, you will have ceph,rgw and
 mds services running
 
 ----
@@ -25,13 +25,13 @@ mds services running
 ...
 ----
 
-At this point from the `workstation` node, run the `break_and_fix.yaml` playbook
+At this point, from the `workstation` node, run the `break_and_fix.yaml` playbook
 
 ----
 ansible-playbook -i /root/cluster2 /root/cephadmdeploy/ansible-cephadm-deploy/break-fix.yaml
 ----
 
-After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing
+After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing.
 
 * Take a look at the cluster health in detail
 * Increase debug log verbosity if needed
@@ -40,7 +40,7 @@ After the playbook finishes its run, you will have three different issues on you
 * Once problems have been fixed restart the affected daemons if needed
 
 
-A first look at the cluster health we can see several problems:
+A first look at the cluster health, we can see several problems:
 
 ----
 # ceph -s
@@ -74,7 +74,7 @@ A first look at the cluster health we can see several problems:
              13  undersized+degraded+peered
 ----
 
-My first priority would be to see what is happening with the `14.222% pgs not
+My priority would be to see what is happening with the `14.222% pgs not
 active` as these PGs are not serving any IO:
 
 ----
@@ -114,8 +114,7 @@ PG_STAT  STATE                       UP     UP_PRIMARY  ACTING  ACTING_PRIMARY
 2.6      undersized+degraded+peered  [2,0]           2   [2,0]               2
 ----
 
-I can see that all inactive PGs are from pool 2, and check who is pool 2.
-
+I can see that all inactive PGs are from pool 2, let’s check the name of the pool with ID 2
 ----
 # ceph osd lspools
 1 rbdpool
@@ -142,7 +141,7 @@ also have my CephFS filesystem down:
 It seems strange that with 2 OSDs available in the Acting set, the PGs are
 stuck in Peered
 
-I can check the status of a pg for information, there is something odd with the
+I can check the status of a pg for information; there is something odd with the
 `num_object_copies` saying `5`, and `num_objects_degraded `3`
 
 ----
@@ -163,17 +162,17 @@ I can check the status of a pg for information, there is something odd with the
 The description of peered gives us a huge clue https://docs.ceph.com/en/quincy/rados/operations/pg-states/[Doc]:
 
 *peered:*
-The placement group has peered, but cannot serve client IO due to not having enough copies to reach the pool’s configured min_size parameter. Recovery may occur in this state, so the pg may heal up to min_size eventually.
+The placement group has peered but cannot serve client IO due to insufficient copies to reach the pool’s configured min_size parameter. Recovery may occur in this state, so the pg may heal up to min_size eventually.
 
-So it seems that the min_size parameter is higher than the amount of hosts that
-we have, and by the pg query info it seems set to 5, lets check:
+So it seems that the min_size parameter is higher than the number of hosts that
+we have, and by the `pg query info`, it seems set to 5, let's check:
 
 ----
 # ceph osd pool ls detail | grep 'pool 2'
 pool 2 'cephfs.cephfs.meta' replicated size 5 min_size 3 crush_rule 0 object_hash rjenkins pg_num 32 pgp_num 32 autoscale_mode on last_change 41 flags hashpspool stripe_width 0 pg_autoscale_bias 4 pg_num_min 16 recovery_priority 5 application cephfs 
 ----
 
-Aha, so the size is set to 5 and min_size set to 3, the failure domain for the crush rule is set to host, and we only have 3 hosts available
+Aha, so the size is set to 5 and min_size set to 3, the failure domain for the crush rule is set to host, and we only have three hosts available.
 
 ----
 [root@ceph-mon01 ~]# ceph osd tree
@@ -188,7 +187,7 @@ ID  CLASS  WEIGHT   TYPE NAME                STATUS  REWEIGHT  PRI-AFF
  1    hdd  0.00980              osd.1          down         0  1.00000
 ----
 
-We are not able to comply with min_size 3 because we have 1 OSD in down state, so lets fix the size and min_size first
+We are not able to comply with min_size 3 because we have 1 OSD in downstate, so let's fix the size and min_size first.
 
 ----
 # ceph osd pool set cephfs.cephfs.meta size 3
@@ -200,7 +199,7 @@ set pool 2 min_size to 2
 ok
 ----
 
-Great!, no inactive PGs!, all PGs are serving IO, let's check the cephfs pool:
+Great!, no inactive PGs! all PGs are serving IO. Let's check the cephfs pool:
 
 ----
 # ceph fs status
@@ -211,10 +210,10 @@ RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAP
        POOL           TYPE     USED  AVAIL
 ----
 
-Nice, just by fixing the inactive PGs of the cephfs metadata pool we are back ONLINE!
+Nice, we are back ONLINE by fixing the inactive PGs of the cephfs metadata pool!
 
-Let's try and see what is going on with osd.1 that is in down state, first
-thing I would try is a quick restart:
+Let's try and see what is going on with osd.1 that is in downstate,
+The first thing I would try is a quick restart:
 
 ----
 # ceph orch ps  | grep osd.1
@@ -225,7 +224,7 @@ Scheduled to restart osd.1 on host 'ceph-mon03'
 osd.1                           ceph-mon03               error             4s ago  60m        -    4096M  <unknown>          <unknown>     <unknown>
 ----
 
-No luck.., the daemon is still in error state, let's check the output log on
+No luck... The daemon is still in an error state. Let's check the output log on
 the host where OSD.1 is running ceph-node03
 
 ----
@@ -252,16 +251,16 @@ Mar 02 09:49:29 ceph-mon03 systemd[1]: ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989
 ----
 
 
-Strate away we can see 2 lines with important information:
+Strate, away we can see two lines with important information:
 
 ----
 Mar 02 09:49:28 ceph-mon03 ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989-mon-ceph-mon03[10586]: debug 2023-03-02T14:49:28.299+0000 7f7d1ea65700  0 cephx server osd.1: couldn't find entity name: osd.1
 Mar 02 09:49:28 ceph-mon03 ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989-osd-1[30984]: debug 2023-03-02T14:49:28.299+0000 7f3a52ca1700 -1 monclient(hunting): handle_auth_bad_method server allowed_methods [2] but i only support [2]
 ----
 
-cephx authentication is complaning that osd.1 doesn't have a key: `cephx server
+cephx authentication is complaining that osd.1 doesn't have a key: `cephx server
 osd.1: couldn't find entity name: osd.1` and auth is failing
-`handle_auth_bad_method server allowed_methods [2] but i only support [2]`,
+`handle_auth_bad_method server allowed_methods [2] but I only support [2]`,
 next stop check if the key in `ceph auth ls` matches with the key the osd is
 using to start up.
 
@@ -274,7 +273,7 @@ installed auth entries:
 osd.2
 ----
 
-What no key for OSD.1 ??, no wonder it doesn't start..., I'm going to re-create
+What, no key for OSD.1 ??? No wonder it doesn't start..., I'm going to re-create
 the cephx key for OSD.1
 
 ----
@@ -287,7 +286,7 @@ installed auth entries:
 osd.1
 ----
 
-Ready!, let's restart the OSD.1 daemon 
+Ready! let's restart the OSD.1 daemon.
 
 ----
 # ceph orch daemon restart osd.1
@@ -297,7 +296,7 @@ Scheduled to restart osd.1 on host 'ceph-mon03'
 osd.1                           ceph-mon03               error             9s ago  85m        -    4096M  <unknown>          <unknown>     <unknown>
 ----
 
-Still not working??, lets check the log for the OSD
+Still not working??, let's check the log for the OSD
 
 ----
 # journalctl -f | grep osd.1
@@ -317,8 +316,8 @@ Key from OSD.1 in ceph auth ls: `key = AQBaugBkdGa7CRAAG5CltpQSVYZ68aq81lYxyg==`
 key = AQCjpgBk/aBWBhAA4aKa3tlejoGLmUHI1SiVtw==
 ----
 
-Ok..., the keys clearly don't match, I have to re-config my OSD daemon it uses
-the new key in the cephx auth
+Ok..., the keys don't match, I have to re-config my OSD daemon so  it uses
+the new key in the cephx auth database, I will use cephadm with the daemon reconfig option:
 
 ----
 # ceph orch daemon reconfig osd.1
@@ -329,7 +328,7 @@ Scheduled to reconfig osd.1 on host 'ceph-mon03'
 	key = AQBaugBkdGa7CRAAG5CltpQSVYZ68aq81lYxyg==
 ----
 
-Looking better!, one more restart
+Looking better!, one more restart.
 
 ----
 # ceph orch daemon restart osd.1
@@ -338,8 +337,7 @@ Scheduled to restart osd.1 on host 'ceph-mon03'
 osd.1                           ceph-mon03               error             9s ago  85m        -    4096M  <unknown>          <unknown>     <unknown>
 ----
 
-Noooo!, they key has changed again to the old key, add this point I decide to
-just re-create the OSD..
+Noooo!, the key has changed again to the old key. At this point, it would take less time just to re-create the OSD, and look for answers on how the key creation works for and OSD afterwards(look at the appendix of this section for more information)
 
 ----
 # cat /var/lib/ceph/cd172aa4-b8fe-11ed-b71d-2cc260754989/osd.1/keyring
@@ -347,7 +345,7 @@ just re-create the OSD..
 key = AQCjpgBk/aBWBhAA4aKa3tlejoGLmUHI1SiVtw==
 ----
 
-Remove the OSD with the force flag because we are in health_warn and OSD in error state 
+Remove the OSD with the force flag because we are in health_warn, and OSD is in error state 
 
 ----
 # ceph orch osd rm 1 --force --zap
@@ -357,7 +355,7 @@ OSD  HOST        STATE                    PGS  REPLACE  FORCE  ZAP   DRAIN START
 1    ceph-mon03  done, waiting for purge    0  False    True   True                    
 ----
 
-We now run the purge command
+We now run the purge command.
 
 ----
 # ceph osd purge 1 --yes-i-really-mean-it
@@ -374,7 +372,7 @@ ceph-mon03  /dev/vdb  hdd   c9a07526-4b59-43d5-a  10.7G  Yes        111s ago
 
 ----
 
-We can wait for the cephadm cache to expire or restart the manager to makes
+We can wait for the cephadm cache to expire(`$ ceph config get mon mgr/cephadm/daemon_cache_timeout`) or restart the manager to make
 things quicker:
 
 ----
@@ -407,7 +405,7 @@ Scheduled to restart rgw.objectgw.ceph-mon02.fewdjv on host 'ceph-mon02'
 rgw.objectgw.ceph-mon02.fewdjv  ceph-mon02  *:8080       error             3s ago   2h        -        -  <unknown>          <unknown>     <unknown>
 ----
 
-Arg!, that would have been to easy... , let's take a look at the logs.., I do a
+Arg!, that would have been too easy... , let's take a look at the logs.., I do a
 follow while I restart the RGW
 
 ----
@@ -428,8 +426,8 @@ A clear Error pops out here:
 Mar 02 11:25:53 ceph-mon02 ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989-rgw-objectgw-ceph-mon02-fewdjv[33479]: debug 2023-03-02T16:25:53.115+0000 7f3c5b6085c0 -1 rgw main: Cannot find zone id= (name=nozone)
 ----
 
-So the RGW is triying to start using a zone name called nozone, but it seems
-that the RGW nozone pools dont exist, let's check:
+So the RGW is trying to start using a zone name called nozone, but it seems
+that the RGW nozone pools don't exist, let's check:
 
 ----
 # ceph config dump | grep zone
@@ -441,7 +439,7 @@ that the RGW nozone pools dont exist, let's check:
 8 default.rgw.meta
 ----
 
-So there is a mismatch, I will change the rgw_zone config parameter to nozone 
+So there is a mismatch, I will change the rgw_zone config parameter to nozone(you could also opt for creating the nozone pools..)
 
 ----
 # ceph config set client.rgw rgw_zone default
@@ -458,14 +456,14 @@ Working!!, let's check the health:
 HEALTH_OK
 ----
 
-
+== Appendix. A
 
 [TIP]
 ====
 There is a way to change the keyring for the OSD, without removing the OSD like
-we did in the exercise:
+we did during the exercise:
 
-You need to modify the OSD unit run and betweein the ceph-volume activate pod
+You need to modify the OSD unit run and between the ceph-volume activate pod
 and the osd start pod, add the following container run, change the key for they
 new OSD key you want to use, you can find it with -v at the very end of the
 podman run command
@@ -483,54 +481,46 @@ podman run command
 
 After you restart( or use bash
 /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0/unit.run) once with
-add  this line the new key will be in place and the OSD will work fine, after
-the rist reboot you need to remove the extra podman run we added to the
+add  this line, the new key will be in place, and the OSD will work fine, after
+the first reboot you need to remove the extra podman run we added to the
 unit.run file,
 
-The explanation being:
+The explanation is:
 
-the command that is creating the new keyring and overwriting the key deployed by cephadm is `/usr/bin/ceph-bluestore-tool   prime-osd-dir` that is part of `ceph-volume activate` command that runs when the OSD container is started, it reads the information from a label in the main bluestore block device that contains OSD metadata, one of the keys it contains is the OSD keyring
+the command that creates the new keyring and overwrites the key deployed by cephadm is `/usr/bin/ceph-bluestore-tool   prime-osd-dir` that is part of `ceph-volume activate` command that runs when the OSD container is started, it reads the information from a label in the main bluestore block device that contains OSD metadata, one of the keys it contains is the OSD keyring
 
 ----
 # /usr/bin/ceph-bluestore-tool show-label --path /var/lib/ceph/osd/ceph-0
 inferring bluefs devices from bluestore path
 {
-    "/var/lib/ceph/osd/ceph-0/block": {
-        "osd_uuid": "3c190bab-0c06-4950-9942-d41dc8f93afb",
-        "size": 10733223936,
-        "btime": "2023-02-28T15:28:23.907605+0000",
-        "description": "main",
-        "bfm_blocks": "2620416",
-        "bfm_blocks_per_key": "128",
-        "bfm_bytes_per_block": "4096",
-        "bfm_size": "10733223936",
-        "bluefs": "1",
-        "ceph_fsid": "4d197f56-b77c-11ed-80f2-2cc26078e4ef",
-        "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
-        "mkfs_done": "yes",
-        "osd_key": "AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=v",
-        "osdspec_affinity": "all-available-devices",
-        "ready": "ready",
-        "require_osd_release": "16",
-        "whoami": "0"
-    }
+    "/var/lib/ceph/osd/ceph-0/block": {
+        "osd_uuid": "3c190bab-0c06-4950-9942-d41dc8f93afb",
+        "size": 10733223936,
+        "btime": "2023-02-28T15:28:23.907605+0000",
+        "description": "main",
+        "bfm_blocks": "2620416",
+        "bfm_blocks_per_key": "128",
+        "bfm_bytes_per_block": "4096",
+        "bfm_size": "10733223936",
+        "bluefs": "1",
+        "ceph_fsid": "4d197f56-b77c-11ed-80f2-2cc26078e4ef",
+        "kv_backend": "rocksdb",
+        "magic": "ceph osd volume v026",
+        "mkfs_done": "yes",
+        "osd_key": "AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=v",
+        "osdspec_affinity": "all-available-devices",
+        "ready": "ready",
+        "require_osd_release": "16",
+        "whoami": "0"
+    }
 }
 ----
 
 Changing the old key for the new key with the set-label-key makes a permanent
-change to the bluestore lable for the device, and fixed the issue
+change to the bluestore label for the device, and fix the issue
 
 ----
-# /usr/bin/ceph-bluestore-tool set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQC3OOZj5a5MARAAW4+XD/sESGy7AW
+# /usr/bin/ceph-bluestore-tool set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQC3OOZj5a5MARAAW4+XD/sESGy7AW
 ----
 
 ====
-
-
-
-
-
-
-
-

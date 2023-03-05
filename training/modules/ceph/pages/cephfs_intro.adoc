@@ -423,6 +423,11 @@ client quota df = false
 
 - *Layout & Quota Restriction*
 
+[TIP]
+====
+For more information on Cephfs Quotas follow this https://docs.ceph.com/en/latest/cephfs/quota/#quotas[link]
+====
+
 To set layouts or quotas, clients require the ‘p’ flag in addition to ‘rw’. This restricts all the attributes that are set by special extended attributes with a “ceph.” prefix, as well as restricting other means of setting these fields (such as openc operations with layouts).
 
 ----
