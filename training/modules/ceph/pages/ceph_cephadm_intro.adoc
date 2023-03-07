@@ -63,7 +63,7 @@ NOTE: Available services also include `nfs` and `iscsi`. They are not covered
 in this documentation.
 
 TIP: For troubleshooting or tuning you can pass additional parameters to the
-container upong startup. See example below.
+container upon startup. See example below.
 
 .Add container parameters
 [source,yaml]
@@ -142,7 +142,7 @@ The `data_devices`, `db_devices` and `wal_devices` parameters accept the followi
 
 NOTE: `cephadm` also support FileStore parameters for specific cases.
 
-The RADOS Gateway service service file accepts additional paraneters due
+The RADOS Gateway service service file accepts additional parameters due
 to the nature of the RADOS Gateway service. The additional parameters are:
 
 * `networks` to specify which CIDR the gateway will bind to
@@ -265,7 +265,7 @@ TIP: To bootstrap a test cluster that will always be a single node cluster use t
 
 === CLI to your new cluster
 
-Once the cluster has been bootstrapped, use trhe `cephadm shell` command to issue
+Once the cluster has been bootstrapped, use the `cephadm shell` command to issue
 Ceph commands. The `shell` command can be used with or without an actual command.
 Without a command you will be provided with an interactive shell. Providing a command
 will actually issue the command against the cluster and return.
@@ -300,7 +300,7 @@ To label a node to your cluster, use the following command from your `cephadm sh
 $ *ceph orch host label add {hostname} {label}*
 ----
 
-To add a node to your cluster you must first distribuite the SSH keys that were generated
+To add a node to your cluster you must first distribute the SSH keys that were generated
 by `cephadm` during the bootstrapping. Once the keys have been copied, execute the following
 command to add a the node the cluster.
 
@@ -383,7 +383,7 @@ to be placed in maintenance mode. This flag does not allow you to bypass alerts.
 === Adding Monitors
 
 Once your inital cluster has been depployed and the nodes added to it, you can then deploy
-the addotional Monitors that will create your "real" cluster. Before you do so you will have
+the additional Monitors that will create your "real" cluster. Before you do so you will have
 to configure the network parameters that will be used by your cluster.
 
 .Setting your public and cluster networks
@@ -420,7 +420,7 @@ $ *ceph orch apply mon --placement="{hostname1},{hostname2},{hostname3}"*
 
 === Removing Monitors
 
-To remove a Monitor, simply use the following commad: `ceph orch daemon rm mon.{hostname}`
+To remove a Monitor, simply use the following command: `ceph orch daemon rm mon.{hostname}`
 
 == Manager management
 
@@ -491,7 +491,7 @@ instruct `cephadm` to apply it.
 $ *ceph orch apply -i {path_to_osd_service_file}*
 ----
 
-TIP: A single service file can contain multiple specificatiobs. See example below.
+TIP: A single service file can contain multiple specifications. See example below.
 
 .Multiple specifications in a single file
 [source, yaml]
@@ -518,7 +518,7 @@ spec:
 
 === OSD selective addition
 
-Anotehr option to add OSDs is to indicate `cephadm` which devices from what specific node
+Another option to add OSDs is to indicate `cephadm` which devices from what specific node
 must be added to the cluster.
 
 .Selective OSd addition
@@ -698,7 +698,7 @@ spec:
 
 === Adding MDS
 
-Deploying an MDS is done in conunction with the creation of a Ceph FileSystem. The name of the filesystem
+Deploying an MDS is done in conjunction with the creation of a Ceph FileSystem. The name of the filesystem
 will be the ID of the MDs service you deploy.
 
 You can deploy an MDS using two different methods:
@@ -727,7 +727,7 @@ NOTE: The second method will require you to manually create the pools used by th
 
 Just like for the creation of the Ceph FileSystem there are two (2) ways to remove a FileSystem
 
-.By deleteing a volume
+.By deleting a volume
 [source, shell, subs="quotes"]
 ----
 $ *ceph fs volume rm {fs_name} --yes-i-really-mean-it*
