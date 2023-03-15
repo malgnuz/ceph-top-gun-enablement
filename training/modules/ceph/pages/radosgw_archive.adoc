@@ -1,6 +1,18 @@
 = RadosGW Archive Zone 
 
+//++++
+//<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+//++++
+:icons: font
+:source-language: shell
 :numbered:
+// Activate experimental attribute for Keyboard Shortcut keys
+:experimental:
+:source-highlighter: pygments
+:sectnums:
+:sectnumlevels: 6
+:toc: left
+:toclevels: 4
 
 
 == Introduction(TP in 5.3)
@@ -45,7 +57,7 @@ For example:
 # radosgw-admin period update --rgw-realm=multisite --commit
 ----
 
-And then skip to section 3.2
+And then skip to section 2.3
 ====
 
 [IMPORTANT]
@@ -190,7 +202,7 @@ Create a system user that we will use to configure the sync between sites.
 # radosgw-admin user create --uid=syncuser --display-name="syncuser" --access-key=sync --secret=sync --system
 ----
 
-=== Configure Seconday Zone
+=== Configure Archive Zone
 
 Steps to configure the RADOS Gateway instance on the Archive zone.
 
