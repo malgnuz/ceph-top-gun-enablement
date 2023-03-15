@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>RadosGW Multisite :: Ceph Top Gun Enablement</title>
+    <title>RadosGW Archive Zone :: Ceph Top Gun Enablement</title>
     <link rel="canonical" href="https://likid0.github.io/ceph-top-gun-enablement/training/ceph/radosgw_archive.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../_/css/site.css">
@@ -314,7 +314,7 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Ceph Top-Gun Enablement</a></li>
-    <li><a href="radosgw_archive.html">RadosGW Multisite</a></li>
+    <li><a href="radosgw_archive.html">RadosGW Archive Zone</a></li>
   </ul>
 </nav>
   <div class="edit-this-page"><a href="file:///antora/training/modules/ceph/pages/radosgw_archive.adoc">Edit this Page</a></div>
@@ -324,166 +324,42 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">RadosGW Multisite</h1>
+<h1 class="page">RadosGW Archive Zone</h1>
 <div class="sect1">
-<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<h2 id="_introductiontp_in_5_3"><a class="anchor" href="#_introductiontp_in_5_3"></a>1. Introduction(TP in 5.3)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A single zone configuration typically consists of one zone group containing one
-zone and one or more ceph-radosgw instances where you may load-balance gateway
-client requests between the instances. In a single zone configuration, typically
-multiple gateway instances point to a single Ceph storage cluster.</p>
+<p>RGW archive zone and has the following main characteristics:</p>
 </div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/multisite-intro.png" alt="Multisite Diagram">
-</div>
-</div>
-<div class="paragraph">
-<p>Ceph by its own design is synchronous. And so that means from a client&#8217;s level,
-write is not acknowledged until all replication copies are written into the
-cluster. So, for example, if you have a two-way replication cluster with your
-failure domain at the host level, and your client writes into the cluster, that
-client does not receive acknowledgment until that second copy has been written
-to any other node than where the primary write happened. So, you can very
-quickly see where this would become unusable at the multisite level, especially
-when the cluster spanned vast geographic distances to one another.</p>
-</div>
-<div class="paragraph">
-<p>This is where asynchronous replication is used. This allows each cluster in the
-multisite to become eventually consistent with each other.</p>
-</div>
-<div class="paragraph">
-<p>So, from the top down, we have realm, Zone Group and zones and I&#8217;m going to
-explain all those right now. So, a realm represents a globally unique namespace
-and represents the highest level of the Ceph multisite cluster. Each realm can
-then contain either one or multiple zone groups and multiple zones. So next we
-have zone groups. These used to be called regions and they&#8217;re essentially made
-to define one or more multiple geographic areas. So next we have zones. These
-are the lowest level of the Ceph multisite configuration and they&#8217;re represented
-by one or more object gateways underneath one single Ceph cluster.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_rgw_multisite_components"><a class="anchor" href="#_rgw_multisite_components"></a>2. RGW Multisite components</h2>
-<div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Zone</strong></p>
 <div class="ulist">
 <ul>
 <li>
-<p>Defines a logical group consisting of one or more Ceph Object Gateway instances</p>
+<p>Versioning is enabled in all buckets in the RGW archive zone.</p>
 </li>
 <li>
-<p>Configuring zones differs from typical Ceph configuration procedures, because not all of the settings end up in a Ceph configuration file</p>
+<p>Every time a user uploads a new object, this object is asynchronous replicated to the archive zone.</p>
 </li>
 <li>
-<p>There will be one zone that should be designated as the Master zone in a zonegroup</p>
+<p>If an object is modified, a new version is generated in the archive zone.</p>
 </li>
 <li>
-<p>The Master zone will handle all bucket and user creation</p>
-</li>
-<li>
-<p>Secondary zone can receive bucket and user operations, but will redirect them to the Master zone</p>
-</li>
-<li>
-<p>If the Master zone is down, bucket and user operations will fail</p>
-</li>
-<li>
-<p>It is possible to promote a secondary zone to Master zone. This a complex operation. It is recommended only when the Master zone will be down for a long period of time</p>
+<p>If an object is deleted, the object is kept in the archive zone.</p>
 </li>
 </ul>
-</div>
-</li>
-<li>
-<p><strong>Zone Group</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>A zone group is a set of one or more zones. Data can be replicated between
-zones inside the same zonegroup.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Realm</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>A realm forms a global/unified namespace for all objects and buckets in the
-realm . A realm contains one or more zone groups, each of which contains one
-or more zones.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Multi-zone</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>A more advanced configuration consists of one zone group and multiple zones,
-each zone with one or more ceph-radosgw instances. Each zone is backed by its
-own Ceph Storage Cluster. Multiple zones in a zone group provides disaster
-recovery for the zone group should one of the zones experience a significant
-failure. In Kraken, each zone is active and may receive write operations. In
-addition to disaster recovery, multiple active zones may also serve as a
-foundation for content delivery networks.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Multi-zone-group</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>Formerly called ‘regions’, Ceph Object Gateway can also support multiple zone
-groups, each zone group with one or more zones. Objects stored to zones in one
-zone group within the same realm as another zone group will share a global
-object namespace, ensuring unique object IDs across zone groups and zones.</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p><strong>Multiple Realms</strong></p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>In Kraken, the Ceph Object Gateway supports the notion of realms, which can be a
-single zone group or multiple zone groups and a globally unique namespace for
-the realm. Multiple realms provide the ability to support numerous
-configurations and namespaces.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_multisite_lab"><a class="anchor" href="#_multisite_lab"></a>3. Multisite Lab.</h2>
+<h2 id="_archive_zone_lab"><a class="anchor" href="#_archive_zone_lab"></a>2. Archive Zone Lab.</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>In this lab we are going to deploy an advanced configuration that consists of a
-single realm with one zone group and two zones, each zone with two Ceph RGW
-instances. Each zone is backed by its own Ceph Storage Cluster. Multiple zones
-in a zone group provides disaster recovery for the zone group should one of the
-zones experience a significant failure. Each zone is active and may receive
-write operations.</p>
-</div>
-<div class="paragraph">
-<p>The next diagram has a layout of RGW multisite in our Lab.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/multi_multi.jpeg" alt="RGW multisite Lab Layout">
-</div>
+single realm with one zone group and two zones, one zone will be the production
+zone, and the second zone will be the archive zone, each zone with two Ceph RGW
+instances. Each zone is backed by its own Ceph Storage Cluster.</p>
 </div>
 <div class="sect2">
-<h3 id="_configure_the_master_realm_zonegroup_and_zone"><a class="anchor" href="#_configure_the_master_realm_zonegroup_and_zone"></a>3.1. Configure the Master Realm, Zonegroup and Zone.</h3>
+<h3 id="_configure_the_master_realm_zonegroup_and_zone"><a class="anchor" href="#_configure_the_master_realm_zonegroup_and_zone"></a>2.1. Configure the Master Realm, Zonegroup and Zone.</h3>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -507,20 +383,27 @@ you will need to add valid rgw endpoints to the zonegroup and zone.</p>
 # radosgw-admin period update --rgw-realm=multisite --commit</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>And then skip to section 3.2</p>
+</div>
 </td>
 </tr>
 </table>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="paragraph">
 <p>If you have done the virtual host configuration from the RadosGW introduction
 module it needs to be removed, before you continue with this lab</p>
 </div>
-<div class="exampleblock">
-<div class="content">
-<div class="paragraph">
-<p>And then skip to section 3.2</p>
-</div>
-</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -530,7 +413,7 @@ module it needs to be removed, before you continue with this lab</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Run commands on the master/primary cluster.</p>
+<p>Always Run commands on the master/primary cluster.</p>
 </div>
 </td>
 </tr>
@@ -695,7 +578,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 </div>
 <div class="sect2">
-<h3 id="_create_sync_user"><a class="anchor" href="#_create_sync_user"></a>3.2. Create Sync User</h3>
+<h3 id="_create_sync_user"><a class="anchor" href="#_create_sync_user"></a>2.2. Create Sync User</h3>
 <div class="paragraph">
 <p>Create a system user that we will use to configure the sync between sites.</p>
 </div>
@@ -706,19 +589,19 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 </div>
 <div class="sect2">
-<h3 id="_configure_seconday_zone"><a class="anchor" href="#_configure_seconday_zone"></a>3.3. Configure Seconday Zone</h3>
+<h3 id="_configure_seconday_zone"><a class="anchor" href="#_configure_seconday_zone"></a>2.3. Configure Seconday Zone</h3>
 <div class="paragraph">
-<p>Steps to configure the RADOS Gateway instance on the secondary zone.</p>
+<p>Steps to configure the RADOS Gateway instance on the Archive zone.</p>
 </div>
-<div class="admonitionblock warning">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Run commands on the seconday Ceph cluster</p>
+<p>Run commands on the secondary/Archive Ceph cluster, in our example ceph-mon01</p>
 </div>
 </td>
 </tr>
@@ -833,30 +716,30 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 </div>
 <div class="paragraph">
-<p>Create a secondary zone.</p>
+<p>Create the archive zone.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin zone create --rgw-zone=zone2 --rgw-zonegroup=multizg --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default
-2022-12-23T09:28:04.140-0500 7f905d907500  0 failed reading obj info from .rgw.root:zone_info.c5dc9503-6c11-4851-91bd-f1d5ca61473c: (2) No such file or directory
-2022-12-23T09:28:04.140-0500 7f905d907500  0 WARNING: could not read zone params for zone id=c5dc9503-6c11-4851-91bd-f1d5ca61473c name=zone1
+<pre># radosgw-admin zone create --rgw-zone=archive --rgw-zonegroup=multizg --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default --tier-type=archive
+2023-03-15T07:23:42.554-0400 7ffb657fd500  0 failed reading obj info from .rgw.root:zone_info.1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f: (2) No such file or directory
+2023-03-15T07:23:42.554-0400 7ffb657fd500  0 WARNING: could not read zone params for zone id=1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f name=zone1
 {
-    "id": "5c14f28b-72f2-4323-aa35-24bd1cb8fc0e",
-    "name": "zone2",
-    "domain_root": "zone2.rgw.meta:root",
-    "control_pool": "zone2.rgw.control",
-    "gc_pool": "zone2.rgw.log:gc",
-    "lc_pool": "zone2.rgw.log:lc",
-    "log_pool": "zone2.rgw.log",
-    "intent_log_pool": "zone2.rgw.log:intent",
-    "usage_log_pool": "zone2.rgw.log:usage",
-    "roles_pool": "zone2.rgw.meta:roles",
-    "reshard_pool": "zone2.rgw.log:reshard",
-    "user_keys_pool": "zone2.rgw.meta:users.keys",
-    "user_email_pool": "zone2.rgw.meta:users.email",
-    "user_swift_pool": "zone2.rgw.meta:users.swift",
-    "user_uid_pool": "zone2.rgw.meta:users.uid",
-    "otp_pool": "zone2.rgw.otp",
+    "id": "d7c2da60-e269-4681-a231-e744d1f0dc8a",
+    "name": "archive",
+    "domain_root": "archive.rgw.meta:root",
+    "control_pool": "archive.rgw.control",
+    "gc_pool": "archive.rgw.log:gc",
+    "lc_pool": "archive.rgw.log:lc",
+    "log_pool": "archive.rgw.log",
+    "intent_log_pool": "archive.rgw.log:intent",
+    "usage_log_pool": "archive.rgw.log:usage",
+    "roles_pool": "archive.rgw.meta:roles",
+    "reshard_pool": "archive.rgw.log:reshard",
+    "user_keys_pool": "archive.rgw.meta:users.keys",
+    "user_email_pool": "archive.rgw.meta:users.email",
+    "user_swift_pool": "archive.rgw.meta:users.swift",
+    "user_uid_pool": "archive.rgw.meta:users.uid",
+    "otp_pool": "archive.rgw.otp",
     "system_key": {
         "access_key": "sync",
         "secret_key": "sync"
@@ -865,20 +748,19 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
         {
             "key": "default-placement",
             "val": {
-                "index_pool": "zone2.rgw.buckets.index",
+                "index_pool": "archive.rgw.buckets.index",
                 "storage_classes": {
                     "STANDARD": {
-                        "data_pool": "zone2.rgw.buckets.data"
+                        "data_pool": "archive.rgw.buckets.data"
                     }
                 },
-                "data_extra_pool": "zone2.rgw.buckets.non-ec",
+                "data_extra_pool": "archive.rgw.buckets.non-ec",
                 "index_type": 0
             }
         }
     ],
-    "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
-    "notif_pool": "zone2.rgw.log:notif"
-}</pre>
+    "realm_id": "da2a45d7-764b-4c92-a28a-049d02c8c22f",
+    "notif_pool": "archive.rgw.log:notif"</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -887,17 +769,18 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 <div class="listingblock">
 <div class="content">
 <pre># radosgw-admin period update --commit
-Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
+2023-03-15T07:24:31.295-0400 7f62337c9500  1 Cannot find zone id=d7c2da60-e269-4681-a231-e744d1f0dc8a (name=archive), switching to local zonegroup configuration
+Sending period to new master zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f
 {
-    "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
-    "epoch": 7,
-    "predecessor_uuid": "68a74587-6404-4798-83e0-6cd3bf417288",
+    "id": "9c4eba19-7849-48cf-8024-7fe44067a9a9",
+    "epoch": 2,
+    "predecessor_uuid": "40025556-2e6b-4a26-af36-89158d79816c",
     "sync_status": [],
     "period_map": {
-        "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
+        "id": "9c4eba19-7849-48cf-8024-7fe44067a9a9",
         "zonegroups": [
             {
-                "id": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
+                "id": "fc3debfe-2a29-448b-baa8-1e54c7eee9b1",
                 "name": "multizg",
                 "api_name": "multizg",
                 "is_master": "true",
@@ -906,10 +789,10 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
                 ],
                 "hostnames": [],
                 "hostnames_s3website": [],
-                "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                "master_zone": "1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f",
                 "zones": [
                     {
-                        "id": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+                        "id": "1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f",
                         "name": "zone1",
                         "endpoints": [
                             "http://proxy01:8000"
@@ -921,11 +804,14 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
                         "tier_type": "",
                         "sync_from_all": "true",
                         "sync_from": [],
-                        "redirect_zone": ""
+                        "redirect_zone": "",
+                        "supported_features": [
+                            "resharding"
+                        ]
                     },
                     {
-                        "id": "ec5a7187-95e1-4bf2-8519-208175c81487",
-                        "name": "zone2",
+                        "id": "d7c2da60-e269-4681-a231-e744d1f0dc8a",
+                        "name": "archive",
                         "endpoints": [
                             "http://proxy02:8000"
                         ],
@@ -933,10 +819,13 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
                         "log_data": "true",
                         "bucket_index_max_shards": 11,
                         "read_only": "false",
-                        "tier_type": "",
+                        "tier_type": "archive",
                         "sync_from_all": "true",
                         "sync_from": [],
-                        "redirect_zone": ""
+                        "redirect_zone": "",
+                        "supported_features": [
+                            "resharding"
+                        ]
                     }
                 ],
                 "placement_targets": [
@@ -944,40 +833,33 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
                         "name": "default-placement",
                         "tags": [],
                         "storage_classes": [
-                            "SSD",
-                            "STANDARD"
-                        ]
-                    },
-                    {
-                        "name": "ssd",
-                        "tags": [
-                            "allowed-ssd"
-                        ],
-                        "storage_classes": [
                             "STANDARD"
                         ]
                     }
                 ],
                 "default_placement": "default-placement",
-                "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+                "realm_id": "da2a45d7-764b-4c92-a28a-049d02c8c22f",
                 "sync_policy": {
                     "groups": []
-                }
+                },
+                "enabled_features": [
+                    "resharding"
+                ]
             }
         ],
         "short_zone_ids": [
             {
-                "key": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
-                "val": 2695141038
+                "key": "1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f",
+                "val": 3465814334
             },
             {
-                "key": "ec5a7187-95e1-4bf2-8519-208175c81487",
-                "val": 3374434257
+                "key": "d7c2da60-e269-4681-a231-e744d1f0dc8a",
+                "val": 702125852
             }
         ]
     },
-    "master_zonegroup": "6b9fbc87-3202-4a35-85d0-e3e16fc91b32",
-    "master_zone": "c5dc9503-6c11-4851-91bd-f1d5ca61473c",
+    "master_zonegroup": "fc3debfe-2a29-448b-baa8-1e54c7eee9b1",
+    "master_zone": "1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f",
     "period_config": {
         "bucket_quota": {
             "enabled": false,
@@ -994,7 +876,7 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
             "max_objects": -1
         }
     },
-    "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
+    "realm_id": "da2a45d7-764b-4c92-a28a-049d02c8c22f",
     "realm_name": "multisite",
     "realm_epoch": 2
 }</pre>
@@ -1005,19 +887,20 @@ Sending period to new master zone c5dc9503-6c11-4851-91bd-f1d5ca61473c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># ceph orch apply rgw multi.zone2 --realm=multisite --zone=zone2 --placement="2 proxy02 ceph-mon02" --port=8000</pre>
+<pre># ceph orch apply rgw multi.archive --realm=multisite --zone=archive --placement="2 proxy02 ceph-mon02" --port=8000
+Scheduled rgw.multi.archive update...</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Use the radosgw-admin sync status command, we can see the sync is started and a
-full copy of the master zone is being synced with the secondary zone</p>
+full copy of the master zone is being synced to the Archive zone</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre># radosgw-admin sync status
           realm e72107cb-4b3f-49b9-abb0-83c68a9967f9 (multisite)
       zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 (multizg)
-           zone ec5a7187-95e1-4bf2-8519-208175c81487 (zone2)
+           zone ec5a7187-95e1-4bf2-8519-208175c81487 (Archive)
    current time 2022-12-23T14:41:08Z
   metadata sync syncing
                 full sync: 1/64 shards
@@ -1075,15 +958,16 @@ verbosity you can follow the steps of this
 <div class="listingblock">
 <div class="content">
 <pre># radosgw-admin sync status
-          realm 4818713d-4bdf-4ef7-ab7b-c9ceb8009bdb (multisite)
-      zonegroup ce0533e9-ebe7-45f4-8126-91e9f9253599 (multizg)
-           zone d0492b20-abca-463a-8972-9eae824537fd (zone2)
-   current time 2022-12-24T10:52:29Z
+          realm da2a45d7-764b-4c92-a28a-049d02c8c22f (multisite)
+      zonegroup fc3debfe-2a29-448b-baa8-1e54c7eee9b1 (multizg)
+           zone d7c2da60-e269-4681-a231-e744d1f0dc8a (archive)
+   current time 2023-03-15T11:27:00Z
+zonegroup features enabled: resharding
   metadata sync syncing
                 full sync: 0/64 shards
                 incremental sync: 64/64 shards
                 metadata is caught up with master
-      data sync source: 4913e13d-17a9-4c6f-96a4-91b87d2cfe68 (zone1)
+      data sync source: 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f (zone1)
                         syncing
                         full sync: 0/128 shards
                         incremental sync: 128/128 shards
@@ -1091,581 +975,382 @@ verbosity you can follow the steps of this
 </div>
 </div>
 <div class="paragraph">
-<p>With this current configuration every data object will be synced
-bi-directionally on both sites, so we can upload objects to site1 or
-site2(Active/Active) and they
-we will get replicated in async mode between sites, using the term eventually
-consistent.</p>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Remember that metadata changes should only be done on the master node,
-the master node will take care of replicating the metadata changes to the rest
-of the zones in the zonegroup</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>By default, the objects are not verified again after the synchronization of an
-object was successful. To enable that, you can set rgw_sync_obj_etag_verify to
-true. After enabling the optional objects that will be synchronized going
-forward, an additional MD5 checksum will verify that it is computed on the
-source and the destination. This is to ensure the integrity of the objects
-fetched from a remote server over HTTP including multisite sync. This option can
-decrease the performance of your RGW as more computation is needed.</p>
-</div>
-</td>
-</tr>
-</table>
+<p>The replication with the Archive zone is uni-directional, so only objects from
+zone1 will be replicated to the archive zone, and not the other way around.</p>
 </div>
 <div class="paragraph">
-<p>We can see the sync direction configuration using <code>radosgw-admin sync info</code>
-command, we can see that sources and destinations are replicating <code>*</code> all
-buckets and their data between sites.</p>
+<p>That is why if we check the same radosgw-admin sync status command on the
+cluster from zone1, we can see there us no data sync information:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync info
+<pre># radosgw-admin sync status
+          realm da2a45d7-764b-4c92-a28a-049d02c8c22f (multisite)
+      zonegroup fc3debfe-2a29-448b-baa8-1e54c7eee9b1 (multizg)
+           zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f (zone1)
+   current time 2023-03-15T11:31:00Z
+zonegroup features enabled: resharding
+  metadata sync no sync (zone is master)
+      data sync source: d7c2da60-e269-4681-a231-e744d1f0dc8a (archive)
+                        not syncing from zone</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prepare_the_client_environment"><a class="anchor" href="#_prepare_the_client_environment"></a>2.4. Prepare the client Environment.</h3>
+<div class="paragraph">
+<p>We are going to use 2 clients, the aws cli and the rclone cli tool.</p>
+</div>
+<div class="paragraph">
+<p>First we are going to create a specific user for our tests, sone in our zone1
+cluster we run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># radosgw-admin user create --uid=archuser --display-name="S3 user to test the archive zone" --access-key=archuser
+--secret-key=archuser
 {
-    "sources": [
+    "user_id": "archuser",
+    "display_name": "S3 user to test the archive zone",
+    "email": "",
+    "suspended": 0,
+    "max_buckets": 1000,
+    "subusers": [],
+    "keys": [
         {
-            "id": "all",
-            "source": {
-                "zone": "zone1",
-                "bucket": "*"
-            },
-            "dest": {
-                "zone": "zone2",
-                "bucket": "*"
-            },
-            "params": {
-                "source": {
-                    "filter": {
-                        "tags": []
-                    }
-                },
-                "dest": {},
-                "priority": 0,
-                "mode": "system",
-                "user": ""
-            }
+            "user": "archuser",
+            "access_key": "archuser",
+            "secret_key": "archuser"
         }
     ],
-    "dests": [
-        {
-            "id": "all",
-            "source": {
-                "zone": "zone2",
-                "bucket": "*"
-            },
-            "dest": {
-                "zone": "zone1",
-                "bucket": "*"
-            },
-            "params": {
-                "source": {
-                    "filter": {
-                        "tags": []
-                    }
-                },
-                "dest": {},
-                "priority": 0,
-                "mode": "system",
-                "user": ""
-            }
-        }
-    ],</pre>
+    "swift_keys": [],
+    "caps": [],
+    "op_mask": "read, write, delete",
+    "default_placement": "",
+    "default_storage_class": "",
+    "placement_tags": [],
+    "bucket_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "user_quota": {
+        "enabled": false,
+        "check_on_raw": false,
+        "max_size": -1,
+        "max_size_kb": 0,
+        "max_objects": -1
+    },
+    "temp_url_keys": [],
+    "type": "rgw",
+    "mfa_ids": []
+}</pre>
 </div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>For multi-site only, you can check out the metadata log (mdlog), the bucket
-index log (bilog) and the data log (datalog). You can list them and also trim
-them which is not needed in most cases as rgw_sync_log_trim_interval is set to
-20 minutes as default. You shouldn’t have to trim it at any time as it could
-cause side effects otherwise.</p>
-</div>
-</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s check if metadata and data replication is working
-fine, all metadata changes have to be in the primary site, so I&#8217;m going to
-create a user, and we can check how it&#8217;s synced to the secondary site.</p>
+<p>We are going to configure the AWS client with this user:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[ceph-node01 ~]# radosgw-admin user create --uid=multiuser --display-name="multiuser" --access-key=multiuser --secret=multiuser --system
+<pre># aws configure
+AWS Access Key ID [None]: archuser
+AWS Secret Access Key [None]: archuser
+Default region name [None]: multizg
+Default output format [None]: text</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>I&#8217;m also going to create a couple of alias to make our life easier.</p>
+</div>
+<div class="paragraph">
+<p>Alias for zone1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># alias s3apiarchive='aws --endpoint=http://proxy02:8000 s3api'
+# alias s3apizone1='aws --endpoint=http://proxy01:8000 s3api'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We will also use rclone, so lets download and install the rclone rpm:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># yum install https://downloads.rclone.org/v1.62.0/rclone-v1.62.0-linux-amd64.rpm -y</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Configure the rclone client:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># mkdir -p /root/.config/rclone/
+# cat &lt;&lt;EOF &gt; /root/.config/rclone/rclone.conf
+[zone1]
+type = s3
+provider = Other
+access_key_id = archuser
+secret_access_key = archuser
+endpoint = http://proxy01:8000
+location_constraint = multizg
+acl = bucket-owner-full-control
 
-[root@ceph-mon01 ~]# radosgw-admin user list
-[
-    "syncuser",
-    "dashboard",
-    "multiuser"
-]</pre>
+[archive]
+type = s3
+provider = Ceph
+access_key_id = archuser
+secret_access_key = archuser
+endpoint = http://proxy02:8000
+location_constraint = multizg
+acl = bucket-owner-full-control
+EOF</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Using the multiuser user we just created let&#8217;s upload some objects from each
-site and check that they are getting replicated in both directions</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>We change the endpoint in the AWS CLI when we want to interact with the primary
-or secondary cluster, proxy01 is zone1, and proxy02 is zone2.</p>
-</div>
-</td>
-</tr>
-</table>
+<p>Create some test files and get the output of their MD5 sum, so we can
+review further down the line:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint http://proxy01:8000 s3 mb s3://bucket1
-# aws --endpoint http://proxy01:8000 s3 ls
-2022-12-29 03:59:14 bucket1
-# aws --endpoint http://proxy02:8000 s3 ls
-2022-12-29 03:59:14 bucket1
-# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
-2022-12-29 04:18:01       1330 file1
-# aws --endpoint  http://proxy02:8000 s3 cp /etc/hosts s3://bucket1/file2
-# aws --endpoint  http://proxy01:8000 s3 ls s3://bucket1/
-2022-12-29 04:18:01       1330 file1
-2022-12-29 04:18:54       1330 file2</pre>
+<pre># echo "This is file 1" &gt; /tmp/test-file-1
+# echo "This is file 2" &gt; /tmp/test-file-2
+# echo "This is file 3" &gt; /tmp/test-file-3
+# md5sum /tmp/test-file-1
+88c16a56754e0f17a93d269ae74dde9b  /tmp/test-file-1
+# md5sum /tmp/test-file-2
+db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
+# md5sum /tmp/test-file-3
+95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</pre>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_archive_zone_testing"><a class="anchor" href="#_archive_zone_testing"></a>2.5. Archive Zone testing</h3>
+<div class="paragraph">
+<p>We have our client&#8217;s ready, let&#8217;s check out the archive zone.</p>
 </div>
 <div class="paragraph">
-<p>We have now confirmed that metadata and data sync replication is working fine
-in our deployment.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_rgw_multisite_sync_flowsbucket_granularity_ga_in_6_1"><a class="anchor" href="#_rgw_multisite_sync_flowsbucket_granularity_ga_in_6_1"></a>4. RGW Multisite Sync Flows(Bucket Granularity) GA in 6.1</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>With this current configuration every data object will be synced
-bi-directionally on both sites, so we can upload objects to site1 or
-site2(Active/Active) and they
-we will get replicated in async mode between sites, using the terme eventually
-consistent.</p>
-</div>
-<div class="paragraph">
-<p>There is a new feature in RGW multisite called Sync policies that gives greater
-flexibility on how we sync our data.</p>
-</div>
-<div class="paragraph">
-<p>Multisite bucket-granularity sync policy provides fine grained control of data
-movement between buckets in different zones. It extends the zone sync
-mechanism. Previously buckets were being treated symmetrically, that is – each
-(data) zone holds a mirror of that bucket that should be the same as all the
-other zones. Whereas leveraging the bucket-granularity sync policy is possible
-for buckets to diverge, and a bucket can pull data from other buckets (ones that
-don’t share its name or its ID) in different zone. The sync process was assuming
-therefore that the bucket sync source and the bucket sync destination were
-always referring to the same bucket, now that is not the case anymore.</p>
-</div>
-<div class="paragraph">
-<p>The sync policy supersedes the old zonegroup coarse configuration
-(sync_from*). The sync policy can be configured at the zonegroup level (and if
-it is configured it replaces the old style config), but it can also be
-configured at the bucket level.</p>
-</div>
-<div class="paragraph">
-<p>In the sync policy multiple groups that can contain lists of data-flow
-configurations can be defined, as well as lists of pipe configurations. The
-data-flow defines the flow of data between the different zones. It can define
-symmetrical data flow, in which multiple zones sync data from each other, and it
-can define directional data flow, in which the data moves in one way from one
-zone to another.</p>
-</div>
-<div class="paragraph">
-<p>This new feature opens up many configuration options for our multisite
-replication, in this lab we are just going to show one example, where we
-configure bucket replication granularity, and only configure replication
-between sites for bucket1. you can check more examples in the upstream <a href="https://docs.ceph.com/en/quincy/radosgw/multisite-sync-policy/#examples">DOC</a></p>
-</div>
-<div class="paragraph">
-<p>We configure the zonegroup sync policy group that needs to be in place(flow + pipe) to be able to configure bucket sync policy</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Any changes to the zonegroup policy needs to be applied on the zonegroup master
-zone, and require period update and commit.</p>
-</div>
-</td>
-</tr>
-</table>
+<p>Create a new bucket and verify the bucket has been created in all RGW zones:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>+----------------------------+----------------------------------------+
-|  Value                     | Description                            |
-+============================+========================================+
-| ``enabled``                | sync is allowed and enabled            |
-+----------------------------+----------------------------------------+
-| ``allowed``                | sync is allowed                        |
-+----------------------------+----------------------------------------+
-| ``forbidden``              | sync (as defined by this group) is not |
-|                            | allowed and can override other groups  |
-+----------------------------+----------------------------------------+</pre>
+<pre># s3apizone1 create-bucket --bucket my-bucket
+# s3apizone1 list-buckets
+BUCKETS 2023-03-15T12:03:54.315000+00:00        my-bucket
+OWNER   S3 user to test the archive zone        archuser
+# s3apiarchive list-buckets
+BUCKETS 2023-03-15T12:03:54.315000+00:00        my-bucket
+OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>We create the zonegroup sync group and set the replication status to allowed</p>
+<p>Verify that the object versioning is not yet configured as this is implemented lazily</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync group create --group-id=group1 --status=allowed
+<pre># s3apizone1 get-bucket-versioning --bucket my-bucket
+# s3apiarchive get-bucket-versioning --bucket my-bucket</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Upload a new object to our bucket my-bucket and verify the object has been created in all RGW zones</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone copy /tmp/test-file-1 zone1:my-bucket</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify how S3 versioning has been enabled in the archive zone but not in zone1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># s3apiarchive get-bucket-versioning --bucket my-bucket
 {
-    "groups": [
-        {
-            "id": "group1",
-            "data_flow": {},
-            "pipes": [],
-            "status": "allowed"
-        }
-    ]
-}</pre>
+    "Status": "Enabled",
+    "MFADelete": "Disabled"
+}
+# s3apizone1 get-bucket-versioning --bucket my-bucket</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Now we create a flow for the group, setting the flow bi-derectional/symmetrical
-for zones: zone1,zone2</p>
+<p>Verify object version ID is null in master and secondary zone but not in the archive zone:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync group flow create --group-id=group1  --flow-id=flow-symmetrical --flow-type=symmetrical --zones=zone1,zone2
+<pre># s3apizone1 list-object-versions --bucket my-bucket
 {
-    "groups": [
+    "Versions": [
         {
-            "id": "group1",
-            "data_flow": {
-                "symmetrical": [
-                    {
-                        "id": "flow-symmetrical",
-                        "zones": [
-                            "zone2",
-                            "zone1"
-                        ]
-                    }
-                ]
-            },
-            "pipes": [],
-            "status": "allowed"
-        }
-    ]
-}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Finally we set on the zonegroup sync policy a pipe where we allow replication of
-all buckets from all zones in the group</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>radosgw-admin sync group pipe create --group-id=group1 --pipe-id=pipe1 --source-zones='*' --source-bucket='*' --dest-zones='*' --dest-bucket='*'
-{
-    "groups": [
-        {
-            "id": "group1",
-            "data_flow": {
-                "symmetrical": [
-                    {
-                        "id": "flow-symmetrical",
-                        "zones": [
-                            "zone2",
-                            "zone1"
-                        ]
-                    }
-                ]
-            },
-            "pipes": [
-                {
-                    "id": "pipe1",
-                    "source": {
-                        "bucket": "*",
-                        "zones": [
-                            "*"
-                        ]
-                    },
-                    "dest": {
-                        "bucket": "*",
-                        "zones": [
-                            "*"
-                        ]
-                    },
-                    "params": {
-                        "source": {
-                            "filter": {
-                                "tags": []
-                            }
-                        },
-                        "dest": {},
-                        "priority": 0,
-                        "mode": "system",
-                        "user": ""
-                    }
-                }
-            ],
-            "status": "allowed"
-        }
-    ]
-}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We need to do a period update so the changes we made to the zonegroup
-replication are reflected on both sites</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># radosgw-admin period update --commit</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>But remember that the status of the replication for the zonegroup is set to
-<code>allowed</code> not <code>enabled</code> so there is currently no replication between sites, we
-can confirm it with the s3 cli.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>[root@ceph-node01 ~]# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket1/file11
-upload: ../etc/hosts to s3://bucket1/file11
-[root@ceph-node01 ~]# aws --endpoint  http://proxy01:8000 s3 ls s3://bucket1/
-2022-12-29 04:18:01       1330 file1
-2022-12-29 04:38:20       1330 file11
-2022-12-29 04:18:54       1330 file2
-[root@ceph-node01 ~]# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
-2022-12-29 04:18:01       1330 file1
-2022-12-29 04:18:54       1330 file2</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now that the zonegroup is in place and is <code>allowing</code> replication, we can
-configure the sync policy at the bucket level, we only want to enable sync for
-bucket <code>bucket1</code> , we create a new sync group and pipe for <code>bucket1</code></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># radosgw-admin sync group create --bucket=bucket1 --group-id=bucket1-default --status=enabled
-{
-    "groups": [
-        {
-            "id": "bucket1-default",
-            "data_flow": {},
-            "pipes": [],
-            "status": "enabled"
+            "ETag": "\"88c16a56754e0f17a93d269ae74dde9b\"",
+            "Size": 15,
+            "StorageClass": "STANDARD",
+            "Key": "test-file-1",
+            "VersionId": "null",
+            "IsLatest": true,
+            "LastModified": "2023-03-15T12:07:12.914000+00:00",
+            "Owner": {
+                "DisplayName": "S3 user to test the archive zone",
+                "ID": "archuser"
+            }
         }
     ]
 }
 
-# radosgw-admin sync group pipe create --bucket=bucket1 --group-id=bucket1-default --pipe-id=pipe1 --source-zones='*' --dest-zones='*'
-# radosgw-admin sync group get --bucket bucket1
-[
-    {
-        "key": "bucket1-default",
-        "val": {
-            "id": "bucket1-default",
-            "data_flow": {},
-            "pipes": [
-                {
-                    "id": "pipe1",
-                    "source": {
-                        "bucket": "*",
-                        "zones": [
-                            "*"
-                        ]
-                    },
-                    "dest": {
-                        "bucket": "*",
-                        "zones": [
-                            "*"
-                        ]
-                    },
-                    "params": {
-                        "source": {
-                            "filter": {
-                                "tags": []
-                            }
-                        },
-                        "dest": {},
-                        "priority": 0,
-                        "mode": "system",
-                        "user": "multiuser"
-                    }
-                }
-            ],
-            "status": "enabled"
-        }
-    }
-]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We can check the replication policies configured for a bucket with the help of
-the <code>radosgw-admin sync info</code> command, because the flow we configured for
-replication is bi-directional, we can see that bucket replication for bucket1
-is configured as source and destination</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># radosgw-admin sync info --bucket bucket1
+# s3apiarchive list-object-versions --bucket my-bucket
 {
-    "sources": [
+    "Versions": [
         {
-            "id": "pipe1",
-            "source": {
-                "zone": "zone2",
-                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
-            },
-            "dest": {
-                "zone": "zone1",
-                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
-            },
-            "params": {
-                "source": {
-                    "filter": {
-                        "tags": []
-                    }
-                },
-                "dest": {},
-                "priority": 0,
-                "mode": "system",
-                "user": "multiuser"
+            "ETag": "\"88c16a56754e0f17a93d269ae74dde9b\"",
+            "Size": 15,
+            "StorageClass": "STANDARD",
+            "Key": "test-file-1",
+            "VersionId": "6DRlC7fKtpmkvHA9zknhFA87RjyilTV",
+            "IsLatest": true,
+            "LastModified": "2023-03-15T12:07:12.914000+00:00",
+            "Owner": {
+                "DisplayName": "S3 user to test the archive zone",
+                "ID": "archuser"
             }
         }
-    ],
-    "dests": [
-        {
-            "id": "pipe1",
-            "source": {
-                "zone": "zone1",
-                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
-            },
-            "dest": {
-                "zone": "zone2",
-                "bucket": "bucket1:a315bff5-2e58-495b-b297-95383c1e0ab3.24584.1"
-            },
-            "params": {
-                "source": {
-                    "filter": {
-                        "tags": []
-                    }
-                },
-                "dest": {},
-                "priority": 0,
-                "mode": "system",
-                "user": "multiuser"
-            }
-        }
-    ],
-    "hints": {
-        "sources": [],
-        "dests": []
-    },
-    "resolved-hints-1": {
-        "sources": [],
-        "dests": []
-    },
-    "resolved-hints": {
-        "sources": [],
-        "dests": []
-    }
+    ]
 }</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Bucket policy modifications don&#8217;t need a period update, they are automatically
-detected, so let&#8217;s go ahead and test if bucket replication is working for
-bucket1:</p>
+<p>Modify the object in the master zone and verify a new version is created in the RGW archive zone.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket1/file111
-upload: ../etc/hosts to s3://bucket1/file111
-# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket1/
-2022-12-29 04:18:01       1330 file1
-2022-12-29 04:42:34       1330 file111
-2022-12-29 04:18:54       1330 file2</pre>
+<pre># rclone copyto /tmp/test-file-2 zone1:my-bucket/test-file-1
+# rclone ls zone1:my-bucket
+       15 test-file-1</pre>
 </div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>You could achieve the same bucket granular replication by using the
-<code>radosgw-admin bucket sync [enable/disable] --bucket=&lt;bucket&gt;</code> command, but
-take into account the multisite sync policies are so much more powerfull and
-flexible</p>
-</div>
-</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
-<p>Just to double check we can create a new bucket called <code>bucket2</code> and see how
-this bucket is not getting replicated as there is no policy in place to enable
-this replication.</p>
+<p>Verify a new version has been created in the RGW archive zone:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws --endpoint http://proxy01:8000 s3 mb s3://bucket2
-# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket2/file1
-upload: ../etc/hosts to s3://bucket2/file1
-# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket2/
-#</pre>
+<pre># s3apiarchive list-object-versions --bucket my-bucket
+{
+    "Versions": [
+        {
+            "ETag": "\"db06069ef1c9f40986ffa06db4fe8fd7\"",
+            "Size": 15,
+            "StorageClass": "STANDARD",
+            "Key": "test-file-1",
+            "VersionId": "mXoINEnZsSCDNaWwCDELVysUbnMqNqx",
+            "IsLatest": true,
+            "LastModified": "2023-03-15T12:13:27.057000+00:00",
+            "Owner": {
+                "DisplayName": "S3 user to test the archive zone",
+                "ID": "archuser"
+            }
+        },
+        {
+            "ETag": "\"88c16a56754e0f17a93d269ae74dde9b\"",
+            "Size": 15,
+            "StorageClass": "STANDARD",
+            "Key": "test-file-1",
+            "VersionId": "6DRlC7fKtpmkvHA9zknhFA87RjyilTV",
+            "IsLatest": false,
+            "LastModified": "2023-03-15T12:07:12.914000+00:00",
+            "Owner": {
+                "DisplayName": "S3 user to test the archive zone",
+                "ID": "archuser"
+            }
+        }
+    ]
+}</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If we want to also enable sync in this bucket we can go ahead with</p>
+<p>You can check the ETag it will match the MD5sum for the file, this is only the
+case if multipart upload or object encryption is configured.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync group create --bucket=bucket2 --group-id=bucket2-default --status=enabled
-# radosgw-admin sync group pipe create --bucket=bucket2 --group-id=bucket2-default --pipe-id=pipe1 --source-zones='*' --dest-zones='*'
-# aws --endpoint  http://proxy01:8000 s3 cp /etc/hosts s3://bucket2/file2
-upload: ../etc/hosts to s3://bucket2/file2
-# aws --endpoint  http://proxy02:8000 s3 ls s3://bucket2/
-2022-12-29 05:10:03       1330 file2</pre>
+<pre># md5sum /tmp/test-file-2
+db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
+# md5sum /tmp/test-file-1
+88c16a56754e0f17a93d269ae74dde9b  /tmp/test-file-1</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_recovering_s3_objects_from_the_rgw_archive_zone"><a class="anchor" href="#_recovering_s3_objects_from_the_rgw_archive_zone"></a>2.6. Recovering S3 objects from the RGW archive zone</h3>
+<div class="paragraph">
+<p>Let&#8217;s update one more version of the object</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone copyto /tmp/test-file-3 zone1:my-bucket/test-file-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the primary zone we only have one version, the current version of the object</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone --s3-versions lsl zone1:my-bucket
+       15 2023-03-15 07:59:10.779573336 test-file-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But in the Archive zone we have all 3 versions available:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone --s3-versions lsl archive:my-bucket
+       15 2023-03-15 07:59:10.779573336 test-file-1
+       15 2023-03-15 07:59:03.782438991 test-file-1-v2023-03-15-121327-057
+       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s delete test-file1 from my-bucket in zone1, and recover the object from
+the archive zone:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone delete zone1:my-bucket/test-file-1
+# rclone --s3-versions lsl zone1:my-bucket
+# rclone --s3-versions lsl archive:my-bucket
+       15 2023-03-15 07:59:10.779573336 test-file-1
+       15 2023-03-15 07:59:03.782438991 test-file-1-v2023-03-15-121327-057
+       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The object has been delete from zone1, but still available in the archive zone
+with all it&#8217;s versions, if we recover the latest version test-file-1 it should
+match with the md5 for out test-file-3.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone copyto archive:my-bucket/test-file-1 zone1:my-bucket/test-file-1
+# rclone copyto zone1:my-bucket/test-file-1 /tmp/recovered-file1
+# md5sum /tmp/recovered-file1
+95227e10e2c33771e1c1379b17330c86  /tmp/recovered-file1
+# md5sum /tmp/test-file-3
+95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But let&#8217;s say that we want to recover the object with the version that has date 2023-03-15-121327-057.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># rclone --s3-versions copyto archive:my-bucket/test-file-1-v2023-03-15-121327-057 zone1:my-bucket/test-file-1
+# rclone copyto zone1:my-bucket/test-file-1 /tmp/recovered-file1
+# md5sum /tmp/recovered-file1
+db06069ef1c9f40986ffa06db4fe8fd7  /tmp/recovered-file1
+# md5sum /tmp/test-file-2
+db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2</pre>
+</div>
 </div>
 </div>
 </div>
