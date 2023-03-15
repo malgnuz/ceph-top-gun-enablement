@@ -209,6 +209,9 @@
     <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_archive.html">RGW Archive Zone</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -628,6 +631,21 @@ set pool 5 allow_ec_overwrites to true
 # ceph osd pool application enable cephfs-data-ec cephfs
 enabled application 'cephfs' on pool 'cephfs-data-ec'</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To get more information on why EC pools for Cephfs need to enable
+the config parameter cephfs-data-ec allow_ec_overwrites check out this <a href="https://docs.ceph.com/en/latest/rados/operations/erasure-code/#erasure-coding-with-overwrites">Doc</a></p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s add the new pool to our filesystem</p>

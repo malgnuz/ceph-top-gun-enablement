@@ -209,6 +209,9 @@
     <a class="nav-link" href="radosgw_cloudsync.html">RGW Object Cloud Transition</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="radosgw_archive.html">RGW Archive Zone</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="radosgw_presignedurl.html">RGW presigned URL</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -436,37 +439,6 @@ us-east.rgw.log
 us-east.rgw.buckets.index
 us-east.rgw.buckets.data</pre>
 </div>
-</div>
-<div class="paragraph">
-<p>[TODO] Create  table
- Pool
-Description
-.rgw.root
-Domain Root Pool
-.rgw.control
-Control Pool
-.rgw.gc
-The garbage Collection pool, contains hash buckets containing the IDs of the objects to be deleted
-.log
-Will log bucket and object actions by the RGW
-.intent-log
-Store a copy of the object update request so that it can be used for undo/redo in case the object request fails
-.usage
-Contains a log of usage per user
-.users
-Contains access and secret keys, mapped to user id
-.users.email
-Contains emails associated with a user
-.users.swift
-Contains swift sub-user information
-.users.uid
-Contains a mapping of a user&#8217;s unique uid
-.rgw.buckets.index
-Contains the bucket index
-.rgw.buckets
-Contains object data
-.rgw.root
-Stores the region and zone definition for the RGW</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
