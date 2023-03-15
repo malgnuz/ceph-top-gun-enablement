@@ -227,6 +227,15 @@ Once the playbook for cluster 1 finishes, you need to run the same command but t
 
 ====
 
+
+
+[IMPORTANT]
+====
+If you are following the training, don't use these automated scripts, follow
+the manual steps of a full ceph deployment in this link for the ceph_deploy_basic.adoc[CLI] or this
+one for the ceph_deploy_ui.adoc[UI]
+====
+
 Once the playbook finishes, you are ready to start the ceph deployment. If
 needed several scripts have been created in the `/root` filesystem of our admin host
 `ceph-node01.example.com`
@@ -249,3 +258,4 @@ this file to your needs:
 # ls -l /root/cluster-spec.yaml
 -rw-r--r-- 1 root root 1240 Dec 27 16:13 /root/cluster-spec.yaml
 ----
+

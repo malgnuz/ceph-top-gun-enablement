@@ -329,7 +329,7 @@
 <h2 id="_prepare_the_environment"><a class="anchor" href="#_prepare_the_environment"></a>Prepare the Environment</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To be able to complete the Break &amp; Fix exercises we need to fulfil certain pre-reqs:</p>
+<p>To be able to complete the Break &amp; Fix exercises, we need to fulfil certain prereqs:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -342,7 +342,7 @@
 </ol>
 </div>
 <div class="paragraph">
-<p>Once the cluster is deployed and in a healthy state, you will have ceph,rgw and
+<p>Once the cluster is deployed, and in a healthy state, you will have ceph,rgw and
 mds services running</p>
 </div>
 <div class="listingblock">
@@ -362,7 +362,7 @@ mds services running</p>
 </div>
 </div>
 <div class="paragraph">
-<p>At this point from the <code>workstation</code> node, run the <code>break_and_fix.yaml</code> playbook</p>
+<p>At this point, from the <code>workstation</code> node, run the <code>break_and_fix.yaml</code> playbook</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -370,7 +370,7 @@ mds services running</p>
 </div>
 </div>
 <div class="paragraph">
-<p>After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing</p>
+<p>After the playbook finishes its run, you will have three different issues on your ceph cluster that need fixing.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -392,7 +392,7 @@ mds services running</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>A first look at the cluster health we can see several problems:</p>
+<p>A first look at the cluster health, we can see several problems:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -428,7 +428,7 @@ mds services running</p>
 </div>
 </div>
 <div class="paragraph">
-<p>My first priority would be to see what is happening with the <code>14.222% pgs not
+<p>My priority would be to see what is happening with the <code>14.222% pgs not
 active</code> as these PGs are not serving any IO:</p>
 </div>
 <div class="listingblock">
@@ -470,7 +470,7 @@ PG_STAT  STATE                       UP     UP_PRIMARY  ACTING  ACTING_PRIMARY
 </div>
 </div>
 <div class="paragraph">
-<p>I can see that all inactive PGs are from pool 2, and check who is pool 2.</p>
+<p>I can see that all inactive PGs are from pool 2, let’s check the name of the pool with ID 2</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -503,7 +503,7 @@ also have my CephFS filesystem down:</p>
 stuck in Peered</p>
 </div>
 <div class="paragraph">
-<p>I can check the status of a pg for information, there is something odd with the
+<p>I can check the status of a pg for information; there is something odd with the
 <code>num_object_copies</code> saying <code>5</code>, and <code>num_objects_degraded `3</code></p>
 </div>
 <div class="listingblock">
@@ -526,11 +526,11 @@ stuck in Peered</p>
 </div>
 <div class="paragraph">
 <p><strong>peered:</strong>
-The placement group has peered, but cannot serve client IO due to not having enough copies to reach the pool’s configured min_size parameter. Recovery may occur in this state, so the pg may heal up to min_size eventually.</p>
+The placement group has peered but cannot serve client IO due to insufficient copies to reach the pool’s configured min_size parameter. Recovery may occur in this state, so the pg may heal up to min_size eventually.</p>
 </div>
 <div class="paragraph">
-<p>So it seems that the min_size parameter is higher than the amount of hosts that
-we have, and by the pg query info it seems set to 5, lets check:</p>
+<p>So it seems that the min_size parameter is higher than the number of hosts that
+we have, and by the <code>pg query info</code>, it seems set to 5, let&#8217;s check:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -539,7 +539,7 @@ pool 2 'cephfs.cephfs.meta' replicated size 5 min_size 3 crush_rule 0 object_has
 </div>
 </div>
 <div class="paragraph">
-<p>Aha, so the size is set to 5 and min_size set to 3, the failure domain for the crush rule is set to host, and we only have 3 hosts available</p>
+<p>Aha, so the size is set to 5 and min_size set to 3, the failure domain for the crush rule is set to host, and we only have three hosts available.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -556,7 +556,7 @@ ID  CLASS  WEIGHT   TYPE NAME                STATUS  REWEIGHT  PRI-AFF
 </div>
 </div>
 <div class="paragraph">
-<p>We are not able to comply with min_size 3 because we have 1 OSD in down state, so lets fix the size and min_size first</p>
+<p>We are not able to comply with min_size 3 because we have 1 OSD in downstate, so let&#8217;s fix the size and min_size first.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -570,7 +570,7 @@ ok</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Great!, no inactive PGs!, all PGs are serving IO, let&#8217;s check the cephfs pool:</p>
+<p>Great!, no inactive PGs! all PGs are serving IO. Let&#8217;s check the cephfs pool:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -583,11 +583,11 @@ RANK  STATE             MDS                ACTIVITY     DNS    INOS   DIRS   CAP
 </div>
 </div>
 <div class="paragraph">
-<p>Nice, just by fixing the inactive PGs of the cephfs metadata pool we are back ONLINE!</p>
+<p>Nice, we are back ONLINE by fixing the inactive PGs of the cephfs metadata pool!</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s try and see what is going on with osd.1 that is in down state, first
-thing I would try is a quick restart:</p>
+<p>Let&#8217;s try and see what is going on with osd.1 that is in downstate,
+The first thing I would try is a quick restart:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -600,7 +600,7 @@ osd.1                           ceph-mon03               error             4s ag
 </div>
 </div>
 <div class="paragraph">
-<p>No luck.., the daemon is still in error state, let&#8217;s check the output log on
+<p>No luck&#8230;&#8203; The daemon is still in an error state. Let&#8217;s check the output log on
 the host where OSD.1 is running ceph-node03</p>
 </div>
 <div class="listingblock">
@@ -630,7 +630,7 @@ Mar 02 09:49:29 ceph-mon03 systemd[1]: ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989
 </div>
 </div>
 <div class="paragraph">
-<p>Strate away we can see 2 lines with important information:</p>
+<p>Strate, away we can see two lines with important information:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -639,9 +639,9 @@ Mar 02 09:49:28 ceph-mon03 ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989-osd-1[30984
 </div>
 </div>
 <div class="paragraph">
-<p>cephx authentication is complaning that osd.1 doesn&#8217;t have a key: <code>cephx server
+<p>cephx authentication is complaining that osd.1 doesn&#8217;t have a key: <code>cephx server
 osd.1: couldn&#8217;t find entity name: osd.1</code> and auth is failing
-<code>handle_auth_bad_method server allowed_methods [2] but i only support [2]</code>,
+<code>handle_auth_bad_method server allowed_methods [2] but I only support [2]</code>,
 next stop check if the key in <code>ceph auth ls</code> matches with the key the osd is
 using to start up.</p>
 </div>
@@ -656,7 +656,7 @@ osd.2</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>What no key for OSD.1 ??, no wonder it doesn&#8217;t start&#8230;&#8203;, I&#8217;m going to re-create
+<p>What, no key for OSD.1 ??? No wonder it doesn&#8217;t start&#8230;&#8203;, I&#8217;m going to re-create
 the cephx key for OSD.1</p>
 </div>
 <div class="listingblock">
@@ -671,7 +671,7 @@ osd.1</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Ready!, let&#8217;s restart the OSD.1 daemon</p>
+<p>Ready! let&#8217;s restart the OSD.1 daemon.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -683,7 +683,7 @@ osd.1                           ceph-mon03               error             9s ag
 </div>
 </div>
 <div class="paragraph">
-<p>Still not working??, lets check the log for the OSD</p>
+<p>Still not working??, let&#8217;s check the log for the OSD</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -708,8 +708,8 @@ key = AQCjpgBk/aBWBhAA4aKa3tlejoGLmUHI1SiVtw==</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Ok&#8230;&#8203;, the keys clearly don&#8217;t match, I have to re-config my OSD daemon it uses
-the new key in the cephx auth</p>
+<p>Ok&#8230;&#8203;, the keys don&#8217;t match, I have to re-config my OSD daemon so  it uses
+the new key in the cephx auth database, I will use cephadm with the daemon reconfig option:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -722,7 +722,7 @@ Scheduled to reconfig osd.1 on host 'ceph-mon03'
 </div>
 </div>
 <div class="paragraph">
-<p>Looking better!, one more restart</p>
+<p>Looking better!, one more restart.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -733,8 +733,7 @@ osd.1                           ceph-mon03               error             9s ag
 </div>
 </div>
 <div class="paragraph">
-<p>Noooo!, they key has changed again to the old key, add this point I decide to
-just re-create the OSD..</p>
+<p>Noooo!, the key has changed again to the old key. At this point, it would take less time just to re-create the OSD, and look for answers on how the key creation works for and OSD afterwards(look at the appendix of this section for more information)</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -744,7 +743,7 @@ key = AQCjpgBk/aBWBhAA4aKa3tlejoGLmUHI1SiVtw==</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Remove the OSD with the force flag because we are in health_warn and OSD in error state</p>
+<p>Remove the OSD with the force flag because we are in health_warn, and OSD is in error state</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -756,7 +755,7 @@ OSD  HOST        STATE                    PGS  REPLACE  FORCE  ZAP   DRAIN START
 </div>
 </div>
 <div class="paragraph">
-<p>We now run the purge command</p>
+<p>We now run the purge command.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -774,7 +773,7 @@ ceph-mon03  /dev/vdb  hdd   c9a07526-4b59-43d5-a  10.7G  Yes        111s ago</pr
 </div>
 </div>
 <div class="paragraph">
-<p>We can wait for the cephadm cache to expire or restart the manager to makes
+<p>We can wait for the cephadm cache to expire(<code>$ ceph config get mon mgr/cephadm/daemon_cache_timeout</code>) or restart the manager to make
 things quicker:</p>
 </div>
 <div class="listingblock">
@@ -813,7 +812,7 @@ rgw.objectgw.ceph-mon02.fewdjv  ceph-mon02  *:8080       error             3s ag
 </div>
 </div>
 <div class="paragraph">
-<p>Arg!, that would have been to easy&#8230;&#8203; , let&#8217;s take a look at the logs.., I do a
+<p>Arg!, that would have been too easy&#8230;&#8203; , let&#8217;s take a look at the logs.., I do a
 follow while I restart the RGW</p>
 </div>
 <div class="listingblock">
@@ -837,8 +836,8 @@ Mar 02 11:25:53 ceph-mon02 systemd[1]: ceph-cd172aa4-b8fe-11ed-b71d-2cc260754989
 </div>
 </div>
 <div class="paragraph">
-<p>So the RGW is triying to start using a zone name called nozone, but it seems
-that the RGW nozone pools dont exist, let&#8217;s check:</p>
+<p>So the RGW is trying to start using a zone name called nozone, but it seems
+that the RGW nozone pools don&#8217;t exist, let&#8217;s check:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -852,7 +851,7 @@ that the RGW nozone pools dont exist, let&#8217;s check:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>So there is a mismatch, I will change the rgw_zone config parameter to nozone</p>
+<p>So there is a mismatch, I will change the rgw_zone config parameter to nozone(you could also opt for creating the nozone pools..)</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -872,6 +871,11 @@ rgw.objectgw.ceph-mon02.fewdjv  ceph-mon02  *:8080       running (10s)     8s ag
 HEALTH_OK</pre>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix_a"><a class="anchor" href="#_appendix_a"></a>Appendix. A</h2>
+<div class="sectionbody">
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -881,10 +885,10 @@ HEALTH_OK</pre>
 <td class="content">
 <div class="paragraph">
 <p>There is a way to change the keyring for the OSD, without removing the OSD like
-we did in the exercise:</p>
+we did during the exercise:</p>
 </div>
 <div class="paragraph">
-<p>You need to modify the OSD unit run and betweein the ceph-volume activate pod
+<p>You need to modify the OSD unit run and between the ceph-volume activate pod
 and the osd start pod, add the following container run, change the key for they
 new OSD key you want to use, you can find it with -v at the very end of the
 podman run command</p>
@@ -904,51 +908,51 @@ podman run command</p>
 <div class="paragraph">
 <p>After you restart( or use bash
 /var/lib/ceph/4d197f56-b77c-11ed-80f2-2cc26078e4ef/osd.0/unit.run) once with
-add  this line the new key will be in place and the OSD will work fine, after
-the rist reboot you need to remove the extra podman run we added to the
+add  this line, the new key will be in place, and the OSD will work fine, after
+the first reboot you need to remove the extra podman run we added to the
 unit.run file,</p>
 </div>
 <div class="paragraph">
-<p>The explanation being:</p>
+<p>The explanation is:</p>
 </div>
 <div class="paragraph">
-<p>the command that is creating the new keyring and overwriting the key deployed by cephadm is <code>/usr/bin/ceph-bluestore-tool   prime-osd-dir</code> that is part of <code>ceph-volume activate</code> command that runs when the OSD container is started, it reads the information from a label in the main bluestore block device that contains OSD metadata, one of the keys it contains is the OSD keyring</p>
+<p>the command that creates the new keyring and overwrites the key deployed by cephadm is <code>/usr/bin/ceph-bluestore-tool   prime-osd-dir</code> that is part of <code>ceph-volume activate</code> command that runs when the OSD container is started, it reads the information from a label in the main bluestore block device that contains OSD metadata, one of the keys it contains is the OSD keyring</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre># /usr/bin/ceph-bluestore-tool show-label --path /var/lib/ceph/osd/ceph-0
 inferring bluefs devices from bluestore path
 {
-    "/var/lib/ceph/osd/ceph-0/block": {
-        "osd_uuid": "3c190bab-0c06-4950-9942-d41dc8f93afb",
-        "size": 10733223936,
-        "btime": "2023-02-28T15:28:23.907605+0000",
-        "description": "main",
-        "bfm_blocks": "2620416",
-        "bfm_blocks_per_key": "128",
-        "bfm_bytes_per_block": "4096",
-        "bfm_size": "10733223936",
-        "bluefs": "1",
-        "ceph_fsid": "4d197f56-b77c-11ed-80f2-2cc26078e4ef",
-        "kv_backend": "rocksdb",
-        "magic": "ceph osd volume v026",
-        "mkfs_done": "yes",
-        "osd_key": "AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=v",
-        "osdspec_affinity": "all-available-devices",
-        "ready": "ready",
-        "require_osd_release": "16",
-        "whoami": "0"
-    }
+    "/var/lib/ceph/osd/ceph-0/block": {
+        "osd_uuid": "3c190bab-0c06-4950-9942-d41dc8f93afb",
+        "size": 10733223936,
+        "btime": "2023-02-28T15:28:23.907605+0000",
+        "description": "main",
+        "bfm_blocks": "2620416",
+        "bfm_blocks_per_key": "128",
+        "bfm_bytes_per_block": "4096",
+        "bfm_size": "10733223936",
+        "bluefs": "1",
+        "ceph_fsid": "4d197f56-b77c-11ed-80f2-2cc26078e4ef",
+        "kv_backend": "rocksdb",
+        "magic": "ceph osd volume v026",
+        "mkfs_done": "yes",
+        "osd_key": "AQCWHf5jBupNKRAAALhkcGeBglz1SCT3/zHNJw=v",
+        "osdspec_affinity": "all-available-devices",
+        "ready": "ready",
+        "require_osd_release": "16",
+        "whoami": "0"
+    }
 }</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Changing the old key for the new key with the set-label-key makes a permanent
-change to the bluestore lable for the device, and fixed the issue</p>
+change to the bluestore label for the device, and fix the issue</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># /usr/bin/ceph-bluestore-tool set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQC3OOZj5a5MARAAW4+XD/sESGy7AW</pre>
+<pre># /usr/bin/ceph-bluestore-tool set-label-key --path /var/lib/ceph/osd/ceph-0 --dev /dev/mapper/ceph--9edcda9a--f7a8--4496--a5ca--d19c4e8a4bdf-osd--block--3c190bab--0c06--4950--9942--d41dc8f93afb  -k osd_key -v 'AQC3OOZj5a5MARAAW4+XD/sESGy7AW</pre>
 </div>
 </div>
 </td>
