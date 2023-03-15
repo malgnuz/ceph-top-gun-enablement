@@ -448,7 +448,7 @@ in this documentation.
 </td>
 <td class="content">
 For troubleshooting or tuning you can pass additional parameters to the
-container upong startup. See example below.
+container upon startup. See example below.
 </td>
 </tr>
 </table>
@@ -617,7 +617,7 @@ OSD deployments based on drive types. The additional parameters are:</p>
 </table>
 </div>
 <div class="paragraph">
-<p>The RADOS Gateway service service file accepts additional paraneters due
+<p>The RADOS Gateway service service file accepts additional parameters due
 to the nature of the RADOS Gateway service. The additional parameters are:</p>
 </div>
 <div class="ulist">
@@ -854,7 +854,7 @@ To bootstrap a test cluster that will always be a single node cluster use the fo
 <div class="sect2">
 <h3 id="_cli_to_your_new_cluster"><a class="anchor" href="#_cli_to_your_new_cluster"></a>4.1. CLI to your new cluster</h3>
 <div class="paragraph">
-<p>Once the cluster has been bootstrapped, use trhe <code>cephadm shell</code> command to issue
+<p>Once the cluster has been bootstrapped, use the <code>cephadm shell</code> command to issue
 Ceph commands. The <code>shell</code> command can be used with or without an actual command.
 Without a command you will be provided with an interactive shell. Providing a command
 will actually issue the command against the cluster and return.</p>
@@ -896,7 +896,7 @@ $ <strong>ceph status</strong></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>To add a node to your cluster you must first distribuite the SSH keys that were generated
+<p>To add a node to your cluster you must first distribute the SSH keys that were generated
 by <code>cephadm</code> during the bootstrapping. Once the keys have been copied, execute the following
 command to add a the node the cluster.</p>
 </div>
@@ -1032,7 +1032,7 @@ to be placed in maintenance mode. This flag does not allow you to bypass alerts.
 <h3 id="_adding_monitors"><a class="anchor" href="#_adding_monitors"></a>6.1. Adding Monitors</h3>
 <div class="paragraph">
 <p>Once your inital cluster has been depployed and the nodes added to it, you can then deploy
-the addotional Monitors that will create your "real" cluster. Before you do so you will have
+the additional Monitors that will create your "real" cluster. Before you do so you will have
 to configure the network parameters that will be used by your cluster.</p>
 </div>
 <div class="listingblock">
@@ -1093,7 +1093,7 @@ $ <strong>ceph orch apply mon --placement="{hostname1},{hostname2},{hostname3}"<
 <div class="sect2">
 <h3 id="_removing_monitors"><a class="anchor" href="#_removing_monitors"></a>6.2. Removing Monitors</h3>
 <div class="paragraph">
-<p>To remove a Monitor, simply use the following commad: <code>ceph orch daemon rm mon.{hostname}</code></p>
+<p>To remove a Monitor, simply use the following command: <code>ceph orch daemon rm mon.{hostname}</code></p>
 </div>
 </div>
 </div>
@@ -1209,7 +1209,7 @@ instruct <code>cephadm</code> to apply it.</p>
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-A single service file can contain multiple specificatiobs. See example below.
+A single service file can contain multiple specifications. See example below.
 </td>
 </tr>
 </table>
@@ -1241,7 +1241,7 @@ spec:
 <div class="sect2">
 <h3 id="_osd_selective_addition"><a class="anchor" href="#_osd_selective_addition"></a>8.3. OSD selective addition</h3>
 <div class="paragraph">
-<p>Anotehr option to add OSDs is to indicate <code>cephadm</code> which devices from what specific node
+<p>Another option to add OSDs is to indicate <code>cephadm</code> which devices from what specific node
 must be added to the cluster.</p>
 </div>
 <div class="listingblock">
@@ -1514,7 +1514,7 @@ spec:
 <div class="sect2">
 <h3 id="_adding_mds"><a class="anchor" href="#_adding_mds"></a>12.1. Adding MDS</h3>
 <div class="paragraph">
-<p>Deploying an MDS is done in conunction with the creation of a Ceph FileSystem. The name of the filesystem
+<p>Deploying an MDS is done in conjunction with the creation of a Ceph FileSystem. The name of the filesystem
 will be the ID of the MDs service you deploy.</p>
 </div>
 <div class="paragraph">
@@ -1557,7 +1557,7 @@ The second method will require you to manually create the pools used by the Ceph
 <p>Just like for the creation of the Ceph FileSystem there are two (2) ways to remove a FileSystem</p>
 </div>
 <div class="listingblock">
-<div class="title">By deleteing a volume</div>
+<div class="title">By deleting a volume</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ <strong>ceph fs volume rm {fs_name} --yes-i-really-mean-it</strong></code></pre>
 </div>

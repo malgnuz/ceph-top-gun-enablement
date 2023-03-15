@@ -333,6 +333,18 @@
 <h2 id="_introductiontp_in_5_3"><a class="anchor" href="#_introductiontp_in_5_3"></a>1. Introduction(TP in 5.3)</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>This sync module leverages the versioning feature of the S3 objects in RGW to have an archive zone that captures the different versions of the S3 objects as they occur over time in the other zones.</p>
+</div>
+<div class="paragraph">
+<p>An archive zone allows to have a history of versions of S3 objects that can only be eliminated through the gateways associated with the archive zone.</p>
+</div>
+<div class="paragraph">
+<p>This functionality is useful to have a configuration where several non-versioned zones replicate their data and metadata through their zone gateways (mirror configuration) providing high availability to the end users, while the archive zone captures all the data updates and metadata for consolidate them as versions of S3 objects.</p>
+</div>
+<div class="paragraph">
+<p>Including an archive zone in a multizone configuration allows you to have the flexibility of an S3 object history in one only zone while saving the space that the replicas of the versioned S3 objects would consume in the rest of the zones.</p>
+</div>
+<div class="paragraph">
 <p>RGW archive zone and has the following main characteristics:</p>
 </div>
 <div class="ulist">
@@ -381,14 +393,14 @@ you will need to add valid rgw endpoints to the zonegroup and zone.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin zone modify --endpoints=http://proxy01:8000 --rgw-zone=zone1
 # radosgw-admin zonegroup modify --endpoints=http://proxy01:8000  --rgw-zonegroup=multizg
 # radosgw-admin zone modify --access-key=sync --secret=sync --rgw-zone=zone1
-# radosgw-admin period update --rgw-realm=multisite --commit</pre>
+# radosgw-admin period update --rgw-realm=multisite --commit</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>And then skip to section 3.2</p>
+<p>And then skip to section 2.3</p>
 </div>
 </td>
 </tr>
@@ -588,12 +600,12 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin user create --uid=syncuser --display-name="syncuser" --access-key=sync --secret=sync --system</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user create --uid=syncuser --display-name="syncuser" --access-key=sync --secret=sync --system</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_configure_seconday_zone"><a class="anchor" href="#_configure_seconday_zone"></a>2.3. Configure Seconday Zone</h3>
+<h3 id="_configure_archive_zone"><a class="anchor" href="#_configure_archive_zone"></a>2.3. Configure Archive Zone</h3>
 <div class="paragraph">
 <p>Steps to configure the RADOS Gateway instance on the Archive zone.</p>
 </div>
@@ -613,7 +625,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin realm pull --rgw-realm=multisite  --url=http://proxy01:8000 --access-key=sync --secret=sync --default
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin realm pull --rgw-realm=multisite  --url=http://proxy01:8000 --access-key=sync --secret=sync --default
 2022-12-23T09:26:56.377-0500 7fccf8715500  1 error read_lastest_epoch .rgw.root:periods.e7ccb8e8-4a93-4a87-9a6d-8a650696e839.latest_epoch
 2022-12-23T09:26:56.415-0500 7fccf8715500  1 Set the period's master zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 as the default
 {
@@ -621,7 +633,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
     "name": "multisite",
     "current_period": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
     "epoch": 2
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -629,7 +641,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin period pull --url=http://proxy01:8000 --access-key=sync --secret=sync
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin period pull --url=http://proxy01:8000 --access-key=sync --secret=sync
 {
     "id": "e7ccb8e8-4a93-4a87-9a6d-8a650696e839",
     "epoch": 5,
@@ -716,7 +728,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
     "realm_id": "e72107cb-4b3f-49b9-abb0-83c68a9967f9",
     "realm_name": "multisite",
     "realm_epoch": 2
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -724,7 +736,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin zone create --rgw-zone=archive --rgw-zonegroup=multizg --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default --tier-type=archive
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin zone create --rgw-zone=archive --rgw-zonegroup=multizg --endpoints=http://proxy02:8000 --access-key=sync --secret=sync --default --tier-type=archive
 2023-03-15T07:23:42.554-0400 7ffb657fd500  0 failed reading obj info from .rgw.root:zone_info.1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f: (2) No such file or directory
 2023-03-15T07:23:42.554-0400 7ffb657fd500  0 WARNING: could not read zone params for zone id=1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f name=zone1
 {
@@ -764,7 +776,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
         }
     ],
     "realm_id": "da2a45d7-764b-4c92-a28a-049d02c8c22f",
-    "notif_pool": "archive.rgw.log:notif"</pre>
+    "notif_pool": "archive.rgw.log:notif"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -772,7 +784,7 @@ rgw.multi.zone1.proxy01.mhawfj      proxy01      *:8000       running (30m)     
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin period update --commit
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin period update --commit
 2023-03-15T07:24:31.295-0400 7f62337c9500  1 Cannot find zone id=d7c2da60-e269-4681-a231-e744d1f0dc8a (name=archive), switching to local zonegroup configuration
 Sending period to new master zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f
 {
@@ -883,7 +895,7 @@ Sending period to new master zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f
     "realm_id": "da2a45d7-764b-4c92-a28a-049d02c8c22f",
     "realm_name": "multisite",
     "realm_epoch": 2
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -891,8 +903,8 @@ Sending period to new master zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># ceph orch apply rgw multi.archive --realm=multisite --zone=archive --placement="2 proxy02 ceph-mon02" --port=8000
-Scheduled rgw.multi.archive update...</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># ceph orch apply rgw multi.archive --realm=multisite --zone=archive --placement="2 proxy02 ceph-mon02" --port=8000
+Scheduled rgw.multi.archive update...</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -901,7 +913,7 @@ full copy of the master zone is being synced to the Archive zone</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync status
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin sync status
           realm e72107cb-4b3f-49b9-abb0-83c68a9967f9 (multisite)
       zonegroup 6b9fbc87-3202-4a35-85d0-e3e16fc91b32 (multizg)
            zone ec5a7187-95e1-4bf2-8519-208175c81487 (Archive)
@@ -918,7 +930,7 @@ full copy of the master zone is being synced to the Archive zone</p>
                         full sync: 77 buckets to sync
                         incremental sync: 65/128 shards
                         data is behind on 63 shards
-                        behind shards: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,36,37,38,39,40,41,42,43,44,45,46,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,105,106,107,108,109,110,111,112,113,114,115,116]</pre>
+                        behind shards: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,36,37,38,39,40,41,42,43,44,45,46,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,105,106,107,108,109,110,111,112,113,114,115,116]</code></pre>
 </div>
 </div>
 <div class="admonitionblock tip">
@@ -961,7 +973,7 @@ verbosity you can follow the steps of this
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync status
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin sync status
           realm da2a45d7-764b-4c92-a28a-049d02c8c22f (multisite)
       zonegroup fc3debfe-2a29-448b-baa8-1e54c7eee9b1 (multizg)
            zone d7c2da60-e269-4681-a231-e744d1f0dc8a (archive)
@@ -975,7 +987,7 @@ zonegroup features enabled: resharding
                         syncing
                         full sync: 0/128 shards
                         incremental sync: 128/128 shards
-                        data is caught up with source</pre>
+                        data is caught up with source</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -988,7 +1000,7 @@ cluster from zone1, we can see there us no data sync information:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin sync status
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin sync status
           realm da2a45d7-764b-4c92-a28a-049d02c8c22f (multisite)
       zonegroup fc3debfe-2a29-448b-baa8-1e54c7eee9b1 (multizg)
            zone 1ed728d7-f0bf-4401-8ea8-657c9f1f4b0f (zone1)
@@ -996,7 +1008,7 @@ cluster from zone1, we can see there us no data sync information:</p>
 zonegroup features enabled: resharding
   metadata sync no sync (zone is master)
       data sync source: d7c2da60-e269-4681-a231-e744d1f0dc8a (archive)
-                        not syncing from zone</pre>
+                        not syncing from zone</code></pre>
 </div>
 </div>
 </div>
@@ -1011,7 +1023,7 @@ cluster we run:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># radosgw-admin user create --uid=archuser --display-name="S3 user to test the archive zone" --access-key=archuser
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># radosgw-admin user create --uid=archuser --display-name="S3 user to test the archive zone" --access-key=archuser
 --secret-key=archuser
 {
     "user_id": "archuser",
@@ -1050,7 +1062,7 @@ cluster we run:</p>
     "temp_url_keys": [],
     "type": "rgw",
     "mfa_ids": []
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1058,11 +1070,11 @@ cluster we run:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># aws configure
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># aws configure
 AWS Access Key ID [None]: archuser
 AWS Secret Access Key [None]: archuser
 Default region name [None]: multizg
-Default output format [None]: text</pre>
+Default output format [None]: text</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1073,8 +1085,8 @@ Default output format [None]: text</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># alias s3apiarchive='aws --endpoint=http://proxy02:8000 s3api'
-# alias s3apizone1='aws --endpoint=http://proxy01:8000 s3api'</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># alias s3apiarchive='aws --endpoint=http://proxy02:8000 s3api'
+# alias s3apizone1='aws --endpoint=http://proxy01:8000 s3api'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1082,7 +1094,7 @@ Default output format [None]: text</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># yum install https://downloads.rclone.org/v1.62.0/rclone-v1.62.0-linux-amd64.rpm -y</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># yum install https://downloads.rclone.org/v1.62.0/rclone-v1.62.0-linux-amd64.rpm -y</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1090,7 +1102,7 @@ Default output format [None]: text</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># mkdir -p /root/.config/rclone/
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># mkdir -p /root/.config/rclone/
 # cat &lt;&lt;EOF &gt; /root/.config/rclone/rclone.conf
 [zone1]
 type = s3
@@ -1109,7 +1121,7 @@ secret_access_key = archuser
 endpoint = http://proxy02:8000
 location_constraint = multizg
 acl = bucket-owner-full-control
-EOF</pre>
+EOF</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1118,7 +1130,7 @@ review further down the line:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># echo "This is file 1" &gt; /tmp/test-file-1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># echo "This is file 1" &gt; /tmp/test-file-1
 # echo "This is file 2" &gt; /tmp/test-file-2
 # echo "This is file 3" &gt; /tmp/test-file-3
 # md5sum /tmp/test-file-1
@@ -1126,7 +1138,7 @@ review further down the line:</p>
 # md5sum /tmp/test-file-2
 db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 # md5sum /tmp/test-file-3
-95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</pre>
+95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</code></pre>
 </div>
 </div>
 </div>
@@ -1140,13 +1152,13 @@ db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># s3apizone1 create-bucket --bucket my-bucket
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># s3apizone1 create-bucket --bucket my-bucket
 # s3apizone1 list-buckets
 BUCKETS 2023-03-15T12:03:54.315000+00:00        my-bucket
 OWNER   S3 user to test the archive zone        archuser
 # s3apiarchive list-buckets
 BUCKETS 2023-03-15T12:03:54.315000+00:00        my-bucket
-OWNER   S3 user to test the archive zone        archuser</pre>
+OWNER   S3 user to test the archive zone        archuser</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1154,8 +1166,8 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># s3apizone1 get-bucket-versioning --bucket my-bucket
-# s3apiarchive get-bucket-versioning --bucket my-bucket</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># s3apizone1 get-bucket-versioning --bucket my-bucket
+# s3apiarchive get-bucket-versioning --bucket my-bucket</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1163,7 +1175,7 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone copy /tmp/test-file-1 zone1:my-bucket</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone copy /tmp/test-file-1 zone1:my-bucket</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1171,12 +1183,12 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># s3apiarchive get-bucket-versioning --bucket my-bucket
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># s3apiarchive get-bucket-versioning --bucket my-bucket
 {
     "Status": "Enabled",
     "MFADelete": "Disabled"
 }
-# s3apizone1 get-bucket-versioning --bucket my-bucket</pre>
+# s3apizone1 get-bucket-versioning --bucket my-bucket</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1184,7 +1196,7 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># s3apizone1 list-object-versions --bucket my-bucket
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># s3apizone1 list-object-versions --bucket my-bucket
 {
     "Versions": [
         {
@@ -1220,7 +1232,7 @@ OWNER   S3 user to test the archive zone        archuser</pre>
             }
         }
     ]
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1228,9 +1240,9 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone copyto /tmp/test-file-2 zone1:my-bucket/test-file-1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone copyto /tmp/test-file-2 zone1:my-bucket/test-file-1
 # rclone ls zone1:my-bucket
-       15 test-file-1</pre>
+       15 test-file-1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1238,7 +1250,7 @@ OWNER   S3 user to test the archive zone        archuser</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># s3apiarchive list-object-versions --bucket my-bucket
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># s3apiarchive list-object-versions --bucket my-bucket
 {
     "Versions": [
         {
@@ -1268,7 +1280,7 @@ OWNER   S3 user to test the archive zone        archuser</pre>
             }
         }
     ]
-}</pre>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1277,10 +1289,10 @@ case if multipart upload or object encryption is configured.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># md5sum /tmp/test-file-2
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># md5sum /tmp/test-file-2
 db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 # md5sum /tmp/test-file-1
-88c16a56754e0f17a93d269ae74dde9b  /tmp/test-file-1</pre>
+88c16a56754e0f17a93d269ae74dde9b  /tmp/test-file-1</code></pre>
 </div>
 </div>
 </div>
@@ -1291,7 +1303,7 @@ db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone copyto /tmp/test-file-3 zone1:my-bucket/test-file-1</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone copyto /tmp/test-file-3 zone1:my-bucket/test-file-1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1299,8 +1311,8 @@ db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone --s3-versions lsl zone1:my-bucket
-       15 2023-03-15 07:59:10.779573336 test-file-1</pre>
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone --s3-versions lsl zone1:my-bucket
+       15 2023-03-15 07:59:10.779573336 test-file-1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1308,10 +1320,10 @@ db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone --s3-versions lsl archive:my-bucket
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone --s3-versions lsl archive:my-bucket
        15 2023-03-15 07:59:10.779573336 test-file-1
        15 2023-03-15 07:59:03.782438991 test-file-1-v2023-03-15-121327-057
-       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</pre>
+       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1320,12 +1332,12 @@ the archive zone:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone delete zone1:my-bucket/test-file-1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone delete zone1:my-bucket/test-file-1
 # rclone --s3-versions lsl zone1:my-bucket
 # rclone --s3-versions lsl archive:my-bucket
        15 2023-03-15 07:59:10.779573336 test-file-1
        15 2023-03-15 07:59:03.782438991 test-file-1-v2023-03-15-121327-057
-       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</pre>
+       15 2023-03-15 07:58:58.135330567 test-file-1-v2023-03-15-120712-914</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1335,12 +1347,12 @@ match with the md5 for out test-file-3.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone copyto archive:my-bucket/test-file-1 zone1:my-bucket/test-file-1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone copyto archive:my-bucket/test-file-1 zone1:my-bucket/test-file-1
 # rclone copyto zone1:my-bucket/test-file-1 /tmp/recovered-file1
 # md5sum /tmp/recovered-file1
 95227e10e2c33771e1c1379b17330c86  /tmp/recovered-file1
 # md5sum /tmp/test-file-3
-95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</pre>
+95227e10e2c33771e1c1379b17330c86  /tmp/test-file-3</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1348,12 +1360,12 @@ match with the md5 for out test-file-3.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># rclone --s3-versions copyto archive:my-bucket/test-file-1-v2023-03-15-121327-057 zone1:my-bucket/test-file-1
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell"># rclone --s3-versions copyto archive:my-bucket/test-file-1-v2023-03-15-121327-057 zone1:my-bucket/test-file-1
 # rclone copyto zone1:my-bucket/test-file-1 /tmp/recovered-file1
 # md5sum /tmp/recovered-file1
 db06069ef1c9f40986ffa06db4fe8fd7  /tmp/recovered-file1
 # md5sum /tmp/test-file-2
-db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2</pre>
+db06069ef1c9f40986ffa06db4fe8fd7  /tmp/test-file-2</code></pre>
 </div>
 </div>
 </div>
