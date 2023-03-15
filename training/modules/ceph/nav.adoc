@@ -48,6 +48,7 @@
 * xref:radosgw_sts_bucket_role_policy.adoc[RGW Bucket vs Role Policy]
 * xref:radosgw_multisite.adoc[RGW Multisite Replication]
 * xref:radosgw_cloudsync.adoc[RGW Object Cloud Transition]
+* xref:radosgw_archive.adoc[RGW Archive Zone]
 * xref:radosgw_presignedurl.adoc[RGW presigned URL]
 * xref:radosgw_opslog.adoc[RGW Opslog]
 * xref:radosgw_bucket_notification.adoc[RGW bucket Notification]
